@@ -133,7 +133,7 @@ like.setCallbacks({
     like.graphics.setFont(16);
     like.graphics.print('Press any key to see it logged', 20, like.getHeight() - 60);
     like.graphics.print('Click anywhere for mouse position', 20, like.getHeight() - 40);
-    like.graphics.print('Audio: Space=Play, S=Stop, P=Pause, R=Rewind', 20, like.getHeight() - 20);
+    like.graphics.print('Audio: Space=Play/Stop, P=Pause/Resume', 20, like.getHeight() - 20);
   },
   
   keypressed: (key: string) => {
@@ -164,10 +164,6 @@ like.setCallbacks({
             const result = audioSource.resume();
             console.log('Audio resumed:', result);
           }
-          break;
-        case 'r':
-          audioSource.rewind();
-          console.log('Audio rewound');
           break;
       }
     } else if (audioSource) {

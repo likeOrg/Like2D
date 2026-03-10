@@ -58,7 +58,8 @@ export class Source {
       return false;
     }
     
-    if (this.audio.paused || this.audio.ended) {
+    // Only reset to beginning if stopped (not paused)
+    if (this.isStopped() || this.audio.ended) {
       this.audio.currentTime = 0;
     }
     
@@ -85,10 +86,6 @@ export class Source {
       return this.play();
     }
     return false;
-  }
-
-  rewind(): void {
-    this.audio.currentTime = 0;
   }
 
   seek(position: number): void {
@@ -204,14 +201,6 @@ export class Audio {
           s.resume();
         }
       });
-    }
-  }
-
-  rewind(source?: Source): void {
-    if (source) {
-      source.rewind();
-    } else {
-      this.sources.forEach(s => s.rewind());
     }
   }
 
