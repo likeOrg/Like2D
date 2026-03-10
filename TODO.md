@@ -1,103 +1,49 @@
 # Like2D Implementation TODO
 
-## Phase 1: Project Setup
-- [x] Initialize project with pnpm and package.json
-- [x] Install Vite as dev dependency
-- [x] Configure TypeScript (tsconfig.json)
-- [x] Set up Vite config for dev server and hot reload
-- [x] Create directory structure: src/, src/like/
+## Phase 1: Core Refactor - Scene System
 
-## Phase 2: Core Infrastructure
-- [x] Create src/like/index.ts - singleton Like class
-- [x] Implement canvas creation and management
-- [x] Add game loop with requestAnimationFrame
-- [x] Implement callback registration system (draw, update, keypressed, etc.)
-- [x] Create fullscreen toggle functionality
+- [ ] Redesign Like class to support Scene-based architecture
+- [ ] Implement Scene interface with width/height resolution setting
+- [ ] Create `like.setScene(scene)` for scene switching
+- [ ] Remove old callback-based system
+- [ ] Update entry point to instantiate and run scenes
+- [ ] Ensure canvas resizes when switching to scene with different resolution
 
-## Phase 3: Graphics Module (High Priority)
-- [x] Implement love.graphics.clear()
-- [x] Implement love.graphics.rectangle() - draw/fill modes
-- [x] Implement love.graphics.circle() - draw/fill modes
-- [x] Implement love.graphics.line()
-- [x] Implement love.graphics.setColor()
-- [x] Implement love.graphics.print() - text rendering
-- [x] Implement love.graphics.newImage() and love.graphics.draw() for images
-- [x] Add coordinate transformation (push/pop/translate/rotate/scale)
+## Phase 2: Asset Preloader
 
-## Phase 4: Audio Module (High Priority)
-- [x] Implement love.audio.newSource()
-- [x] Implement source:play(), stop(), pause()
-- [x] Implement volume control
-- [x] Support common formats (ogg, mp3, wav)
+- [ ] Create `like.assets` module
+- [ ] Implement `like.assets.preload([...])` returning Promise
+- [ ] Support image preloading (`like.assets.image(path)`)
+- [ ] Support audio preloading (`like.assets.audio(path)`)
+- [ ] Support JSON preloading (`like.assets.json(path)`)
+- [ ] Support text preloading (`like.assets.text(path)`)
+- [ ] Block scene.load() until preload completes
+- [ ] Cache loaded assets for reuse
 
-## Phase 5: Input Handling
-- [x] Implement keyboard event handling (keypressed, keyreleased)
-- [x] Implement mouse event handling (mousepressed, mousereleased)
-- [x] Add key state queries (love.keyboard.isDown)
-- [x] Add mouse state queries (love.mouse.getPosition)
+## Phase 3: Input Mapping System
 
-## Phase 6: User Interface
-- [x] Create src/index.html with canvas element
-- [x] Add fullscreen button to HTML
-- [x] Style the page (center canvas, basic styling)
-- [x] Create src/main.ts as user entry point
+- [ ] Create `like.input` module
+- [ ] Implement `like.input.map(action, inputs[])`
+- [ ] Implement `like.input.isDown(action)` - checks if any mapped input is held
+- [ ] Implement `like.input.justPressed(action)` - true on first frame of press
+- [ ] Implement `like.input.justReleased(action)` - true on first frame of release
+- [ ] Support keyboard keys in mapping
+- [ ] Support mouse buttons in mapping
+- [ ] Support gamepad buttons, axes, and D-pad in mapping
+- [ ] Maintain low-level `like.keyboard`, `like.mouse`, and `like.gamepad` access
 
-## Phase 7: Additional Love2D API
-- [x] Implement love.load() callback
-- [x] ~~Implement love.quit() callback~~ (skipped - not applicable to web)
-- [x] Add love.timer.getDelta() / getFPS()
-- [x] Add window title management (document.title)
-- [x] Add love.filesystem for save/load game state (localStorage/IndexedDB)
+## Phase 4: Modernize Existing Modules
 
-## Phase 8: Testing & Polish
-- [x] Create example game to test all features (src/main.ts demo)
-- [x] Verify hot reload works correctly (Vite dev server)
-- [x] Test fullscreen functionality across browsers
-- [x] Add error handling and user-friendly messages
+- [ ] Refactor Graphics module to use 0-1 color range consistently
+- [ ] Update Audio module API for consistency
+- [ ] Ensure Timer module works with Scene lifecycle
+- [ ] Rename `localstorage.ts` to `storage.ts` with cleaner API
+- [ ] Update all module imports/exports
 
-## Phase 9: Touch Module (love.touch)
-- [ ] Implement touch event handling via Touch Events API
-- [ ] Implement love.touch.getTouches() - get active touch IDs
-- [ ] Implement love.touch.getPosition(id) - get touch position by ID
-- [ ] Add love.touchpressed callback to LikeCallbacks
-- [ ] Add love.touchreleased callback to LikeCallbacks
-- [ ] Add love.touchmoved callback to LikeCallbacks
-- [ ] Support multi-touch tracking (simultaneous touches)
-- [ ] Create src/like/touch.ts module
+## Future Considerations (Post-Game Object Model)
 
-## Phase 10: Joystick/Gamepad Module (love.joystick)
-- [ ] Implement gamepad detection via Gamepad API
-- [ ] Implement love.joystickadded callback
-- [ ] Implement love.joystickremoved callback
-- [ ] Implement love.joystickpressed callback
-- [ ] Implement love.joystickreleased callback
-- [ ] Implement love.joystickaxis callback
-- [ ] Implement love.joystickhat callback
-- [ ] Implement Joystick class with isDown(), getAxis(), getHat() methods
-- [ ] Implement love.joystick.getJoysticks()
-- [ ] Create src/like/joystick.ts module
-
-## Phase 11: Sound Module (love.sound - Web Audio API)
-- [ ] Implement SoundData class for raw audio data
-- [ ] Implement love.sound.newSoundData() constructor
-- [ ] Implement Decoder for audio format decoding
-- [ ] Implement getDuration(), getSampleRate(), getBitDepth() on SoundData
-- [ ] Implement getSample() / setSample() for raw audio manipulation
-- [ ] Create src/like/sound.ts module
-
-## Phase 12: Math Module - Random (love.math)
-- [ ] Implement love.math.random() with optional min/max args
-- [ ] Implement love.math.randomSeed() for seeding RNG
-- [ ] Implement RandomGenerator class for stateful random generation
-- [ ] Ensure random matches LOVE API exactly
-- [ ] Create src/like/math.ts module
-
-## Phase 13: Image Data Module (love.image)
-- [ ] Implement ImageData class for pixel manipulation
-- [ ] Implement love.image.newImageData(width, height) - create blank
-- [ ] Implement love.image.newImageData(filename) - load from file
-- [ ] Implement getWidth() / getHeight() on ImageData
-- [ ] Implement getPixel() / setPixel() for individual pixel access
-- [ ] Implement mapPixel() for batch pixel operations
-- [ ] Implement encode() to save ImageData to file
-- [ ] Create src/like/image.ts module
+- Camera system
+- Tweening/animation
+- Entity systems
+- Particle systems
+- Collision detection
