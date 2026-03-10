@@ -1,4 +1,5 @@
 import graphics from './graphics.ts';
+import audio from './audio.ts';
 
 export interface LikeCallbacks {
   load?: () => void;
@@ -20,6 +21,7 @@ class Like {
   private currentHeight = 600;
 
   graphics = graphics;
+  audio = audio;
 
   constructor() {}
 
@@ -165,3 +167,4 @@ class Like {
 const like = new Like();
 export default like;
 export const love = like;
+export { Source } from './audio.ts';

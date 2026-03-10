@@ -25,10 +25,10 @@
 - [x] Add coordinate transformation (push/pop/translate/rotate/scale)
 
 ## Phase 4: Audio Module (High Priority)
-- [ ] Implement love.audio.newSource()
-- [ ] Implement source:play(), stop(), pause()
-- [ ] Implement volume control
-- [ ] Support common formats (ogg, mp3, wav)
+- [x] Implement love.audio.newSource()
+- [x] Implement source:play(), stop(), pause()
+- [x] Implement volume control
+- [x] Support common formats (ogg, mp3, wav)
 
 ## Phase 5: Input Handling
 - [ ] Implement keyboard event handling (keypressed, keyreleased)
