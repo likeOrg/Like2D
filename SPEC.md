@@ -26,7 +26,7 @@ src/main.ts optionally contains callbacks loaded by like.ts, which are just like
 
 For now, src/main.ts also contains demos of every single feature.
 
-The "Like" library should act a bit like a singleton where it can be called from any file, rather than being an object passed around. 
+The "Like" library should be able to be called from any file, rather than being an object passed around. 
 
 The library can run using `pnpm run dev`, which will watch for changes in the source directory, then rebuild and hot reload.
 

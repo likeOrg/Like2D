@@ -3,7 +3,7 @@ import audio from './audio.ts';
 import keyboard from './keyboard.ts';
 import mouse from './mouse.ts';
 import timer from './timer.ts';
-import filesystem from './filesystem.ts';
+import localstorage from './localstorage.ts';
 
 export interface LikeCallbacks {
   load?: () => void;
@@ -29,7 +29,7 @@ class Like {
   keyboard = keyboard;
   mouse = mouse;
   timer = timer;
-  filesystem = filesystem;
+  localstorage = localstorage;
 
   constructor() {}
 
@@ -188,4 +188,4 @@ export default like;
 export const love = like;
 export { Source } from './audio.ts';
 export { timer } from './timer.ts';
-export { filesystem } from './filesystem.ts';
+export { localstorage } from './localstorage.ts';

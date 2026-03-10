@@ -46,14 +46,14 @@
 - [x] Implement love.load() callback
 - [x] ~~Implement love.quit() callback~~ (skipped - not applicable to web)
 - [x] Add love.timer.getDelta() / getFPS()
-- [ ] Add window title management (document.title)
+- [x] Add window title management (document.title)
 - [x] Add love.filesystem for save/load game state (localStorage/IndexedDB)
 
 ## Phase 8: Testing & Polish
 - [x] Create example game to test all features (src/main.ts demo)
 - [x] Verify hot reload works correctly (Vite dev server)
 - [x] Test fullscreen functionality across browsers
-- [ ] Add error handling and user-friendly messages
+- [x] Add error handling and user-friendly messages
 
 ## Phase 9: Touch Module (love.touch)
 - [ ] Implement touch event handling via Touch Events API

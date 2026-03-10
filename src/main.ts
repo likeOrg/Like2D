@@ -5,10 +5,10 @@ import { Source } from './like/index.ts';
 let rotation = 0;
 let pepperImage: Awaited<ReturnType<typeof like.graphics.newImage>> | null = null;
 let audioSource: Source | null = null;
-let saveStatus = 'Press F5 to save, F9 to load';
 let gameStartTime = 0;
 let lastSleepTime = 0;
 let sleepStatus = '';
+let currentSaveStatus: string | undefined = undefined;
 
 // Game state for save/load demo
 interface GameState {
@@ -40,12 +40,6 @@ like.setCallbacks({
       console.log('Audio loaded: test.ogg, ready:', audioSource.isReady());
     } catch (err) {
       console.error('Failed to load audio:', err);
-    }
-
-    // Check for existing save
-    const exists = await like.filesystem.exists('demo_save');
-    if (exists) {
-      saveStatus = 'Save file exists (press F9 to load)';
     }
   },
   
@@ -170,9 +164,10 @@ like.setCallbacks({
       like.graphics.print(`Audio: ${statusText} (${Math.round(audioSource.tell() * 10) / 10}s / ${Math.round(audioSource.getDuration() * 10) / 10}s)`, 20, 520);
     }
     
-    // Save status display
-    like.graphics.setColor(0.9, 0.9, 0.2, 1);
-    like.graphics.print(saveStatus, 20, 550);
+    if (currentSaveStatus) {
+      like.graphics.setColor(0.9, 0.9, 0.2, 1);
+      like.graphics.print(currentSaveStatus, 20, 550);
+    }
     
     // Print instructions
     like.graphics.setColor(0.6, 0.6, 0.6, 1);
@@ -310,20 +305,22 @@ like.setCallbacks({
           rotation: rotation,
           savedAt: new Date().toLocaleString()
         };
-        const success = await like.filesystem.saveGame('demo_save', state);
-        saveStatus = success 
-          ? `Saved at ${state.savedAt}` 
-          : 'Failed to save!';
-        console.log('Save result:', success, state);
+        const writeSuccess = await like.localstorage.write('demo_save', state);
+        if (writeSuccess) {
+          currentSaveStatus = `Saved at ${state.savedAt}`;
+        } else {
+          currentSaveStatus = 'Failed to save!';
+        }
+        console.log('Save result:', writeSuccess, state);
         break;
       case 'F9':
-        const loadedState = await like.filesystem.loadGame<GameState>('demo_save');
+        const loadedState = await like.localstorage.read<GameState>('demo_save');
         if (loadedState) {
           rotation = loadedState.rotation;
-          saveStatus = `Loaded from ${loadedState.savedAt}`;
+          currentSaveStatus = `Loaded from ${loadedState.savedAt}`;
           console.log('Loaded state:', loadedState);
         } else {
-          saveStatus = 'No save file found!';
+          currentSaveStatus = 'No save file found!';
         }
         break;
     }
@@ -337,3 +334,4 @@ like.setCallbacks({
 // Initialize and start
 like.init(800, 600);
 like.start();
+
