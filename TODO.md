@@ -1,18 +1,18 @@
 # Like2D Implementation TODO
 
 ## Phase 1: Project Setup
-- [ ] Initialize project with pnpm and package.json
-- [ ] Install Vite as dev dependency
-- [ ] Configure TypeScript (tsconfig.json)
-- [ ] Set up Vite config for dev server and hot reload
-- [ ] Create directory structure: src/, src/like/
+- [x] Initialize project with pnpm and package.json
+- [x] Install Vite as dev dependency
+- [x] Configure TypeScript (tsconfig.json)
+- [x] Set up Vite config for dev server and hot reload
+- [x] Create directory structure: src/, src/like/
 
 ## Phase 2: Core Infrastructure
-- [ ] Create src/like/index.ts - singleton Like class
-- [ ] Implement canvas creation and management
-- [ ] Add game loop with requestAnimationFrame
-- [ ] Implement callback registration system (draw, update, keypressed, etc.)
-- [ ] Create fullscreen toggle functionality
+- [x] Create src/like/index.ts - singleton Like class
+- [x] Implement canvas creation and management
+- [x] Add game loop with requestAnimationFrame
+- [x] Implement callback registration system (draw, update, keypressed, etc.)
+- [x] Create fullscreen toggle functionality
 
 ## Phase 3: Graphics Module (High Priority)
 - [ ] Implement love.graphics.clear()
