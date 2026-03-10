@@ -1,8 +1,10 @@
-import like from './like/index.ts';
+import like, { Source } from './like/index.ts';
 
 // Example demonstrating Like2D graphics API
 let rotation = 0;
 let pepperImage: Awaited<ReturnType<typeof like.graphics.newImage>> | null = null;
+let audioSource: Source | null = null;
+let audioStatus = 'Not loaded';
 
 like.setCallbacks({
   load: async () => {
@@ -17,6 +19,16 @@ like.setCallbacks({
       console.log('Image loaded:', pepperImage.width, 'x', pepperImage.height);
     } catch (err) {
       console.error('Failed to load image:', err);
+    }
+    
+    // Load audio
+    try {
+      audioSource = like.audio.newSource('test.ogg');
+      audioStatus = 'Ready (Space=Play, S=Stop, P=Pause)';
+      console.log('Audio loaded: test.ogg');
+    } catch (err) {
+      console.error('Failed to load audio:', err);
+      audioStatus = 'Failed to load';
     }
   },
   
@@ -109,16 +121,51 @@ like.setCallbacks({
       like.graphics.print(`Image: ${pepperImage.width}x${pepperImage.height}`, 20, 80);
     }
     
+    // Audio status display
+    if (audioSource) {
+      like.graphics.setColor(0.9, 0.6, 0.2, 1);
+      like.graphics.setFont(18);
+      const isPlaying = audioSource.isPlaying();
+      const statusText = isPlaying ? 'Playing' : audioSource.isPaused() ? 'Paused' : 'Stopped';
+      like.graphics.print(`Audio: ${statusText} (${Math.round(audioSource.tell() * 10) / 10}s / ${Math.round(audioSource.getDuration() * 10) / 10}s)`, 20, 520);
+    }
+    
     // Print instructions
     like.graphics.setColor(0.6, 0.6, 0.6, 1);
     like.graphics.setFont(16);
-    like.graphics.print('Press any key to see it logged', 20, like.getHeight() - 50);
-    like.graphics.print('Click anywhere for mouse position', 20, like.getHeight() - 30);
-    like.graphics.print('Images: normal (top-right), scaled, rotated, and cropped quad', 20, like.getHeight() - 10);
+    like.graphics.print('Press any key to see it logged', 20, like.getHeight() - 60);
+    like.graphics.print('Click anywhere for mouse position', 20, like.getHeight() - 40);
+    like.graphics.print('Audio: Space=Play, S=Stop, P=Pause, R=Rewind', 20, like.getHeight() - 20);
   },
   
   keypressed: (key: string) => {
     console.log('Key pressed:', key);
+    
+    // Audio controls
+    if (audioSource) {
+      switch (key.toLowerCase()) {
+        case ' ':
+          if (audioSource.isPlaying()) {
+            audioSource.stop();
+          } else {
+            audioSource.play();
+          }
+          break;
+        case 's':
+          audioSource.stop();
+          break;
+        case 'p':
+          if (audioSource.isPlaying()) {
+            audioSource.pause();
+          } else if (audioSource.isPaused()) {
+            audioSource.resume();
+          }
+          break;
+        case 'r':
+          audioSource.rewind();
+          break;
+      }
+    }
   },
   
   mousepressed: (x: number, y: number, button: number) => {
