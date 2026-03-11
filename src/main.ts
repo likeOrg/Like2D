@@ -1,5 +1,5 @@
 import like from './like/index.ts';
-import { Source, Scene, ImageHandle } from './like/index.ts';
+import { Source, Scene, ImageHandle, getButtonName } from './like/index.ts';
 
 // Example demonstrating Like2D graphics API with Scene-based architecture
 let rotation = 0;
@@ -42,12 +42,12 @@ const demoScene: Scene = {
     like.graphics.setFont(24);
     
     // Setup input mappings for game actions
-    like.input.map('jump', ['Space', 'ArrowUp', 'KeyW']);
-    like.input.map('fire', ['MouseLeft', 'KeyZ']);
-    like.input.map('move_left', ['ArrowLeft', 'KeyA']);
-    like.input.map('move_right', ['ArrowRight', 'KeyD']);
-    like.input.map('move_up', ['ArrowUp', 'KeyW']);
-    like.input.map('move_down', ['ArrowDown', 'KeyS']);
+    like.input.map('jump', ['Space', 'ArrowUp', 'KeyW', 'GP ButtonBottom']);
+    like.input.map('fire', ['MouseLeft', 'KeyZ', 'GP RT']);
+    like.input.map('move_left', ['ArrowLeft', 'KeyA', 'GP DPadLeft']);
+    like.input.map('move_right', ['ArrowRight', 'KeyD', 'GP DPadRight']);
+    like.input.map('move_up', ['ArrowUp', 'KeyW', 'GP DPadUp']);
+    like.input.map('move_down', ['ArrowDown', 'KeyS', 'GP DPadDown']);
     
     // Menu/system actions
     like.input.map('audio_play_pause', ['Space']);
@@ -154,6 +154,14 @@ const demoScene: Scene = {
 
   actionreleased: (action: string) => {
     console.log('Action released:', action);
+  },
+
+  gamepadpressed: (gamepadIndex: number, buttonIndex: number, buttonName: string) => {
+    console.log(`Gamepad ${gamepadIndex}: ${buttonName} (button ${buttonIndex}) pressed`);
+  },
+
+  gamepadreleased: (gamepadIndex: number, buttonIndex: number, buttonName: string) => {
+    console.log(`Gamepad ${gamepadIndex}: ${buttonName} (button ${buttonIndex}) released`);
   },
 
   draw: () => {
@@ -360,16 +368,37 @@ const demoScene: Scene = {
     // Show active keys list
     keyY += 70;
     const activeKeys: string[] = [];
-    if (like.keyboard.isDown(' ')) activeKeys.push('Space');
+    if (like.keyboard.isDown('Space')) activeKeys.push('Space');
     if (like.keyboard.isDown('Enter')) activeKeys.push('Enter');
-    if (like.keyboard.isDown('Shift')) activeKeys.push('Shift');
-    if (like.keyboard.isDown('Control')) activeKeys.push('Ctrl');
-    if (like.keyboard.isDown('Alt')) activeKeys.push('Alt');
+    if (like.keyboard.isAnyDown('ShiftLeft', 'ShiftRight')) activeKeys.push('Shift');
+    if (like.keyboard.isAnyDown('ControlLeft', 'ControlRight')) activeKeys.push('Ctrl');
+    if (like.keyboard.isAnyDown('AltLeft', 'AltRight')) activeKeys.push('Alt');
     if (like.keyboard.isDown('Escape')) activeKeys.push('Esc');
     
     if (activeKeys.length > 0) {
       like.graphics.setColor(0.9, 0.5, 0.2, 1);
       like.graphics.print(`Active: ${activeKeys.join(', ')}`, 20, keyY);
+    }
+    
+    // Show gamepad status
+    keyY += 30;
+    const connectedGamepads = like.gamepad.getConnectedGamepads();
+    if (connectedGamepads.length > 0) {
+      like.graphics.setColor(0.2, 0.8, 0.2, 1);
+      like.graphics.print(`Gamepads connected: ${connectedGamepads.length}`, 20, keyY);
+      
+      // Show pressed buttons for each connected gamepad
+      for (const gpIndex of connectedGamepads) {
+        keyY += 20;
+        const pressedButtons = like.gamepad.getPressedButtons(gpIndex);
+        if (pressedButtons.size > 0) {
+          const buttonNames = Array.from(pressedButtons).map(idx => getButtonName(idx));
+          like.graphics.print(`  GP${gpIndex}: ${buttonNames.join(', ')}`, 20, keyY);
+        }
+      }
+    } else {
+      like.graphics.setColor(0.5, 0.5, 0.5, 1);
+      like.graphics.print('No gamepads connected', 20, keyY);
     }
     
     // Interactive element - move a circle with WASD/Arrows

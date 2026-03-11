@@ -3,6 +3,7 @@ import audio from './audio.ts';
 import keyboard from './keyboard.ts';
 import mouse from './mouse.ts';
 import input from './input.ts';
+import gamepad from './gamepad.ts';
 import timer from './timer.ts';
 import localstorage from './localstorage.ts';
 import { Scene } from './scene.ts';
@@ -21,6 +22,7 @@ class Like {
   keyboard = keyboard;
   mouse = mouse;
   input = input;
+  gamepad = gamepad;
   timer = timer;
   localstorage = localstorage;
 
@@ -156,7 +158,7 @@ class Like {
     }
 
     timer.update(dt);
-    const { pressed, released } = input.update();
+    const { pressed, released, gamepadPressed, gamepadReleased } = input.update();
 
     // Trigger action callbacks
     if (this.currentScene.actionpressed) {
@@ -167,6 +169,18 @@ class Like {
     if (this.currentScene.actionreleased) {
       for (const action of released) {
         this.currentScene.actionreleased(action);
+      }
+    }
+
+    // Trigger gamepad callbacks
+    if (this.currentScene.gamepadpressed) {
+      for (const { gamepadIndex, buttonIndex, buttonName } of gamepadPressed) {
+        this.currentScene.gamepadpressed(gamepadIndex, buttonIndex, buttonName);
+      }
+    }
+    if (this.currentScene.gamepadreleased) {
+      for (const { gamepadIndex, buttonIndex, buttonName } of gamepadReleased) {
+        this.currentScene.gamepadreleased(gamepadIndex, buttonIndex, buttonName);
       }
     }
 
@@ -206,3 +220,4 @@ export { localstorage } from './localstorage.ts';
 export type { Scene } from './scene.ts';
 export type { ImageHandle } from './graphics.ts';
 export { input } from './input.ts';
+export { gamepad, getButtonName } from './gamepad.ts';

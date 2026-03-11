@@ -10,4 +10,6 @@ export interface Scene {
   mousereleased?: (x: number, y: number, button: number) => void;
   actionpressed?: (action: string) => void;
   actionreleased?: (action: string) => void;
+  gamepadpressed?: (gamepadIndex: number, buttonIndex: number, buttonName: string) => void;
+  gamepadreleased?: (gamepadIndex: number, buttonIndex: number, buttonName: string) => void;
 }

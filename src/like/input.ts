@@ -1,5 +1,8 @@
 import keyboard from './keyboard.ts';
 import mouse from './mouse.ts';
+import gamepad from './gamepad.ts';
+import { InputStateTracker } from './input-state.ts';
+import { getButtonIndex } from './gamepad-button-map.ts';
 
 export type InputType = 'keyboard' | 'mouse' | 'gamepad';
 
@@ -8,10 +11,20 @@ export interface InputBinding {
   code: string;
 }
 
+const buttonMap: Record<string, number> = {
+  'Left': 1,
+  'Right': 3,
+  'Middle': 2,
+  '1': 1,
+  '2': 2,
+  '3': 3,
+  '4': 4,
+  '5': 5,
+};
+
 export class Input {
   private actionMap = new Map<string, InputBinding[]>();
-  private prevState = new Map<string, boolean>();
-  private currState = new Map<string, boolean>();
+  private actionStateTracker = new InputStateTracker();
 
   map(action: string, inputs: string[]): void {
     const bindings: InputBinding[] = inputs.map(input => this.parseInput(input));
@@ -20,8 +33,7 @@ export class Input {
 
   unmap(action: string): void {
     this.actionMap.delete(action);
-    this.prevState.delete(action);
-    this.currState.delete(action);
+    this.actionStateTracker.clear();
   }
 
   isDown(action: string): boolean {
@@ -32,36 +44,32 @@ export class Input {
   }
 
   justPressed(action: string): boolean {
-    const prev = this.prevState.get(action) ?? false;
-    const curr = this.currState.get(action) ?? false;
-    return !prev && curr;
+    return this.actionStateTracker.justPressed(action);
   }
 
   justReleased(action: string): boolean {
-    const prev = this.prevState.get(action) ?? false;
-    const curr = this.currState.get(action) ?? false;
-    return prev && !curr;
+    return this.actionStateTracker.justReleased(action);
   }
 
-  update(): { pressed: string[]; released: string[] } {
-    const pressed: string[] = [];
-    const released: string[] = [];
+  update(): { pressed: string[]; released: string[]; gamepadPressed: Array<{ gamepadIndex: number; buttonIndex: number; buttonName: string }>; gamepadReleased: Array<{ gamepadIndex: number; buttonIndex: number; buttonName: string }> } {
+    const { pressed: gamepadPressed, released: gamepadReleased } = gamepad.update();
+
+    const activeActions = new Set<string>();
 
     for (const [action] of this.actionMap) {
-      const prev = this.currState.get(action) ?? false;
-      const curr = this.isDown(action);
-
-      if (!prev && curr) {
-        pressed.push(action);
-      } else if (prev && !curr) {
-        released.push(action);
+      if (this.isDown(action)) {
+        activeActions.add(action);
       }
-
-      this.prevState.set(action, prev);
-      this.currState.set(action, curr);
     }
 
-    return { pressed, released };
+    const { justPressed, justReleased } = this.actionStateTracker.update(activeActions);
+
+    return { 
+      pressed: justPressed, 
+      released: justReleased,
+      gamepadPressed,
+      gamepadReleased,
+    };
   }
 
   private parseInput(input: string): InputBinding {
@@ -72,8 +80,10 @@ export class Input {
       return { type: 'mouse', code: buttonCode };
     }
 
-    if (normalized.startsWith('Gamepad')) {
-      return { type: 'gamepad', code: normalized };
+    if (normalized.startsWith('GP')) {
+      // Format: GP ButtonBottom, GP LB, GP RT, etc.
+      const buttonName = normalized.replace('GP', '').trim();
+      return { type: 'gamepad', code: buttonName };
     }
 
     return { type: 'keyboard', code: normalized };
@@ -82,25 +92,22 @@ export class Input {
   private isBindingActive(binding: InputBinding): boolean {
     switch (binding.type) {
       case 'keyboard':
-        return keyboard.isScancodeDown(binding.code);
-      case 'mouse':
-        const buttonMap: Record<string, number> = {
-          'Left': 1,
-          'Right': 3,
-          'Middle': 2,
-          '1': 1,
-          '2': 2,
-          '3': 3,
-          '4': 4,
-          '5': 5,
-        };
+        return keyboard.isDown(binding.code);
+      case 'mouse': {
         const button = buttonMap[binding.code];
         if (button !== undefined) {
           return mouse.isDown(button);
         }
         return false;
-      case 'gamepad':
+      }
+      case 'gamepad': {
+        const buttonIndex = getButtonIndex(binding.code);
+        if (buttonIndex !== undefined) {
+          // GP references all gamepads
+          return gamepad.isButtonDownOnAny(buttonIndex);
+        }
         return false;
+      }
       default:
         return false;
     }
@@ -108,8 +115,7 @@ export class Input {
 
   clear(): void {
     this.actionMap.clear();
-    this.prevState.clear();
-    this.currState.clear();
+    this.actionStateTracker.clear();
   }
 }
 

@@ -53,6 +53,10 @@ export class Mouse {
     return this.buttons.has(button);
   }
 
+  getPressedButtons(): Set<number> {
+    return new Set(this.buttons);
+  }
+
   isVisible(): boolean {
     return document.pointerLockElement === null;
   }
