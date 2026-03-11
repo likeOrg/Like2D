@@ -43,12 +43,6 @@ const SDL_TO_INTERNAL_BUTTON: Record<string, string> = {
   'touchpad': 'Touchpad',
 };
 
-// Reverse mapping: internal to SDL
-const INTERNAL_TO_SDL_BUTTON: Record<string, string> = {};
-for (const [sdl, internal] of Object.entries(SDL_TO_INTERNAL_BUTTON)) {
-  INTERNAL_TO_SDL_BUTTON[internal] = sdl;
-}
-
 export interface ButtonMapping {
   // Maps controller-specific button index to standard button index
   toStandard: Map<number, number>;
@@ -63,80 +57,34 @@ export class GamepadMapping {
   private mappings = new Map<string, ButtonMapping>();
   private dbLoaded = false;
 
-  /**
-   * Load the game controller database
-   * In a browser environment, this should be called with the file content
-   */
   async loadDatabase(): Promise<void> {
+    if (this.dbLoaded) return;
+
+    const sources = ['/like/gamecontrollerdb.txt', './gamecontrollerdb.txt'];
+    for (const src of sources) {
+      try {
+        const res = await fetch(src);
+        if (res.ok) {
+          gamepadDatabase.load(await res.text());
+          this.dbLoaded = true;
+          break;
+        }
+      } catch {}
+    }
+
+    if (!this.dbLoaded) {
+      try {
+        // @ts-ignore - Vite handles ?raw imports
+        const module = await import('./gamecontrollerdb.txt?raw');
+        if (typeof module.default === 'string') {
+          gamepadDatabase.load(module.default);
+          this.dbLoaded = true;
+        }
+      } catch {}
+    }
+
     if (this.dbLoaded) {
-      console.log('[GamepadMapping] Database already loaded');
-      return;
-    }
-
-    console.log('[GamepadMapping] Loading database...');
-
-    try {
-      // In a browser/Vite environment, fetch the text file
-      console.log('[GamepadMapping] Trying fetch...');
-      const response = await fetch('/like/gamecontrollerdb.txt');
-      console.log('[GamepadMapping] Fetch response status:', response.status, response.ok);
-      if (response.ok) {
-        const content = await response.text();
-        console.log('[GamepadMapping] Fetch successful, content length:', content.length);
-        gamepadDatabase.load(content);
-        this.dbLoaded = true;
-        console.log('[GamepadMapping] Database loaded successfully via fetch');
-        return;
-      } else {
-        console.log('[GamepadMapping] Fetch failed with status:', response.status);
-      }
-    } catch (e) {
-      console.log('[GamepadMapping] Fetch threw error:', e);
-    }
-
-    // Try relative fetch as fallback
-    try {
-      console.log('[GamepadMapping] Trying relative fetch...');
-      const response = await fetch('./gamecontrollerdb.txt');
-      console.log('[GamepadMapping] Relative fetch response status:', response.status, response.ok);
-      if (response.ok) {
-        const content = await response.text();
-        console.log('[GamepadMapping] Relative fetch successful, content length:', content.length);
-        gamepadDatabase.load(content);
-        this.dbLoaded = true;
-        console.log('[GamepadMapping] Database loaded successfully via relative fetch');
-        return;
-      }
-    } catch (e) {
-      console.log('[GamepadMapping] Relative fetch threw error:', e);
-    }
-
-    // If fetch fails, try to load from Vite's raw import
-    console.log('[GamepadMapping] Trying Vite raw import...');
-    try {
-      // Use ?raw suffix to import as string
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore - Vite handles ?raw imports
-      const module = await import('./gamecontrollerdb.txt?raw');
-      console.log('[GamepadMapping] Import result:', module);
-      if (typeof module.default === 'string') {
-        console.log('[GamepadMapping] Import successful, content length:', module.default.length);
-        gamepadDatabase.load(module.default);
-        this.dbLoaded = true;
-        console.log('[GamepadMapping] Database loaded successfully via import');
-      } else {
-        console.log('[GamepadMapping] Import did not return string, got:', typeof module.default);
-      }
-    } catch (importError) {
-      console.warn('[GamepadMapping] Could not load game controller database:', importError);
-    }
-
-    console.log('[GamepadMapping] Database loaded flag:', this.dbLoaded);
-    if (this.dbLoaded) {
-      const platform = navigator.platform.includes('Win') ? 'Windows' :
-                       navigator.platform.includes('Mac') ? 'Mac OS X' : 'Linux';
-      const platformMappings = gamepadDatabase.getMappingsByPlatform(platform);
-      console.log(`[GamepadMapping] Loaded ${gamepadDatabase.getMappingCount()} total mappings, ${platformMappings.length} for ${platform}`);
+      console.log(`[Gamepad] Loaded ${gamepadDatabase.getMappingCount()} controller mappings`);
     }
   }
 
@@ -217,28 +165,13 @@ export class GamepadMapping {
     };
   }
 
-  /**
-   * Try to find a database mapping for the gamepad
-   */
   private findDatabaseMapping(gamepad: Gamepad): ControllerMapping | undefined {
-    if (!this.dbLoaded) {
-      console.log('[GamepadMapping] Database not loaded yet');
-      return undefined;
-    }
-
-    console.log('[GamepadMapping] Looking for mapping for gamepad:', gamepad.id);
+    if (!this.dbLoaded) return undefined;
 
     const vp = this.extractVendorProduct(gamepad);
     if (vp) {
-      console.log('[GamepadMapping] Looking up by vendor/product:', `0x${vp.vendor.toString(16).padStart(4,'0')}:0x${vp.product.toString(16).padStart(4,'0')}`, `(key: ${0x10000 * vp.vendor + vp.product})`);
-      const mapping = gamepadDatabase.getMappingByVendorProduct(vp.vendor, vp.product);
-      if (mapping) {
-        console.log('[GamepadMapping] Found mapping:', mapping.name);
-        return mapping;
-      }
+      return gamepadDatabase.getMappingByVendorProduct(vp.vendor, vp.product);
     }
-
-    console.log('[GamepadMapping] No mapping found, using default Xbox layout');
     return undefined;
   }
 
@@ -263,7 +196,6 @@ export class GamepadMapping {
       }
     }
 
-    console.log('[GamepadMapping] Could not extract vendor/product from id');
     return null;
   }
 }

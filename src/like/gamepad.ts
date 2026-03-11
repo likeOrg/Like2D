@@ -29,15 +29,11 @@ export class Gamepad {
 
   private setupEventListeners(): void {
     window.addEventListener('gamepadconnected', (e: GamepadEvent) => {
-      console.log('[Gamepad] Connected:', e.gamepad.id, 'Index:', e.gamepad.index);
       this.connectedGamepads.set(e.gamepad.index, e.gamepad);
       this.buttonTrackers.set(e.gamepad.index, new InputStateTracker<number>());
-      // Create/get the button mapping for this gamepad
       const mapping = gamepadMapping.getMapping(e.gamepad);
       this.buttonMappings.set(e.gamepad.index, mapping);
-      console.log('[Gamepad] Mapping created - hasMapping:', mapping.hasMapping, 'controllerName:', mapping.controllerName);
-      console.log('[Gamepad] toStandard mappings:', Array.from(mapping.toStandard.entries()));
-      console.log('[Gamepad] fromStandard mappings:', Array.from(mapping.fromStandard.entries()));
+      console.log(`[Gamepad] Connected: ${mapping.controllerName}${mapping.hasMapping ? '' : ' (unmapped)'}`);
     });
 
     window.addEventListener('gamepaddisconnected', (e: GamepadEvent) => {
