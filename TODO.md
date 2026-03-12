@@ -68,9 +68,9 @@ Plan:
 
 ## Phase 5: Restructuring
 
-### No default exports
-Yes, that simple. Remove every default export, replace with explicit import/export, and put this in the spec.
-Consider any other code style choices as well.
+### No default exports ✓
+- [x] Remove every default export, replace with explicit import/export
+- [x] Document in SPEC.md
 
 ### Nailing down the spec
 What parts of the codebase are implict, and should be in the spec?

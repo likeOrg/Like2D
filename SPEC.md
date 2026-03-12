@@ -161,6 +161,7 @@ These will be revisited after establishing a game object model:
 - Fire-and-forget asset loading (no async/await in game code)
 - Global singleton access: `like.graphics`, `like.audio`, etc.
 - Canvas coordinates: (0,0) at top-left
+- Named exports only (no default exports)
 
 ## Dependencies
 
