@@ -72,6 +72,11 @@ Plan:
 - [x] Remove every default export, replace with explicit import/export
 - [x] Document in SPEC.md
 
+### Documentation ✓
+- [x] Create concise README.md focused on core functionality
+- [x] Break down SPEC.md into spec/ folder with design intent documents
+- [x] Remove old SPEC.md (replaced by spec/ folder)
+
 ### Nailing down the spec
 What parts of the codebase are implict, and should be in the spec?
 What good parts of the code do we notice, philosophically, and what bad parts?
