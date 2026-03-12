@@ -13,7 +13,8 @@ This document defines the graphics rendering API for Like2D.
 
 ```typescript
 type Color = [number, number, number, number?] | string;
-type Quad = [number, number, number, number];
+type Vector2 = [number, number];
+type Rect = [number, number, number, number];  // x, y, width, height
 ```
 
 ### Color
@@ -21,8 +22,11 @@ Colors can be specified in two ways:
 - Array form: `[r, g, b, a?]` where values are 0.0-1.0 floats (default alpha: 1.0)
 - String form: Any valid CSS color string
 
-### Quad
-Defines a sub-region of an image as `[x, y, width, height]`.
+### Vector2
+A two-item array representing an (x, y) coordinate pair. Used for positions, sizes, velocities, etc. See [vector2.md](./vector2.md) for operations.
+
+### Rect
+A four-item array representing a rectangle as `[x, y, width, height]`. Used for both screen rectangles and texture regions. See [rect.md](./rect.md) for operations.
 
 ## Shape Drawing
 
@@ -103,7 +107,7 @@ draw(
   y: number,
   props?: {
     color?: Color;
-    quad?: Quad;
+    quad?: Rect;     // sub-region of image to draw
     r?: number;      // rotation in radians (default: 0)
     sx?: number;     // scale x (default: 1)
     sy?: number;     // scale y (default: sx)
@@ -269,9 +273,9 @@ like.graphics.draw(img, 100, 100);
 // Draw with rotation and scaling
 like.graphics.draw(img, 200, 200, { r: Math.PI / 4, sx: 2, sy: 2 });
 
-// Draw with a quad (sub-region)
+// Draw with a sub-region (quad)
 like.graphics.draw(img, 300, 300, {
-  quad: [0, 0, 32, 32],
+  quad: [0, 0, 32, 32] as Rect,
   sx: 2,
   sy: 2
 });

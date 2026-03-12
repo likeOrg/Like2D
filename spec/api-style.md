@@ -30,6 +30,23 @@ like.graphics.print('Hello', 100, 100, { color: [1, 1, 1], limit: 200, align: 'c
 like.graphics.draw(playerImage, x, y, { quad: spriteQuad, r: rotation, sx: 2 });
 ```
 
+**Tuple types for coordinates** - Use `Vector2` and `Rect` tuples for geometric data:
+
+```typescript
+// Vector2 is a two-item array: [x, y]
+type Vector2 = [number, number];
+
+// Rect is a four-item array: [x, y, width, height]
+type Rect = [number, number, number, number];
+
+// Use the V2 module for vector operations
+import { V2 } from './like/vector2.ts';
+
+const position: Vector2 = [100, 200];
+const velocity: Vector2 = [10, 5];
+const newPos = V2.add(position, velocity);  // [110, 205]
+```
+
 ## Global Singleton
 
 The `like` object is a global singleton. This is intentional:

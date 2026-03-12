@@ -224,3 +224,7 @@ export type { Color, Quad, ShapeProps, DrawProps, PrintProps } from './graphics.
 export { input } from './input.ts';
 export { gamepad, getButtonName } from './gamepad.ts';
 export type { StickPosition } from './gamepad.ts';
+export type { Vector2 } from './vector2.ts';
+export { V2 } from './vector2.ts';
+export type { Rect } from './rect.ts';
+export { R } from './rect.ts';

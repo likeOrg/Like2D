@@ -292,18 +292,18 @@ const demoScene: Scene = {
     
     // Display mouse position
     const mousePos = like.mouse.getPosition();
-    like.graphics.print(`Mouse: (${Math.round(mousePos.x)}, ${Math.round(mousePos.y)})`, 20, 180, { 
+    like.graphics.print(`Mouse: (${Math.round(mousePos[0])}, ${Math.round(mousePos[1])})`, 20, 180, { 
       color: [0.2, 0.9, 0.9, 1],
       font: '16px sans-serif'
     });
     
     // Draw mouse position indicator on canvas
-    like.graphics.circle('line', mousePos.x, mousePos.y, 10, { color: [0.2, 0.9, 0.9, 0.5] });
-    like.graphics.line([mousePos.x - 15, mousePos.y, mousePos.x + 15, mousePos.y], { 
-      color: [0.2, 0.9, 0.9, 0.5] 
+    like.graphics.circle('line', mousePos[0], mousePos[1], 10, { color: [0.2, 0.9, 0.9, 0.5] });
+    like.graphics.line([mousePos[0] - 15, mousePos[1], mousePos[0] + 15, mousePos[1]], {
+      color: [0.2, 0.9, 0.9, 0.5]
     });
-    like.graphics.line([mousePos.x, mousePos.y - 15, mousePos.x, mousePos.y + 15], { 
-      color: [0.2, 0.9, 0.9, 0.5] 
+    like.graphics.line([mousePos[0], mousePos[1] - 15, mousePos[0], mousePos[1] + 15], {
+      color: [0.2, 0.9, 0.9, 0.5]
     });
     
     // Display mouse button states

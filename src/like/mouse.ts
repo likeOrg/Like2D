@@ -1,3 +1,5 @@
+import type { Vector2 } from './vector2.ts';
+
 export class Mouse {
   private x = 0;
   private y = 0;
@@ -37,8 +39,8 @@ export class Mouse {
     });
   }
 
-  getPosition(): { x: number; y: number } {
-    return { x: this.x, y: this.y };
+  getPosition(): Vector2 {
+    return [this.x, this.y];
   }
 
   getX(): number {

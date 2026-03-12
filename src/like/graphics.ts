@@ -1,7 +1,12 @@
+import type { Vector2 } from './vector2.ts';
+import type { Rect } from './rect.ts';
+
 type DrawMode = 'fill' | 'line';
 
 export type Color = [number, number, number, number?] | string;
-export type Quad = [number, number, number, number];
+export type Quad = Rect;
+
+export type { Vector2, Rect };
 
 export type ShapeProps = {
   color?: Color;

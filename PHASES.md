@@ -5,8 +5,7 @@ We will complete one phase at a time, in order.
 1. We investigate whether a phase needs to be done, and if so its scope.
 2. We update relevant files in spec/.
 3. We create TODO.md items based on the difference between the spec and the relevant code.
-4. After stopping for a TODO review, we complete the TODO items and check them off.
-5. We commit
+4. Don't do the TODO items.
 
 ### DONE: Objects vs Args
 Love2D was designed for Lua, so it uses arguments for everything, which can vary.
@@ -19,15 +18,13 @@ Canvases take in CSS colors. Let's have a `Type Color = [number, number, number,
 When drawing functions encounter a string, they will use a CSS color. If they encounter an array like this, they can use an RGBA color like love2d.
 Let's also consider whether a small Color library would be needed.
 
-### TODO: Consideration: Geometric Data Types
-It's much easier to manipulate coordinates if they're stored as a two-item array, which can be typed as Vector2.
-Vector2 should not be an object, just a two-item array. `Type Vector2 = [number, number]`
-There should be a set of common (pure) functions on the Vector2 inside of a library, and x,y / w,h coordinate pairs passed around should be put inside of them.
-A common pattern would be `import { V2 } from Vector2`, then for example `V2.mul(a, b)`.
-Further, maybe x,y,w,h coord sets should be stored as four-item arrays, typed as Rect and again with a library.
-Maybe circles as well.
+### DONE: Consideration: Geometric Data Types
+Implemented Vector2 and Rect as tuple types with pure function libraries.
 
-We need to consider whether this would simplify our library and increase ergonomics.
+- Vector2: `[number, number]` with V2 namespace containing add, sub, mul, div, dot, cross, length, normalize, lerp, rotate, etc.
+- Rect: `[number, number, number, number]` with R namespace containing create, fromPoints, fromCenter, position, size, center, contains, intersects, intersection, union, inflate, offset, etc.
+- Constants exported for common vectors: zero, one, up, down, left, right
+- Quad type in graphics is now an alias of Rect
 
 ### TODO: Consideration: reducing state, preferring objects over args.
 It is rare that we benefit from setting color, then line width, then calling draw afterwards. 
