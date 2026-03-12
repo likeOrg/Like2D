@@ -1,17 +1,31 @@
 type DrawMode = 'fill' | 'line';
 
-export interface ImageHandle {
-  readonly path: string;
-  isReady(): boolean;
-  ready(): Promise<void>;
-  readonly width: number;
-  readonly height: number;
-}
+export type Color = [number, number, number, number?] | string;
+export type Quad = [number, number, number, number];
 
-class ImageHandleImpl implements ImageHandle {
+export type ShapeProps = {
+  color?: Color;
+  lineWidth?: number;
+};
+
+export type DrawProps = ShapeProps & {
+  quad?: Quad;
+  r?: number;
+  sx?: number;
+  sy?: number;
+  ox?: number;
+  oy?: number;
+};
+
+export type PrintProps = {
+  color?: Color;
+  font?: string;
+  limit?: number;
+  align?: 'left' | 'center' | 'right';
+};
+
+export class ImageHandle {
   readonly path: string;
-  private _width = 0;
-  private _height = 0;
   private element: HTMLImageElement | null = null;
   private loadPromise: Promise<void>;
   private isLoaded = false;
@@ -23,8 +37,6 @@ class ImageHandleImpl implements ImageHandle {
       const img = new Image();
       img.onload = () => {
         this.element = img;
-        this._width = img.width;
-        this._height = img.height;
         this.isLoaded = true;
         resolve();
       };
@@ -44,11 +56,11 @@ class ImageHandleImpl implements ImageHandle {
   }
 
   get width(): number {
-    return this._width;
+    return this.element?.width ?? 0;
   }
 
   get height(): number {
-    return this._height;
+    return this.element?.height ?? 0;
   }
 
   getElement(): HTMLImageElement | null {
@@ -56,106 +68,133 @@ class ImageHandleImpl implements ImageHandle {
   }
 }
 
-
+function parseColor(color: Color): string {
+  if (typeof color === 'string') {
+    return color;
+  }
+  
+  const [r, g, b, a = 1] = color;
+  return `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;
+}
 
 export class Graphics {
   private ctx: CanvasRenderingContext2D | null = null;
-  private currentColor = { r: 1, g: 1, b: 1, a: 1 };
-  private backgroundColor = { r: 0, g: 0, b: 0, a: 1 };
-  private images = new Map<string, ImageHandleImpl>();
+  private backgroundColor: Color = [0, 0, 0, 1];
+  private images = new Map<string, ImageHandle>();
+  private defaultFont = '16px sans-serif';
 
   setContext(ctx: CanvasRenderingContext2D | null): void {
     this.ctx = ctx;
+    if (ctx) {
+      ctx.font = this.defaultFont;
+    }
+  }
+
+  private applyColor(color?: Color): string {
+    return parseColor(color ?? [1, 1, 1, 1]);
   }
 
   clear(): void {
     if (!this.ctx) return;
-    const { r, g, b, a } = this.backgroundColor;
-    this.ctx.fillStyle = `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;
+    this.ctx.fillStyle = parseColor(this.backgroundColor);
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 
-  setBackgroundColor(r: number, g: number, b: number, a: number = 1): void {
-    this.backgroundColor = { r, g, b, a };
+  setBackgroundColor(color: Color): void {
+    this.backgroundColor = color;
     this.clear();
   }
 
-  setColor(r: number, g: number, b: number, a: number = 1): void {
-    this.currentColor = { r, g, b, a };
-    if (this.ctx) {
-      this.ctx.fillStyle = `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;
-      this.ctx.strokeStyle = `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;
-    }
-  }
-
-  getColor(): { r: number; g: number; b: number; a: number } {
-    return { ...this.currentColor };
-  }
-
-  rectangle(mode: DrawMode, x: number, y: number, width: number, height: number): void {
+  rectangle(mode: DrawMode, x: number, y: number, width: number, height: number, props?: ShapeProps): void {
     if (!this.ctx) return;
     
+    const color = this.applyColor(props?.color);
+    
     if (mode === 'fill') {
+      this.ctx.fillStyle = color;
       this.ctx.fillRect(x, y, width, height);
     } else {
+      this.ctx.strokeStyle = color;
+      if (props?.lineWidth) {
+        this.ctx.lineWidth = props.lineWidth;
+      }
       this.ctx.strokeRect(x, y, width, height);
     }
   }
 
-  circle(mode: DrawMode, x: number, y: number, radius: number): void {
+  circle(mode: DrawMode, x: number, y: number, radius: number, props?: ShapeProps): void {
     if (!this.ctx) return;
+    
+    const color = this.applyColor(props?.color);
     
     this.ctx.beginPath();
     this.ctx.arc(x, y, radius, 0, Math.PI * 2);
     
     if (mode === 'fill') {
+      this.ctx.fillStyle = color;
       this.ctx.fill();
     } else {
+      this.ctx.strokeStyle = color;
+      if (props?.lineWidth) {
+        this.ctx.lineWidth = props.lineWidth;
+      }
       this.ctx.stroke();
     }
   }
 
-  line(x1: number, y1: number, x2: number, y2: number, ...points: number[]): void {
-    if (!this.ctx) return;
+  line(points: number[], props?: ShapeProps): void {
+    if (!this.ctx || points.length < 4) return;
+    
+    const color = this.applyColor(props?.color);
     
     this.ctx.beginPath();
-    this.ctx.moveTo(x1, y1);
-    this.ctx.lineTo(x2, y2);
+    this.ctx.moveTo(points[0], points[1]);
     
-    // Handle additional points (x3, y3, x4, y4, ...)
-    for (let i = 0; i < points.length; i += 2) {
+    for (let i = 2; i < points.length; i += 2) {
       if (i + 1 < points.length) {
         this.ctx.lineTo(points[i], points[i + 1]);
       }
     }
     
+    this.ctx.strokeStyle = color;
+    if (props?.lineWidth) {
+      this.ctx.lineWidth = props.lineWidth;
+    }
     this.ctx.stroke();
   }
 
-  print(text: string, x: number, y: number): void {
+  print(text: string, x: number, y: number, props?: PrintProps): void {
     if (!this.ctx) return;
     
-    this.ctx.fillText(text, x, y);
-  }
-
-  printf(text: string, x: number, y: number, limit: number, align: 'left' | 'center' | 'right' = 'left'): void {
-    if (!this.ctx) return;
+    const color = this.applyColor(props?.color);
+    this.ctx.fillStyle = color;
     
-    const lines = this.wrapText(text, limit);
-    const lineHeight = this.getFontHeight();
+    if (props?.font) {
+      this.ctx.font = props.font;
+    } else {
+      this.ctx.font = this.defaultFont;
+    }
     
-    lines.forEach((line, index) => {
-      let drawX = x;
-      const lineWidth = this.ctx!.measureText(line).width;
+    if (props?.limit !== undefined) {
+      const lines = this.wrapText(text, props.limit);
+      const lineHeight = this.getFontHeight();
+      const align = props.align ?? 'left';
       
-      if (align === 'center') {
-        drawX = x + (limit - lineWidth) / 2;
-      } else if (align === 'right') {
-        drawX = x + limit - lineWidth;
-      }
-      
-      this.ctx!.fillText(line, drawX, y + index * lineHeight);
-    });
+      lines.forEach((line, index) => {
+        let drawX = x;
+        const lineWidth = this.ctx!.measureText(line).width;
+        
+        if (align === 'center') {
+          drawX = x + (props.limit! - lineWidth) / 2;
+        } else if (align === 'right') {
+          drawX = x + props.limit! - lineWidth;
+        }
+        
+        this.ctx!.fillText(line, drawX, y + index * lineHeight);
+      });
+    } else {
+      this.ctx.fillText(text, x, y);
+    }
   }
 
   private wrapText(text: string, maxWidth: number): string[] {
@@ -187,19 +226,18 @@ export class Graphics {
 
   setFont(size: number, font: string = 'sans-serif'): void {
     if (!this.ctx) return;
-    this.ctx.font = `${size}px ${font}`;
+    this.defaultFont = `${size}px ${font}`;
+    this.ctx.font = this.defaultFont;
   }
 
   getFont(): string {
-    if (!this.ctx) return '16px sans-serif';
-    return this.ctx.font;
+    return this.defaultFont;
   }
 
   newImage(path: string): ImageHandle {
-    // Return cached handle if it exists
     let handle = this.images.get(path);
     if (!handle) {
-      handle = new ImageHandleImpl(path);
+      handle = new ImageHandle(path);
       this.images.set(path, handle);
     }
     return handle;
@@ -209,20 +247,15 @@ export class Graphics {
     handle: ImageHandle | string,
     x: number,
     y: number,
-    r: number = 0,
-    sx: number = 1,
-    sy: number = sx,
-    ox: number = 0,
-    oy: number = 0
+    props?: DrawProps
   ): void {
     if (!this.ctx) return;
     
-    let imageHandle: ImageHandleImpl | undefined;
+    let imageHandle: ImageHandle | undefined;
     
     if (typeof handle === 'string') {
       imageHandle = this.images.get(handle);
       if (!imageHandle) {
-        // Silently skip - asset not loaded yet
         return;
       }
     } else {
@@ -230,69 +263,31 @@ export class Graphics {
     }
     
     if (!imageHandle || !imageHandle.isReady()) {
-      // Silently skip if not ready
       return;
     }
     
     const element = imageHandle.getElement();
     if (!element) return;
     
+    const r = props?.r ?? 0;
+    const sx = props?.sx ?? 1;
+    const sy = props?.sy ?? sx;
+    const ox = props?.ox ?? 0;
+    const oy = props?.oy ?? 0;
+    const quad = props?.quad;
+    
     this.ctx.save();
     this.ctx.translate(x, y);
     this.ctx.rotate(r);
     this.ctx.scale(sx, sy);
-    this.ctx.drawImage(element, -ox, -oy);
-    this.ctx.restore();
-  }
-
-  drawq(
-    handle: ImageHandle | string,
-    quad: { x: number; y: number; width: number; height: number },
-    x: number,
-    y: number,
-    r: number = 0,
-    sx: number = 1,
-    sy: number = sx,
-    ox: number = 0,
-    oy: number = 0
-  ): void {
-    if (!this.ctx) return;
     
-    let imageHandle: ImageHandleImpl | undefined;
-    
-    if (typeof handle === 'string') {
-      imageHandle = this.images.get(handle);
-      if (!imageHandle) {
-        // Silently skip - asset not loaded yet
-        return;
-      }
+    if (quad) {
+      const [qx, qy, qw, qh] = quad;
+      this.ctx.drawImage(element, qx, qy, qw, qh, -ox, -oy, qw, qh);
     } else {
-      imageHandle = this.images.get(handle.path);
+      this.ctx.drawImage(element, -ox, -oy);
     }
     
-    if (!imageHandle || !imageHandle.isReady()) {
-      // Silently skip if not ready
-      return;
-    }
-    
-    const element = imageHandle.getElement();
-    if (!element) return;
-    
-    this.ctx.save();
-    this.ctx.translate(x, y);
-    this.ctx.rotate(r);
-    this.ctx.scale(sx, sy);
-    this.ctx.drawImage(
-      element,
-      quad.x,
-      quad.y,
-      quad.width,
-      quad.height,
-      -ox,
-      -oy,
-      quad.width,
-      quad.height
-    );
     this.ctx.restore();
   }
 
@@ -329,51 +324,63 @@ export class Graphics {
     return this.ctx?.canvas.height ?? 600;
   }
 
-  polygon(mode: DrawMode, ...vertices: number[]): void {
-    if (!this.ctx || vertices.length < 6) return;
+  polygon(mode: DrawMode, points: number[], props?: ShapeProps): void {
+    if (!this.ctx || points.length < 6) return;
+    
+    const color = this.applyColor(props?.color);
     
     this.ctx.beginPath();
-    this.ctx.moveTo(vertices[0], vertices[1]);
+    this.ctx.moveTo(points[0], points[1]);
     
-    for (let i = 2; i < vertices.length; i += 2) {
-      this.ctx.lineTo(vertices[i], vertices[i + 1]);
+    for (let i = 2; i < points.length; i += 2) {
+      this.ctx.lineTo(points[i], points[i + 1]);
     }
     
     this.ctx.closePath();
     
     if (mode === 'fill') {
+      this.ctx.fillStyle = color;
       this.ctx.fill();
     } else {
+      this.ctx.strokeStyle = color;
+      if (props?.lineWidth) {
+        this.ctx.lineWidth = props.lineWidth;
+      }
       this.ctx.stroke();
     }
   }
 
-  arc(mode: DrawMode, x: number, y: number, radius: number, angle1: number, angle2: number): void {
+  arc(mode: DrawMode, x: number, y: number, radius: number, angle1: number, angle2: number, props?: ShapeProps): void {
     if (!this.ctx) return;
+    
+    const color = this.applyColor(props?.color);
     
     this.ctx.beginPath();
     this.ctx.arc(x, y, radius, angle1, angle2);
     
     if (mode === 'fill') {
+      this.ctx.fillStyle = color;
       this.ctx.fill();
     } else {
+      this.ctx.strokeStyle = color;
+      if (props?.lineWidth) {
+        this.ctx.lineWidth = props.lineWidth;
+      }
       this.ctx.stroke();
     }
   }
 
-  points(...vertices: number[]): void {
+  points(points: number[], props?: { color?: Color }): void {
     if (!this.ctx) return;
     
-    this.ctx.save();
-    this.ctx.fillStyle = `rgba(${this.currentColor.r * 255}, ${this.currentColor.g * 255}, ${this.currentColor.b * 255}, ${this.currentColor.a})`;
+    const color = this.applyColor(props?.color);
+    this.ctx.fillStyle = color;
     
-    for (let i = 0; i < vertices.length; i += 2) {
-      if (i + 1 < vertices.length) {
-        this.ctx.fillRect(vertices[i], vertices[i + 1], 1, 1);
+    for (let i = 0; i < points.length; i += 2) {
+      if (i + 1 < points.length) {
+        this.ctx.fillRect(points[i], points[i + 1], 1, 1);
       }
     }
-    
-    this.ctx.restore();
   }
 }
 

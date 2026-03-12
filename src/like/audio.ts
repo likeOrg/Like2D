@@ -1,4 +1,4 @@
-interface SourceOptions {
+export interface SourceOptions {
   volume?: number;
   pitch?: number;
   looping?: boolean;
@@ -162,8 +162,8 @@ export class Audio {
   private sources: Set<Source> = new Set();
   private globalVolume: number = 1;
 
-  newSource(path: string): Source {
-    const source = new Source(path);
+  newSource(path: string, options?: SourceOptions): Source {
+    const source = new Source(path, options);
     source._setGlobalVolume(this.globalVolume);
     this.sources.add(source);
     return source;

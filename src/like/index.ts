@@ -216,9 +216,11 @@ class Like {
 export const like = new Like();
 export const love = like;
 export { Source } from './audio.ts';
+export type { SourceOptions } from './audio.ts';
 export { timer } from './timer.ts';
 export type { Scene } from './scene.ts';
-export type { ImageHandle } from './graphics.ts';
+export { ImageHandle } from './graphics.ts';
+export type { Color, Quad, ShapeProps, DrawProps, PrintProps } from './graphics.ts';
 export { input } from './input.ts';
 export { gamepad, getButtonName } from './gamepad.ts';
 export type { StickPosition } from './gamepad.ts';

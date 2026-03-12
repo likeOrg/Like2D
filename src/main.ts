@@ -1,5 +1,6 @@
-import { like } from "./like/index.ts";
-import { Source, Scene, ImageHandle, getButtonName } from './like/index.ts';
+import { like, ImageHandle } from "./like/index.ts";
+import type { Source, Scene } from './like/index.ts';
+import { getButtonName } from './like/index.ts';
 
 // Example demonstrating Like2D graphics API with Scene-based architecture
 let rotation = 0;
@@ -29,7 +30,7 @@ const demoScene: Scene = {
     gameStartTime = like.timer.getTime();
     
     // Set initial background color (dark gray)
-    like.graphics.setBackgroundColor(0.1, 0.1, 0.15, 1);
+    like.graphics.setBackgroundColor([0.1, 0.1, 0.15, 1]);
     like.graphics.setFont(24);
     
     // Setup input mappings for game actions
@@ -129,9 +130,10 @@ const demoScene: Scene = {
     const centerY = like.getHeight() / 2;
     
     // Draw title
-    like.graphics.setColor(1, 1, 1, 1);
-    like.graphics.setFont(28, 'sans-serif');
-    like.graphics.print('Like2D Framework Demo', 20, 30);
+    like.graphics.print('Like2D Framework Demo', 20, 30, { 
+      color: [1, 1, 1, 1],
+      font: '28px sans-serif'
+    });
     
     // Draw FPS and timer info
     const fps = like.timer.getFPS();
@@ -140,157 +142,187 @@ const demoScene: Scene = {
     const elapsedTime = currentTime - gameStartTime;
     const isSleeping = like.timer.isSleeping();
     
-    like.graphics.setColor(0.2, 0.9, 0.2, 1);
-    like.graphics.setFont(16);
-    like.graphics.print(`FPS: ${fps}`, like.getWidth() - 100, 30);
-    like.graphics.print(`Delta: ${(delta * 1000).toFixed(2)}ms`, like.getWidth() - 160, 50);
-    like.graphics.print(`Time: ${elapsedTime.toFixed(1)}s`, like.getWidth() - 160, 70);
+    like.graphics.print(`FPS: ${fps}`, like.getWidth() - 100, 30, { color: [0.2, 0.9, 0.2, 1] });
+    like.graphics.print(`Delta: ${(delta * 1000).toFixed(2)}ms`, like.getWidth() - 160, 50, { color: [0.2, 0.9, 0.2, 1] });
+    like.graphics.print(`Time: ${elapsedTime.toFixed(1)}s`, like.getWidth() - 160, 70, { color: [0.2, 0.9, 0.2, 1] });
     
     if (isSleeping) {
-      like.graphics.setColor(0.9, 0.2, 0.2, 1);
-      like.graphics.print('SLEEPING', like.getWidth() - 160, 90);
+      like.graphics.print('SLEEPING', like.getWidth() - 160, 90, { color: [0.9, 0.2, 0.2, 1] });
     }
     
     if (sleepStatus) {
-      like.graphics.setColor(0.9, 0.6, 0.2, 1);
-      like.graphics.print(sleepStatus, 20, 580);
+      like.graphics.print(sleepStatus, 20, 580, { color: [0.9, 0.6, 0.2, 1] });
     }
     
     // Draw filled red rectangle
-    like.graphics.setColor(0.9, 0.2, 0.2, 1);
-    like.graphics.rectangle('fill', 50, 100, 100, 80);
+    like.graphics.rectangle('fill', 50, 100, 100, 80, { color: [0.9, 0.2, 0.2, 1] });
     
     // Draw outlined rectangle
-    like.graphics.setColor(0.2, 0.9, 0.2, 1);
-    like.graphics.rectangle('line', 50, 100, 100, 80);
+    like.graphics.rectangle('line', 50, 100, 100, 80, { color: [0.2, 0.9, 0.2, 1] });
     
     // Draw filled blue circle
-    like.graphics.setColor(0.2, 0.4, 0.9, 1);
-    like.graphics.circle('fill', centerX, centerY, 50);
+    like.graphics.circle('fill', centerX, centerY, 50, { color: [0.2, 0.4, 0.9, 1] });
     
     // Draw outlined circle
-    like.graphics.setColor(1, 1, 0.2, 1);
-    like.graphics.circle('line', centerX, centerY, 60);
+    like.graphics.circle('line', centerX, centerY, 60, { color: [1, 1, 0.2, 1] });
     
     // Draw lines
-    like.graphics.setColor(0.5, 0.5, 0.5, 1);
-    like.graphics.line(200, 100, 350, 180);
-    like.graphics.line(200, 180, 350, 100, 400, 140);
+    like.graphics.line([200, 100, 350, 180], { color: [0.5, 0.5, 0.5, 1] });
+    like.graphics.line([200, 180, 350, 100, 400, 140], { color: [0.5, 0.5, 0.5, 1] });
     
     // Draw polygon
-    like.graphics.setColor(0.8, 0.3, 0.8, 1);
-    like.graphics.polygon('fill', 500, 100, 550, 150, 500, 200, 450, 150);
+    like.graphics.polygon('fill', [500, 100, 550, 150, 500, 200, 450, 150], { 
+      color: [0.8, 0.3, 0.8, 1] 
+    });
     
     // Draw outlined polygon
-    like.graphics.setColor(1, 0.5, 0.2, 1);
-    like.graphics.polygon('line', 600, 100, 650, 150, 600, 200, 550, 150);
+    like.graphics.polygon('line', [600, 100, 650, 150, 600, 200, 550, 150], { 
+      color: [1, 0.5, 0.2, 1] 
+    });
     
     // Demo coordinate transformations
     like.graphics.push();
     like.graphics.translate(centerX, 300);
     like.graphics.rotate(rotation);
-    like.graphics.setColor(0.2, 0.8, 0.9, 1);
-    like.graphics.rectangle('fill', -40, -40, 80, 80);
+    like.graphics.rectangle('fill', -40, -40, 80, 80, { color: [0.2, 0.8, 0.9, 1] });
     like.graphics.pop();
     
     // Draw images if loaded (draw() skips silently if not ready)
     // Using path directly - looks up handle in cache
-    like.graphics.setColor(1, 1, 1, 1);
     like.graphics.draw('pepper.png', 650, 350);
     
     // Draw scaled down image
-    like.graphics.draw('pepper.png', 650, 350, 0, 0.5, 0.5);
+    like.graphics.draw('pepper.png', 650, 350, { sx: 0.5, sy: 0.5 });
     
     // Draw rotated image (using handle if available)
     if (pepperImage && pepperImage.isReady()) {
       like.graphics.push();
       like.graphics.translate(200, 400);
       like.graphics.rotate(rotation * 0.5);
-      like.graphics.draw(pepperImage, 0, 0, 0, 0.4, 0.4, pepperImage.width / 2, pepperImage.height / 2);
+      like.graphics.draw(pepperImage, 0, 0, { 
+        sx: 0.4, 
+        sy: 0.4, 
+        ox: pepperImage.width / 2, 
+        oy: pepperImage.height / 2 
+      });
       like.graphics.pop();
       
       // Draw image quad (sub-region) - just the center portion
       like.graphics.push();
       like.graphics.translate(400, 400);
       like.graphics.rotate(-rotation * 0.3);
-      like.graphics.drawq(
+      like.graphics.draw(
         pepperImage,
-        { 
-          x: pepperImage.width * 0.25, 
-          y: pepperImage.height * 0.25, 
-          width: pepperImage.width * 0.5, 
-          height: pepperImage.height * 0.5 
-        },
-        0, 0, 0, 1.2, 1.2
+        0, 0,
+        {
+          quad: [
+            pepperImage.width * 0.25, 
+            pepperImage.height * 0.25, 
+            pepperImage.width * 0.5, 
+            pepperImage.height * 0.5 
+          ],
+          sx: 1.2,
+          sy: 1.2
+        }
       );
       like.graphics.pop();
       
       // Image info
-      like.graphics.setColor(0.8, 0.8, 0.8, 1);
-      like.graphics.setFont(14);
-      like.graphics.print(`Image: ${pepperImage.width}x${pepperImage.height}`, 20, 80);
+      like.graphics.print(`Image: ${pepperImage.width}x${pepperImage.height}`, 20, 80, { 
+        color: [0.8, 0.8, 0.8, 1],
+        font: '14px sans-serif'
+      });
     }
     
     // Audio status display
     if (audioSource && audioSource.isReady()) {
-      like.graphics.setColor(0.9, 0.6, 0.2, 1);
-      like.graphics.setFont(18);
       const isPlaying = audioSource.isPlaying();
       const statusText = isPlaying ? 'Playing' : audioSource.isPaused() ? 'Paused' : 'Stopped';
-      like.graphics.print(`Audio: ${statusText} (${Math.round(audioSource.tell() * 10) / 10}s / ${Math.round(audioSource.getDuration() * 10) / 10}s)`, 20, 520);
+      like.graphics.print(
+        `Audio: ${statusText} (${Math.round(audioSource.tell() * 10) / 10}s / ${Math.round(audioSource.getDuration() * 10) / 10}s)`, 
+        20, 520, 
+        { color: [0.9, 0.6, 0.2, 1], font: '18px sans-serif' }
+      );
     }
     
     // Input action system demo
-    like.graphics.setColor(0.9, 0.7, 0.2, 1);
-    like.graphics.setFont(16);
-    like.graphics.print('Input Actions (mapped):', like.getWidth() - 250, 130);
+    like.graphics.print('Input Actions (mapped):', like.getWidth() - 250, 130, { 
+      color: [0.9, 0.7, 0.2, 1],
+      font: '16px sans-serif'
+    });
     
     const jumpActive = like.input.isDown('jump');
     const fireActive = like.input.isDown('fire');
     
-    like.graphics.setColor(jumpActive ? 0.2 : 0.5, jumpActive ? 0.9 : 0.5, 0.2, 1);
-    like.graphics.print(`Jump: ${jumpActive ? 'PRESSED' : 'up'}`, like.getWidth() - 250, 155);
+    like.graphics.print(
+      `Jump: ${jumpActive ? 'PRESSED' : 'up'}`, 
+      like.getWidth() - 250, 155, 
+      { color: jumpActive ? [0.2, 0.9, 0.2, 1] : [0.5, 0.5, 0.5, 1] }
+    );
     
-    like.graphics.setColor(fireActive ? 0.9 : 0.5, fireActive ? 0.2 : 0.5, 0.2, 1);
-    like.graphics.print(`Fire: ${fireActive ? 'PRESSED' : 'up'}`, like.getWidth() - 250, 175);
+    like.graphics.print(
+      `Fire: ${fireActive ? 'PRESSED' : 'up'}`, 
+      like.getWidth() - 250, 175, 
+      { color: fireActive ? [0.9, 0.2, 0.2, 1] : [0.5, 0.5, 0.5, 1] }
+    );
     
     // Print instructions
-    like.graphics.setColor(0.6, 0.6, 0.6, 1);
-    like.graphics.setFont(16);
-    like.graphics.print('Press any key to see it logged', 20, like.getHeight() - 120);
-    like.graphics.print('Click anywhere for mouse position', 20, like.getHeight() - 100);
-    like.graphics.print('Audio: Space=Play/Stop, S=Stop, P=Pause/Resume', 20, like.getHeight() - 80);
-    like.graphics.print('Timer: L=Sleep 2 seconds', 20, like.getHeight() - 60);
-    like.graphics.print('Input: WASD/Arrows to move, Space/W/Up to jump', 20, like.getHeight() - 20);
+    like.graphics.print('Press any key to see it logged', 20, like.getHeight() - 120, { 
+      color: [0.6, 0.6, 0.6, 1],
+      font: '16px sans-serif'
+    });
+    like.graphics.print('Click anywhere for mouse position', 20, like.getHeight() - 100, { 
+      color: [0.6, 0.6, 0.6, 1],
+      font: '16px sans-serif'
+    });
+    like.graphics.print('Audio: Space=Play/Stop, S=Stop, P=Pause/Resume', 20, like.getHeight() - 80, { 
+      color: [0.6, 0.6, 0.6, 1],
+      font: '16px sans-serif'
+    });
+    like.graphics.print('Timer: L=Sleep 2 seconds', 20, like.getHeight() - 60, { 
+      color: [0.6, 0.6, 0.6, 1],
+      font: '16px sans-serif'
+    });
+    like.graphics.print('Input: WASD/Arrows to move, Space/W/Up to jump', 20, like.getHeight() - 20, { 
+      color: [0.6, 0.6, 0.6, 1],
+      font: '16px sans-serif'
+    });
     
     // ===== KEYBOARD & MOUSE INPUT DEMO =====
     
     // Display mouse position
     const mousePos = like.mouse.getPosition();
-    like.graphics.setColor(0.2, 0.9, 0.9, 1);
-    like.graphics.setFont(16);
-    like.graphics.print(`Mouse: (${Math.round(mousePos.x)}, ${Math.round(mousePos.y)})`, 20, 180);
+    like.graphics.print(`Mouse: (${Math.round(mousePos.x)}, ${Math.round(mousePos.y)})`, 20, 180, { 
+      color: [0.2, 0.9, 0.9, 1],
+      font: '16px sans-serif'
+    });
     
     // Draw mouse position indicator on canvas
-    like.graphics.setColor(0.2, 0.9, 0.9, 0.5);
-    like.graphics.circle('line', mousePos.x, mousePos.y, 10);
-    like.graphics.line(mousePos.x - 15, mousePos.y, mousePos.x + 15, mousePos.y);
-    like.graphics.line(mousePos.x, mousePos.y - 15, mousePos.x, mousePos.y + 15);
+    like.graphics.circle('line', mousePos.x, mousePos.y, 10, { color: [0.2, 0.9, 0.9, 0.5] });
+    like.graphics.line([mousePos.x - 15, mousePos.y, mousePos.x + 15, mousePos.y], { 
+      color: [0.2, 0.9, 0.9, 0.5] 
+    });
+    like.graphics.line([mousePos.x, mousePos.y - 15, mousePos.x, mousePos.y + 15], { 
+      color: [0.2, 0.9, 0.9, 0.5] 
+    });
     
     // Display mouse button states
     const lmb = like.mouse.isDown(1) ? 'L' : '_';
     const mmb = like.mouse.isDown(2) ? 'M' : '_';
     const rmb = like.mouse.isDown(3) ? 'R' : '_';
-    like.graphics.setColor(0.9, 0.9, 0.2, 1);
-    like.graphics.print(`Mouse Buttons: [${lmb}] [${mmb}] [${rmb}]`, 20, 200);
+    like.graphics.print(`Mouse Buttons: [${lmb}] [${mmb}] [${rmb}]`, 20, 200, { 
+      color: [0.9, 0.9, 0.2, 1],
+      font: '16px sans-serif'
+    });
     
     // Keyboard input demo - show arrow keys and WASD state
-    like.graphics.setFont(18);
     let keyY = 230;
     
     // Arrow keys display
-    like.graphics.setColor(0.7, 0.7, 0.7, 1);
-    like.graphics.print('Keyboard (hold to see):', 20, keyY);
+    like.graphics.print('Keyboard (hold to see):', 20, keyY, { 
+      color: [0.7, 0.7, 0.7, 1],
+      font: '18px sans-serif'
+    });
     keyY += 25;
     
     // Draw arrow key states using input mapping
@@ -299,25 +331,25 @@ const demoScene: Scene = {
     const left = like.input.isDown('move_left');
     const right = like.input.isDown('move_right');
     
-    like.graphics.setColor(up ? 0.2 : 0.5, up ? 0.9 : 0.5, 0.2, 1);
-    like.graphics.rectangle(up ? 'fill' : 'line', 170, keyY - 5, 25, 25);
-    like.graphics.setColor(up ? 0 : 0.5, 1, up ? 0 : 0.5, 1);
-    like.graphics.print('↑', 175, keyY);
+    like.graphics.rectangle(up ? 'fill' : 'line', 170, keyY - 5, 25, 25, { 
+      color: up ? [0.2, 0.9, 0.2, 1] : [0.5, 0.5, 0.5, 1]
+    });
+    like.graphics.print('↑', 175, keyY, { color: up ? [0, 1, 0, 1] : [0.5, 1, 0.5, 1] });
     
-    like.graphics.setColor(left ? 0.2 : 0.5, left ? 0.9 : 0.5, 0.2, 1);
-    like.graphics.rectangle(left ? 'fill' : 'line', 135, keyY + 20, 25, 25);
-    like.graphics.setColor(left ? 0 : 0.5, 1, left ? 0 : 0.5, 1);
-    like.graphics.print('←', 140, keyY + 25);
+    like.graphics.rectangle(left ? 'fill' : 'line', 135, keyY + 20, 25, 25, { 
+      color: left ? [0.2, 0.9, 0.2, 1] : [0.5, 0.5, 0.5, 1]
+    });
+    like.graphics.print('←', 140, keyY + 25, { color: left ? [0, 1, 0, 1] : [0.5, 1, 0.5, 1] });
     
-    like.graphics.setColor(down ? 0.2 : 0.5, down ? 0.9 : 0.5, 0.2, 1);
-    like.graphics.rectangle(down ? 'fill' : 'line', 170, keyY + 20, 25, 25);
-    like.graphics.setColor(down ? 0 : 0.5, 1, down ? 0 : 0.5, 1);
-    like.graphics.print('↓', 175, keyY + 25);
+    like.graphics.rectangle(down ? 'fill' : 'line', 170, keyY + 20, 25, 25, { 
+      color: down ? [0.2, 0.9, 0.2, 1] : [0.5, 0.5, 0.5, 1]
+    });
+    like.graphics.print('↓', 175, keyY + 25, { color: down ? [0, 1, 0, 1] : [0.5, 1, 0.5, 1] });
     
-    like.graphics.setColor(right ? 0.2 : 0.5, right ? 0.9 : 0.5, 0.2, 1);
-    like.graphics.rectangle(right ? 'fill' : 'line', 205, keyY + 20, 25, 25);
-    like.graphics.setColor(right ? 0 : 0.5, 1, right ? 0 : 0.5, 1);
-    like.graphics.print('→', 210, keyY + 25);
+    like.graphics.rectangle(right ? 'fill' : 'line', 205, keyY + 20, 25, 25, { 
+      color: right ? [0.2, 0.9, 0.2, 1] : [0.5, 0.5, 0.5, 1]
+    });
+    like.graphics.print('→', 210, keyY + 25, { color: right ? [0, 1, 0, 1] : [0.5, 1, 0.5, 1] });
     
     // Show active keys list
     keyY += 70;
@@ -330,16 +362,20 @@ const demoScene: Scene = {
     if (like.keyboard.isDown('Escape')) activeKeys.push('Esc');
     
     if (activeKeys.length > 0) {
-      like.graphics.setColor(0.9, 0.5, 0.2, 1);
-      like.graphics.print(`Active: ${activeKeys.join(', ')}`, 20, keyY);
+      like.graphics.print(`Active: ${activeKeys.join(', ')}`, 20, keyY, { 
+        color: [0.9, 0.5, 0.2, 1],
+        font: '16px sans-serif'
+      });
     }
     
     // Show gamepad status
     keyY += 30;
     const connectedGamepads = like.gamepad.getConnectedGamepads();
     if (connectedGamepads.length > 0) {
-      like.graphics.setColor(0.2, 0.8, 0.2, 1);
-      like.graphics.print(`Gamepads connected: ${connectedGamepads.length}`, 20, keyY);
+      like.graphics.print(`Gamepads connected: ${connectedGamepads.length}`, 20, keyY, { 
+        color: [0.2, 0.8, 0.2, 1],
+        font: '16px sans-serif'
+      });
       
       // Show pressed buttons for each connected gamepad
       for (const gpIndex of connectedGamepads) {
@@ -347,7 +383,10 @@ const demoScene: Scene = {
         const pressedButtons = like.gamepad.getPressedButtons(gpIndex);
         if (pressedButtons.size > 0) {
           const buttonNames = Array.from(pressedButtons).map(idx => getButtonName(idx));
-          like.graphics.print(`  GP${gpIndex}: ${buttonNames.join(', ')}`, 20, keyY);
+          like.graphics.print(`  GP${gpIndex}: ${buttonNames.join(', ')}`, 20, keyY, { 
+            color: [0.8, 0.8, 0.8, 1],
+            font: '16px sans-serif'
+          });
         }
       }
       
@@ -357,52 +396,65 @@ const demoScene: Scene = {
         const rightStick = like.gamepad.getRightStick(gpIndex);
         
         keyY += 25;
-        like.graphics.setColor(0.7, 0.7, 0.9, 1);
-        like.graphics.print(`GP${gpIndex} Sticks:`, 20, keyY);
+        like.graphics.print(`GP${gpIndex} Sticks:`, 20, keyY, { 
+          color: [0.7, 0.7, 0.9, 1],
+          font: '16px sans-serif'
+        });
         
         // Left stick visual
         const leftStickCenterX = 150;
         const leftStickCenterY = keyY + 40;
         const stickRadius = 25;
         
-        like.graphics.setColor(0.3, 0.3, 0.3, 1);
-        like.graphics.circle('line', leftStickCenterX, leftStickCenterY, stickRadius);
-        like.graphics.setColor(0.2, 0.6, 0.9, 1);
-        like.graphics.circle('fill', leftStickCenterX + leftStick.x * stickRadius, leftStickCenterY + leftStick.y * stickRadius, 5);
-        like.graphics.setColor(0.6, 0.6, 0.6, 1);
-        like.graphics.setFont(12);
-        like.graphics.print('L', leftStickCenterX - 4, leftStickCenterY + stickRadius + 5);
+        like.graphics.circle('line', leftStickCenterX, leftStickCenterY, stickRadius, { 
+          color: [0.3, 0.3, 0.3, 1]
+        });
+        like.graphics.circle('fill', leftStickCenterX + leftStick.x * stickRadius, leftStickCenterY + leftStick.y * stickRadius, 5, { 
+          color: [0.2, 0.6, 0.9, 1]
+        });
+        like.graphics.print('L', leftStickCenterX - 4, leftStickCenterY + stickRadius + 5, { 
+          color: [0.6, 0.6, 0.6, 1],
+          font: '12px sans-serif'
+        });
         
         // Right stick visual
         const rightStickCenterX = leftStickCenterX + 70;
         const rightStickCenterY = leftStickCenterY;
         
-        like.graphics.setColor(0.3, 0.3, 0.3, 1);
-        like.graphics.circle('line', rightStickCenterX, rightStickCenterY, stickRadius);
-        like.graphics.setColor(0.9, 0.6, 0.2, 1);
-        like.graphics.circle('fill', rightStickCenterX + rightStick.x * stickRadius, rightStickCenterY + rightStick.y * stickRadius, 5);
-        like.graphics.setColor(0.6, 0.6, 0.6, 1);
-        like.graphics.print('R', rightStickCenterX - 4, rightStickCenterY + stickRadius + 5);
+        like.graphics.circle('line', rightStickCenterX, rightStickCenterY, stickRadius, { 
+          color: [0.3, 0.3, 0.3, 1]
+        });
+        like.graphics.circle('fill', rightStickCenterX + rightStick.x * stickRadius, rightStickCenterY + rightStick.y * stickRadius, 5, { 
+          color: [0.9, 0.6, 0.2, 1]
+        });
+        like.graphics.print('R', rightStickCenterX - 4, rightStickCenterY + stickRadius + 5, { 
+          color: [0.6, 0.6, 0.6, 1],
+          font: '12px sans-serif'
+        });
         
-        like.graphics.setFont(16);
         keyY += stickRadius * 2 + 15;
       }
     } else {
-      like.graphics.setColor(0.5, 0.5, 0.5, 1);
-      like.graphics.print('No gamepads connected', 20, keyY);
+      like.graphics.print('No gamepads connected', 20, keyY, { 
+        color: [0.5, 0.5, 0.5, 1],
+        font: '16px sans-serif'
+      });
     }
     
     // Interactive element - move a circle with WASD/Arrows
     keyY += 40;
-    like.graphics.setColor(0.5, 0.5, 0.5, 1);
-    like.graphics.print('Move player with WASD or Arrow keys:', 20, keyY);
-    like.graphics.print(`Player: (${Math.round(player.x)}, ${Math.round(player.y)})`, 20, keyY + 20);
+    like.graphics.print('Move player with WASD or Arrow keys:', 20, keyY, { 
+      color: [0.5, 0.5, 0.5, 1],
+      font: '16px sans-serif'
+    });
+    like.graphics.print(`Player: (${Math.round(player.x)}, ${Math.round(player.y)})`, 20, keyY + 20, { 
+      color: [0.5, 0.5, 0.5, 1],
+      font: '16px sans-serif'
+    });
     
     // Draw player at actual position
-    like.graphics.setColor(0.2, 0.9, 0.4, 1);
-    like.graphics.circle('fill', player.x, player.y, 15);
-    like.graphics.setColor(0, 1, 0, 1);
-    like.graphics.circle('line', player.x, player.y, 15);
+    like.graphics.circle('fill', player.x, player.y, 15, { color: [0.2, 0.9, 0.4, 1] });
+    like.graphics.circle('line', player.x, player.y, 15, { color: [0, 1, 0, 1] });
   },
 
 

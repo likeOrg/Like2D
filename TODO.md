@@ -77,51 +77,49 @@ Plan:
 - [x] Break down SPEC.md into spec/ folder with design intent documents
 - [x] Remove old SPEC.md (replaced by spec/ folder)
 
-### Nailing down the spec
-What parts of the codebase are implict, and should be in the spec?
-What good parts of the code do we notice, philosophically, and what bad parts?
-What parts of the spec are outdated? Let's review the spec and fix these problems.
+## Phase 6: Objects vs Args API Modernization
 
-Then, after updating the spec, let's compare the codebase against it.
+**Goal**: Transition from Love2D-style argument lists to modern JavaScript/TypeScript pattern with required args and optional props tables.
 
-### Objects vs Args
-Love2D was designed for Lua, so it uses arguments for everything, which can vary.
-This is kind of antiquated. We should transition our API to:
-1. Take in all required values as args
-2. Take in all optional values as a props table
+### Graphics Module Refactor
 
-We need to write out a plan in TODO for completing this task, and add it to the spec.
+- [x] Create Color type alias: `type Color = [number, number, number, number?] | string`
+- [x] Create Quad type alias: `type Quad = [number, number, number, number]`
+- [x] Update `rectangle(mode, x, y, w, h, props?)` - add color (Color type) and lineWidth to props
+- [x] Update `circle(mode, x, y, radius, props?)` - add color (Color type) and lineWidth to props
+- [x] Update `line(points, props?)` - change from rest params to array, add color (Color type) and lineWidth to props
+- [x] Update `polygon(mode, points, props?)` - change from rest params to array, add color (Color type) and lineWidth to props
+- [x] Update `arc(mode, x, y, radius, angle1, angle2, props?)` - add color (Color type) and lineWidth to props
+- [x] Update `points(points, props?)` - change from rest params to array, add color (Color type) to props
+- [x] **Combine** `draw` and `drawq` into single `draw(handle, x, y, props?)` with optional `quad` prop (Quad type)
+  - Props: color (Color type), quad (Quad type), r (rotation), sx, sy, ox, oy
+- [x] **Combine** `print` and `printf` into single `print(text, x, y, props?)` with optional `limit` and `align` props
+  - Props: color (Color type), font, limit, align
+- [x] Update `setBackgroundColor(color)` to accept Color type
+- [x] Remove `setColor()` - color now always passed via props
+- [x] Remove `getColor()` - no longer needed
+- [x] Remove `setFont()` calls before draw operations - font now in props
+- [x] Update all internal methods to extract color from props and apply to canvas context
 
-### Consideration: Geometric Data Types
-It's much easier to manipulate coordinates if they're stored as a two-item array, which can be typed as Vector2.
-Vector2 should not be an object, just a two-item array. `Type Vector2 = [number, number]`
-There should be a set of common (pure) functions on the Vector2 inside of a library, and x,y / w,h coordinate pairs passed around should be put inside of them.
-A common pattern would be `import { V2 } from Vector2`, then for example `V2.mul(a, b)`.
-Further, maybe x,y,w,h coord sets should be stored as four-item arrays, typed as Rect and again with a library.
-Maybe circles as well.
+### Audio Module Refactor
 
-We need to consider whether this would simplify our library and increase ergonomics, and if so write a plan in TODO and put it in the Spec.
+- [x] Fix `newSource(path, options?)` to actually pass options to Source constructor
+- [x] Verify SourceOptions interface is exported
 
-### Consideration: Color handling
-Canvases take in CSS colors. Let's have a `Type Color = [number, number, number, number?]`.
-When drawing functions encounter a string, they will use a CSS color. If they encounter an array like this, they can use an RGBA color like love2d.
-Let's also consider whether a small Color library would be needed.
-Based on this, write a plan in TODO and put it in the spec.
+### Update Demo (main.ts)
 
-### Consideration: reducing state, preferring objects over args.
-It is rare that we benefit from setting color, then line width, then calling draw afterwards. 
-Instead, let's require that a color be passed into any draw call which requires a color. Line width can be optional.
-For example, line drawing take a color argument. However, if images could take an optional tint argument, put that in a props table.
-Or, for the best ergonomics, maybe colors should be optional as an argument and override the currently set color.
+- [x] Remove all `setColor()` calls
+- [x] Remove all `setFont()` calls before text rendering
+- [x] Update `rectangle()` calls to use props for color
+- [x] Update `circle()` calls to use props for color
+- [x] Update `line()` calls to use array syntax for points
+- [x] Update `polygon()` calls to use array syntax for points
+- [x] Update `print()` calls to use props for color and font
+- [x] Update `draw()` calls - remove drawq usage, add quad to props if needed
+- [x] Verify demo still works correctly
 
-Are there other parts of the codebase that suffer from too much statefulness? Would they be cleaner if state was handled by the user?
+### Update Documentation
 
-Let's think about this, then write a plan in TODO if needed and put it in the spec.
+- [x] Update README.md examples to use new API
+- [x] Update ASSET_LOADING_PLAN.md examples to use new API
 
-## Future Considerations (Post-Game Object Model)
-
-- Camera system
-- Tweening/animation
-- Entity systems
-- Particle systems
-- Collision detection

@@ -27,8 +27,7 @@ const game: Scene = {
   },
   
   draw() {
-    like.graphics.setColor(1, 0, 0, 1);
-    like.graphics.rectangle('fill', 100, 100, 50, 50);
+    like.graphics.rectangle('fill', 100, 100, 50, 50, { color: [1, 0, 0] });
   }
 };
 

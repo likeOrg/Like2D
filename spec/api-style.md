@@ -19,6 +19,15 @@ import { like, Scene } from './like/index.ts';
 ```typescript
 // Required: path. Optional: volume, pitch, looping in props table
 const source = like.audio.newSource('sound.ogg', { volume: 0.5, looping: true });
+
+// Required: mode, position, size. Optional: color, lineWidth in props
+like.graphics.rectangle('fill', 100, 100, 50, 50, { color: [1, 0, 0] });
+
+// Required: text, position. Optional: color, font, wrapping in props
+like.graphics.print('Hello', 100, 100, { color: [1, 1, 1], limit: 200, align: 'center' });
+
+// Required: image, position. Optional: quad, rotation, scale in props
+like.graphics.draw(playerImage, x, y, { quad: spriteQuad, r: rotation, sx: 2 });
 ```
 
 ## Global Singleton
