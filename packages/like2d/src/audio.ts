@@ -17,6 +17,10 @@ export class Source {
   readonly ready: Promise<void>;
   private loaded = false;
   private audioRef: Audio;
+  private pending = {
+    position: 0,
+    playing: false
+  };
 
   constructor(path: string, audioRef: Audio, options: SourceOptions = {}) {
     this.path = path;
@@ -33,13 +37,26 @@ export class Source {
     this.ready = new Promise((resolve, reject) => {
       this.audio.oncanplaythrough = () => {
         this.loaded = true;
+        this.applyPendingState();
         resolve();
       };
       this.audio.onerror = () => reject(new Error(`Failed to load audio: ${path}`));
-      if (this.audio.readyState >= 4) {
-        this.loaded = true;
-        resolve();
-      }
+    });
+  }
+
+  private applyPendingState(): void {
+    if (this.pending.position !== 0) {
+      this.audio.currentTime = this.pending.position;
+    }
+    if (this.pending.playing) {
+      this.pending.playing = false;
+      this.doPlay();
+    }
+  }
+
+  private doPlay(): void {
+    this.audio.play().catch(err => {
+      console.warn(`Failed to play audio "${this.path}":`, err.message);
     });
   }
 
@@ -47,41 +64,51 @@ export class Source {
     return this.loaded;
   }
 
-  play(): boolean {
-    if (!this.loaded) return false;
-
-    if (this.audio.paused || this.audio.ended) {
-      this.audio.currentTime = 0;
+  play(): void {
+    if (this.loaded) {
+      this.doPlay();
+    } else {
+      this.pending.playing = true;
     }
-
-    this.audio.play().catch(err => {
-      console.warn(`Failed to play audio "${this.path}":`, err.message);
-    });
-    return true;
   }
 
   stop(): void {
-    if (!this.loaded) return;
-    this.audio.pause();
-    this.audio.currentTime = 0;
+    if (this.loaded) {
+      this.audio.pause();
+      this.audio.currentTime = 0;
+    } else {
+      this.pending.playing = false;
+      this.pending.position = 0;
+    }
   }
 
   pause(): void {
-    if (!this.loaded) return;
-    this.audio.pause();
+    if (this.loaded) {
+      this.audio.pause();
+    } else {
+      this.pending.playing = false;
+    }
   }
 
-  resume(): boolean {
-    return this.loaded && this.audio.paused ? this.play() : false;
+  resume(): void {
+    if (this.loaded) {
+      if (this.audio.paused) this.doPlay();
+    } else {
+      this.pending.playing = true;
+    }
   }
 
   seek(position: number): void {
-    if (!this.loaded) return;
-    this.audio.currentTime = position;
+    if (this.loaded) {
+      this.audio.currentTime = position;
+    } else {
+      this.pending.position = position;
+    }
   }
 
   tell(): number {
-    return this.loaded ? this.audio.currentTime : 0;
+    if (this.loaded) return this.audio.currentTime;
+    return this.pending.position;
   }
 
   getDuration(): number {
@@ -89,15 +116,18 @@ export class Source {
   }
 
   isPlaying(): boolean {
-    return this.loaded && !this.audio.paused && !this.audio.ended;
+    if (this.loaded) return !this.audio.paused && !this.audio.ended;
+    return this.pending.playing;
   }
 
   isPaused(): boolean {
-    return this.loaded && this.audio.paused && this.audio.currentTime > 0;
+    if (this.loaded) return this.audio.paused && this.audio.currentTime > 0;
+    return !this.pending.playing && this.pending.position > 0;
   }
 
   isStopped(): boolean {
-    return this.loaded && this.audio.paused && this.audio.currentTime === 0;
+    if (this.loaded) return this.audio.paused && this.audio.currentTime === 0;
+    return !this.pending.playing && this.pending.position === 0;
   }
 
   /** Set volume (0-1). Applies global volume scaling. Prefer this over `source.audio.volume`. */
@@ -145,15 +175,12 @@ export class Audio {
     this.getAllSources().forEach(s => s.audio.pause());
   }
 
-  resumeAll(): boolean {
-    let resumed = false;
+  resumeAll(): void {
     this.getAllSources().forEach(s => {
-      if (s.isReady() && s.audio.paused && s.audio.currentTime > 0) {
-        s.play();
-        resumed = true;
+      if (s.isPaused()) {
+        s.resume();
       }
     });
-    return resumed;
   }
 
   setVolume(volume: number): void {
