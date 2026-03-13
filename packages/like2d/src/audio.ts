@@ -1,4 +1,14 @@
-export interface SourceOptions {
+/** The audio module performs a few things:
+ *
+ * ## Make audio resources behave as if synchronous
+ * Functions like playback and seeking are deferred until the sound is loaded.
+ * 
+ * ## Track and give global control to all audio objects
+ * Start, stop, or set global volume for every currently playing sound.
+ *
+ */
+
+export type SourceOptions = {
   volume?: number;
 }
 
@@ -45,19 +55,10 @@ export class Source {
   }
 
   private applyPendingState(): void {
-    if (this.pending.position !== 0) {
-      this.audio.currentTime = this.pending.position;
-    }
+    this.audio.currentTime = this.pending.position;
     if (this.pending.playing) {
-      this.pending.playing = false;
-      this.doPlay();
+      this.audio.play();
     }
-  }
-
-  private doPlay(): void {
-    this.audio.play().catch(err => {
-      console.warn(`Failed to play audio "${this.path}":`, err.message);
-    });
   }
 
   isReady(): boolean {
@@ -66,7 +67,7 @@ export class Source {
 
   play(): void {
     if (this.loaded) {
-      this.doPlay();
+      this.audio.play();
     } else {
       this.pending.playing = true;
     }
@@ -92,7 +93,7 @@ export class Source {
 
   resume(): void {
     if (this.loaded) {
-      if (this.audio.paused) this.doPlay();
+      if (this.audio.paused) this.audio.play();
     } else {
       this.pending.playing = true;
     }
@@ -111,18 +112,14 @@ export class Source {
     return this.pending.position;
   }
 
-  getDuration(): number {
-    return this.loaded ? this.audio.duration || 0 : 0;
-  }
-
   isPlaying(): boolean {
     if (this.loaded) return !this.audio.paused && !this.audio.ended;
     return this.pending.playing;
   }
 
   isPaused(): boolean {
-    if (this.loaded) return this.audio.paused && this.audio.currentTime > 0;
-    return !this.pending.playing && this.pending.position > 0;
+    if (this.loaded) return this.audio.paused;
+    return !this.pending.playing;
   }
 
   isStopped(): boolean {
@@ -151,36 +148,29 @@ export class Audio {
     return source;
   }
 
+  /** Get all audio sources -- note that sources are tracked
+    * using weak references, and storing this list can cause
+    * a memory leak.
+    */
   private getAllSources(): Source[] {
     const active: Source[] = [];
-    this.sources = this.sources.filter(ref => {
-      const source = ref.deref();
-      if (source) {
-        active.push(source);
-        return true;
-      }
-      return false;
-    });
+    for (const sourceRef of this.sources) {
+      const source = sourceRef.deref();
+      if (source) active.push(source);
+    }
     return active;
   }
 
   stopAll(): void {
-    this.getAllSources().forEach(s => {
-      s.audio.pause();
-      s.audio.currentTime = 0;
-    });
+    this.getAllSources().forEach(s => s.stop());
   }
 
   pauseAll(): void {
-    this.getAllSources().forEach(s => s.audio.pause());
+    this.getAllSources().forEach(s => s.pause());
   }
 
   resumeAll(): void {
-    this.getAllSources().forEach(s => {
-      if (s.isPaused()) {
-        s.resume();
-      }
-    });
+    this.getAllSources().forEach(s => s.resume());
   }
 
   setVolume(volume: number): void {
