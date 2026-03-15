@@ -31,5 +31,3 @@ export class Keyboard {
     return scancodes.some(code => this.pressedScancodes.has(code));
   }
 }
-
-export const keyboard = new Keyboard();

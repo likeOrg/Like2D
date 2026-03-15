@@ -54,5 +54,3 @@ export class Timer {
     this.sleepUntil = performance.now() + (duration * 1000);
   }
 }
-
-export const timer = new Timer();

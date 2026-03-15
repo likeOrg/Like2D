@@ -136,6 +136,11 @@ export class Source {
   getVolume(): number {
     return this.options.volume;
   }
+
+  getDuration(): number {
+    if (this.loaded) return this.audio.duration;
+    return 0;
+  }
 }
 
 export class Audio {
@@ -188,5 +193,3 @@ export class Audio {
     return this.newSource(source.path, { ...source.options });
   }
 }
-
-export const audio = new Audio();

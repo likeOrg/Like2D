@@ -75,7 +75,7 @@ export class GamepadMapping {
     if (!this.dbLoaded) {
       try {
         // @ts-ignore - Vite handles ?raw imports
-        const module = await import('./gamecontrollerdb.txt?raw');
+        const module = await import('../gamecontrollerdb.txt?raw');
         if (typeof module.default === 'string') {
           gamepadDatabase.load(module.default);
           this.dbLoaded = true;

@@ -75,5 +75,3 @@ export class Mouse {
     return document.pointerLockElement !== null;
   }
 }
-
-export const mouse = new Mouse();

@@ -407,5 +407,3 @@ export class Graphics {
     points.forEach(([x, y]) => this.ctx!.fillRect(x, y, 1, 1));
   }
 }
-
-export const graphics = new Graphics();

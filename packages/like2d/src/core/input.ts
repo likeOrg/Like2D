@@ -1,6 +1,6 @@
-import { keyboard } from "./keyboard";
-import { mouse } from "./mouse";
-import { gamepad } from "./gamepad";
+import type { Keyboard } from './keyboard';
+import type { Mouse } from './mouse';
+import type { Gamepad } from './gamepad';
 import { InputStateTracker } from './input-state';
 import { getButtonIndex } from './gamepad-button-map';
 
@@ -9,7 +9,7 @@ export type InputType = 'keyboard' | 'mouse' | 'gamepad';
 export interface InputBinding {
   type: InputType;
   code: string;
-  gamepadIndex?: number; // For gamepad inputs, undefined means any gamepad
+  gamepadIndex?: number;
 }
 
 const buttonMap: Record<string, number> = {
@@ -26,6 +26,15 @@ const buttonMap: Record<string, number> = {
 export class Input {
   private actionMap = new Map<string, InputBinding[]>();
   private actionStateTracker = new InputStateTracker<string>();
+  private keyboard: Keyboard;
+  private mouse: Mouse;
+  private gamepad: Gamepad;
+
+  constructor(deps: { keyboard: Keyboard; mouse: Mouse; gamepad: Gamepad }) {
+    this.keyboard = deps.keyboard;
+    this.mouse = deps.mouse;
+    this.gamepad = deps.gamepad;
+  }
 
   map(action: string, inputs: string[]): void {
     const bindings: InputBinding[] = inputs.map(input => this.parseInput(input));
@@ -58,7 +67,7 @@ export class Input {
     gamepadPressed: Array<{ gamepadIndex: number; buttonIndex: number; buttonName: string; rawButtonIndex: number }>; 
     gamepadReleased: Array<{ gamepadIndex: number; buttonIndex: number; buttonName: string; rawButtonIndex: number }>;
   } {
-    const { pressed: gamepadPressed, released: gamepadReleased } = gamepad.update();
+    const { pressed: gamepadPressed, released: gamepadReleased } = this.gamepad.update();
 
     const activeActions = new Set<string>();
 
@@ -87,19 +96,14 @@ export class Input {
     }
 
     if (normalized.startsWith('GP')) {
-      // Format: GP ButtonBottom, GP LB, GP RT, etc. - any gamepad
-      // Format: GP0 ButtonBottom, GP1 LB, etc. - specific gamepad
-      const rest = normalized.slice(2); // Remove "GP" prefix
+      const rest = normalized.slice(2);
       
-      // Check if there's a gamepad index
       const match = rest.match(/^(\d+)\s+(.+)$/);
       if (match) {
-        // Specific gamepad: GP0 ButtonBottom
         const gamepadIndex = parseInt(match[1], 10);
         const buttonName = match[2].trim();
         return { type: 'gamepad', code: buttonName, gamepadIndex };
       } else {
-        // Any gamepad: GP ButtonBottom
         const buttonName = rest.trim();
         return { type: 'gamepad', code: buttonName };
       }
@@ -111,11 +115,11 @@ export class Input {
   private isBindingActive(binding: InputBinding): boolean {
     switch (binding.type) {
       case 'keyboard':
-        return keyboard.isDown(binding.code);
+        return this.keyboard.isDown(binding.code);
       case 'mouse': {
         const button = buttonMap[binding.code];
         if (button !== undefined) {
-          return mouse.isDown(button);
+          return this.mouse.isDown(button);
         }
         return false;
       }
@@ -123,11 +127,9 @@ export class Input {
         const buttonIndex = getButtonIndex(binding.code);
         if (buttonIndex !== undefined) {
           if (binding.gamepadIndex !== undefined) {
-            // Check specific gamepad
-            return gamepad.isButtonDown(binding.gamepadIndex, buttonIndex);
+            return this.gamepad.isButtonDown(binding.gamepadIndex, buttonIndex);
           } else {
-            // Check any gamepad
-            return gamepad.isButtonDownOnAny(buttonIndex);
+            return this.gamepad.isButtonDownOnAny(buttonIndex);
           }
         }
         return false;
@@ -142,5 +144,3 @@ export class Input {
     this.actionStateTracker.clear();
   }
 }
-
-export const input = new Input();

@@ -237,5 +237,3 @@ export class Gamepad {
     return applyRadialDeadzone(gamepad.axes[2], gamepad.axes[3]);
   }
 }
-
-export const gamepad = new Gamepad();
