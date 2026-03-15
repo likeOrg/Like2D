@@ -15,6 +15,11 @@ export type { Source, SourceOptions } from './core/audio';
 export type { Scene } from './adapters/scene/scene';
 export { getButtonName } from './core/gamepad';
 
+// Export input event types for power users
+export type { KeyEvent } from './core/keyboard';
+export type { MouseEvent } from './core/mouse';
+export type { GamepadEvent, GamepadButtonEvent, StickPosition } from './core/gamepad';
+
 // Note: For actual usage, import from specific adapters:
 // import { like, graphics } from 'like2d/callback';
 // import { SceneRunner, Scene } from 'like2d/scene';

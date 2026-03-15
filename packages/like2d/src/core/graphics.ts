@@ -85,20 +85,18 @@ function parseColor(color: Color): string {
 }
 
 export class Graphics {
-  private ctx: CanvasRenderingContext2D | null = null;
-  private screenCtx: CanvasRenderingContext2D | null = null;
+  private ctx: CanvasRenderingContext2D;
+  private readonly screenCtx: CanvasRenderingContext2D;
 
   private canvases = new Map<Canvas, true>();
   private backgroundColor: Color = [0, 0, 0, 1];
   private images = new Map<string, ImageHandle>();
   private defaultFont = '16px sans-serif';
 
-  setContext(ctx: CanvasRenderingContext2D | null): void {
+  constructor(ctx: CanvasRenderingContext2D) {
     this.screenCtx = ctx;
     this.ctx = ctx;
-    if (ctx) {
-      ctx.font = this.defaultFont;
-    }
+    ctx.font = this.defaultFont;
   }
 
   private applyColor(color?: Color): string {

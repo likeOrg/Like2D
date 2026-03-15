@@ -16,6 +16,11 @@ export interface StickPosition {
   y: number;
 }
 
+export type GamepadEvent = {
+  type: 'connected' | 'disconnected';
+  gamepad: globalThis.Gamepad;
+};
+
 const AXIS_DEADZONE = 0.15;
 
 function applyDeadzone(value: number, deadzone: number = AXIS_DEADZONE): number {
@@ -36,9 +41,56 @@ export class Gamepad {
   private buttonTrackers = new Map<number, InputStateTracker<number>>();
   private connectedGamepads = new Map<number, globalThis.Gamepad>();
   private buttonMappings = new Map<number, ButtonMapping>();
+  private onEvent?: (event: GamepadEvent) => void;
 
-  constructor() {
-    this.setupEventListeners();
+  // Event handler references for cleanup
+  private gamepadConnectedHandler: (e: globalThis.GamepadEvent) => void;
+  private gamepadDisconnectedHandler: (e: globalThis.GamepadEvent) => void;
+  private blurHandler: () => void;
+
+  constructor(onEvent?: (event: GamepadEvent) => void) {
+    this.onEvent = onEvent;
+
+    // Bind event handlers
+    this.gamepadConnectedHandler = this.handleGamepadConnected.bind(this);
+    this.gamepadDisconnectedHandler = this.handleGamepadDisconnected.bind(this);
+    this.blurHandler = this.handleBlur.bind(this);
+
+    // Register event listeners
+    window.addEventListener('gamepadconnected', this.gamepadConnectedHandler);
+    window.addEventListener('gamepaddisconnected', this.gamepadDisconnectedHandler);
+    window.addEventListener('blur', this.blurHandler);
+  }
+
+  private handleGamepadConnected(e: globalThis.GamepadEvent): void {
+    this.onGamepadConnectedInternal(e.gamepad);
+    this.onEvent?.({
+      type: 'connected',
+      gamepad: e.gamepad,
+    });
+  }
+
+  private handleGamepadDisconnected(e: globalThis.GamepadEvent): void {
+    this.onGamepadDisconnectedInternal(e.gamepad.index);
+    this.onEvent?.({
+      type: 'disconnected',
+      gamepad: e.gamepad,
+    });
+  }
+
+  private handleBlur(): void {
+    for (const tracker of this.buttonTrackers.values()) {
+      tracker.clear();
+    }
+  }
+
+  dispose(): void {
+    window.removeEventListener('gamepadconnected', this.gamepadConnectedHandler);
+    window.removeEventListener('gamepaddisconnected', this.gamepadDisconnectedHandler);
+    window.removeEventListener('blur', this.blurHandler);
+    this.connectedGamepads.clear();
+    this.buttonTrackers.clear();
+    this.buttonMappings.clear();
   }
 
   async init(): Promise<void> {
@@ -69,33 +121,25 @@ export class Gamepad {
     return null;
   }
 
-  private setupEventListeners(): void {
-    window.addEventListener('gamepadconnected', (e: GamepadEvent) => {
-      this.connectedGamepads.set(e.gamepad.index, e.gamepad);
-      this.buttonTrackers.set(e.gamepad.index, new InputStateTracker<number>());
-      const mapping = gamepadMapping.getMapping(e.gamepad);
-      this.buttonMappings.set(e.gamepad.index, mapping);
-      
-      console.log(`[Gamepad] Connected: "${e.gamepad.id}"`);
-      const vp = this.extractVendorProduct(e.gamepad);
-      if (vp) {
-        console.log(`[Gamepad] Vendor: 0x${vp.vendor.toString(16).padStart(4, '0')}, Product: 0x${vp.product.toString(16).padStart(4, '0')}`);
-      }
-      const mappingType = e.gamepad.mapping === 'standard' ? 'browser standard' : (mapping.hasMapping ? 'SDL DB' : 'unmapped');
-      console.log(`[Gamepad] Mapped as: "${mapping.controllerName}" (${mappingType})`);
-    });
+  private onGamepadConnectedInternal(gamepad: globalThis.Gamepad): void {
+    this.connectedGamepads.set(gamepad.index, gamepad);
+    this.buttonTrackers.set(gamepad.index, new InputStateTracker<number>());
+    const mapping = gamepadMapping.getMapping(gamepad);
+    this.buttonMappings.set(gamepad.index, mapping);
+    
+    console.log(`[Gamepad] Connected: "${gamepad.id}"`);
+    const vp = this.extractVendorProduct(gamepad);
+    if (vp) {
+      console.log(`[Gamepad] Vendor: 0x${vp.vendor.toString(16).padStart(4, '0')}, Product: 0x${vp.product.toString(16).padStart(4, '0')}`);
+    }
+    const mappingType = gamepad.mapping === 'standard' ? 'browser standard' : (mapping.hasMapping ? 'SDL DB' : 'unmapped');
+    console.log(`[Gamepad] Mapped as: "${mapping.controllerName}" (${mappingType})`);
+  }
 
-    window.addEventListener('gamepaddisconnected', (e: GamepadEvent) => {
-      this.connectedGamepads.delete(e.gamepad.index);
-      this.buttonTrackers.delete(e.gamepad.index);
-      this.buttonMappings.delete(e.gamepad.index);
-    });
-
-    window.addEventListener('blur', () => {
-      for (const tracker of this.buttonTrackers.values()) {
-        tracker.clear();
-      }
-    });
+  private onGamepadDisconnectedInternal(gamepadIndex: number): void {
+    this.connectedGamepads.delete(gamepadIndex);
+    this.buttonTrackers.delete(gamepadIndex);
+    this.buttonMappings.delete(gamepadIndex);
   }
 
   update(): { pressed: GamepadButtonEvent[]; released: GamepadButtonEvent[] } {

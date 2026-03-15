@@ -14,18 +14,18 @@ export { getButtonName } from '../../core/gamepad';
 export { V2 } from '../../core/vector2';
 export { R } from '../../core/rect';
 
-// Export singleton instances for Love2D-style API
-export const graphics = new Graphics();
+// Singleton instances for Love2D-style API (initialized in init())
+export let graphics: Graphics;
 export const audio = new Audio();
 export const timer = new Timer();
-export const keyboard = new Keyboard();
-export const mouse = new Mouse();
+export let keyboard: Keyboard;
+export let mouse: Mouse;
 export const gamepad = new Gamepad();
 
 let engine: Engine | null = null;
 
-// Input singleton (depends on keyboard, mouse, gamepad)
-export const input = new Input({ keyboard, mouse, gamepad });
+// Input singleton (initialized in init())
+export let input: Input;
 
 export const like = {
   load: undefined as (() => void) | undefined,
@@ -49,11 +49,49 @@ export const like = {
   ) {
     const { width = 800, height = 600, showStartupScreen = true, startupText = 'Click to Start' } = options;
 
-    engine = new Engine(container, { graphics, input, timer, audio });
+    engine = new Engine(container);
     engine.setSize(width, height);
 
-    // Wire up mouse to canvas for proper coordinate tracking
-    mouse.setCanvas(engine.getCanvas());
+    const ctx = engine.getContext();
+    const canvas = engine.getCanvas();
+
+    // Initialize graphics and mouse with canvas reference
+    graphics = new Graphics(ctx);
+    keyboard = new Keyboard((event) => {
+      if (event.type === 'keydown') {
+        engine?.emit({
+          type: 'keypressed',
+          scancode: event.scancode,
+          keycode: event.keycode,
+        });
+      } else {
+        engine?.emit({
+          type: 'keyreleased',
+          scancode: event.scancode,
+          keycode: event.keycode,
+        });
+      }
+    });
+    mouse = new Mouse(canvas, (event) => {
+      if (event.type === 'mousedown') {
+        const rect = canvas.getBoundingClientRect();
+        engine?.emit({
+          type: 'mousepressed',
+          position: [event.clientX - rect.left, event.clientY - rect.top],
+          button: (event.button ?? 0) + 1,
+        });
+      } else if (event.type === 'mouseup') {
+        const rect = canvas.getBoundingClientRect();
+        engine?.emit({
+          type: 'mousereleased',
+          position: [event.clientX - rect.left, event.clientY - rect.top],
+          button: (event.button ?? 0) + 1,
+        });
+      }
+    });
+    input = new Input({ keyboard, mouse, gamepad });
+
+    engine.setDeps({ graphics, input, timer, audio, keyboard, mouse, gamepad });
 
     await gamepad.init();
 
@@ -96,6 +134,21 @@ export const like = {
 
     // Start the engine with startup screen support
     engine.start(undefined, undefined, { showStartupScreen, startupText });
+  },
+
+  dispose(): void {
+    engine?.dispose();
+    engine = null;
+    this.load = undefined;
+    this.update = undefined;
+    this.draw = undefined;
+    this.keypressed = undefined;
+    this.keyreleased = undefined;
+    this.mousepressed = undefined;
+    this.mousereleased = undefined;
+    this.gamepadpressed = undefined;
+    this.gamepadreleased = undefined;
+    this.handleEvent = undefined;
   }
 };
 

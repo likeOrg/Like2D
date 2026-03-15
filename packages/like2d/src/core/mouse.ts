@@ -1,42 +1,86 @@
 import type { Vector2 } from './vector2';
 
+export type MouseEvent = {
+  type: 'mousemove' | 'mousedown' | 'mouseup';
+  clientX: number;
+  clientY: number;
+  button?: number;
+};
+
 export class Mouse {
   private x = 0;
   private y = 0;
   private buttons = new Set<number>();
-  private canvas: HTMLCanvasElement | null = null;
+  private canvas: HTMLCanvasElement;
+  private onEvent?: (event: MouseEvent) => void;
 
-  constructor() {
-    this.setupEventListeners();
-  }
+  // Event handler references for cleanup
+  private mousemoveHandler: (e: globalThis.MouseEvent) => void;
+  private mousedownHandler: (e: globalThis.MouseEvent) => void;
+  private mouseupHandler: (e: globalThis.MouseEvent) => void;
+  private blurHandler: () => void;
 
-  setCanvas(canvas: HTMLCanvasElement): void {
+  constructor(canvas: HTMLCanvasElement, onEvent?: (event: MouseEvent) => void) {
     this.canvas = canvas;
+    this.onEvent = onEvent;
+
+    // Bind event handlers
+    this.mousemoveHandler = this.handleMouseMove.bind(this);
+    this.mousedownHandler = this.handleMouseDown.bind(this);
+    this.mouseupHandler = this.handleMouseUp.bind(this);
+    this.blurHandler = this.handleBlur.bind(this);
+
+    // Register event listeners
+    window.addEventListener('mousemove', this.mousemoveHandler);
+    window.addEventListener('mousedown', this.mousedownHandler);
+    window.addEventListener('mouseup', this.mouseupHandler);
+    window.addEventListener('blur', this.blurHandler);
   }
 
-  private setupEventListeners(): void {
-    window.addEventListener('mousemove', (e) => {
-      if (this.canvas) {
-        const rect = this.canvas.getBoundingClientRect();
-        this.x = e.clientX - rect.left;
-        this.y = e.clientY - rect.top;
-      } else {
-        this.x = e.clientX;
-        this.y = e.clientY;
-      }
-    });
+  private handleMouseMove(e: globalThis.MouseEvent): void {
+    const rect = this.canvas.getBoundingClientRect();
+    this.x = e.clientX - rect.left;
+    this.y = e.clientY - rect.top;
 
-    window.addEventListener('mousedown', (e) => {
-      this.buttons.add(e.button + 1);
+    this.onEvent?.({
+      type: 'mousemove',
+      clientX: e.clientX,
+      clientY: e.clientY,
     });
+  }
 
-    window.addEventListener('mouseup', (e) => {
-      this.buttons.delete(e.button + 1);
-    });
+  private handleMouseDown(e: globalThis.MouseEvent): void {
+    this.buttons.add(e.button + 1);
 
-    window.addEventListener('blur', () => {
-      this.buttons.clear();
+    this.onEvent?.({
+      type: 'mousedown',
+      clientX: e.clientX,
+      clientY: e.clientY,
+      button: e.button,
     });
+  }
+
+  private handleMouseUp(e: globalThis.MouseEvent): void {
+    this.buttons.delete(e.button + 1);
+
+    this.onEvent?.({
+      type: 'mouseup',
+      clientX: e.clientX,
+      clientY: e.clientY,
+      button: e.button,
+    });
+  }
+
+  private handleBlur(): void {
+    this.buttons.clear();
+  }
+
+  dispose(): void {
+    window.removeEventListener('mousemove', this.mousemoveHandler);
+    window.removeEventListener('mousedown', this.mousedownHandler);
+    window.removeEventListener('mouseup', this.mouseupHandler);
+    window.removeEventListener('blur', this.blurHandler);
+    this.buttons.clear();
   }
 
   getPosition(): Vector2 {
@@ -63,10 +107,10 @@ export class Mouse {
     return document.pointerLockElement === null;
   }
 
-  setVisible(visible: boolean): void {
-    if (!visible && this.canvas) {
-      this.canvas.requestPointerLock();
-    } else if (visible && document.pointerLockElement === this.canvas) {
+  setVisible(visible: boolean, canvas?: HTMLCanvasElement): void {
+    if (!visible && canvas) {
+      canvas.requestPointerLock();
+    } else if (visible && canvas && document.pointerLockElement === canvas) {
       document.exitPointerLock();
     }
   }
