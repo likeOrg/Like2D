@@ -8,11 +8,6 @@
 
 ## Scene Adapter State Management
 
-### Initialize Context References at Construction
-**Task**: Make Graphics.ctx and Mouse.canvas non-nullable by initializing in constructor.
-- Pass context/canvas as constructor parameters instead of using setX() methods post-construction
-- **Goal**: Eliminate null checks, clearer ownership
-
 ### Gamepad Listener Cleanup
 **Task**: Apply the same centralized listener approach to Gamepad module.
 - Ensure Gamepad global listeners are included in centralized cleanup
