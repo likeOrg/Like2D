@@ -9,7 +9,6 @@ export type InputType = 'keyboard' | 'mouse' | 'gamepad';
 export interface InputBinding {
   type: InputType;
   code: string;
-  gamepadIndex?: number;
 }
 
 const buttonMap: Record<string, number> = {
@@ -95,18 +94,8 @@ export class Input {
       return { type: 'mouse', code: buttonCode };
     }
 
-    if (normalized.startsWith('GP')) {
-      const rest = normalized.slice(2);
-      
-      const match = rest.match(/^(\d+)\s+(.+)$/);
-      if (match) {
-        const gamepadIndex = parseInt(match[1], 10);
-        const buttonName = match[2].trim();
-        return { type: 'gamepad', code: buttonName, gamepadIndex };
-      } else {
-        const buttonName = rest.trim();
-        return { type: 'gamepad', code: buttonName };
-      }
+    if (normalized.startsWith('Button') || normalized.startsWith('DP')) {
+      return { type: 'gamepad', code: normalized };
     }
 
     return { type: 'keyboard', code: normalized };
@@ -126,11 +115,7 @@ export class Input {
       case 'gamepad': {
         const buttonIndex = GP_NAME_MAP[binding.code];
         if (buttonIndex !== undefined) {
-          if (binding.gamepadIndex !== undefined) {
-            return this.gamepad.isButtonDown(binding.gamepadIndex, buttonIndex);
-          } else {
-            return this.gamepad.isButtonDownOnAny(buttonIndex);
-          }
+          return this.gamepad.isButtonDownOnAny(buttonIndex);
         }
         return false;
       }

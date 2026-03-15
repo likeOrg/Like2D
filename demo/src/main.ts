@@ -42,12 +42,12 @@ const demoScene: Scene = {
     graphics.setFont(24);
     
     // Setup input mappings for game actions
-    input.map('jump', ['Space', 'ArrowUp', 'KeyW', 'GP ButtonBottom']);
-    input.map('fire', ['MouseLeft', 'KeyZ', 'GP RT']);
-    input.map('move_left', ['ArrowLeft', 'KeyA', 'GP DPadLeft']);
-    input.map('move_right', ['ArrowRight', 'KeyD', 'GP DPadRight']);
-    input.map('move_up', ['ArrowUp', 'KeyW', 'GP DPadUp']);
-    input.map('move_down', ['ArrowDown', 'KeyS', 'GP DPadDown']);
+    input.map('jump', ['Space', 'ArrowUp', 'KeyW', 'ButtonBottom']);
+    input.map('fire', ['MouseLeft', 'KeyZ', 'RT']);
+    input.map('move_left', ['ArrowLeft', 'KeyA', 'DPLeft']);
+    input.map('move_right', ['ArrowRight', 'KeyD', 'DPRight']);
+    input.map('move_up', ['ArrowUp', 'KeyW', 'DPUp']);
+    input.map('move_down', ['ArrowDown', 'KeyS', 'DPDown']);
     
     // Menu/system actions
     input.map('audio_play_pause', ['Space']);

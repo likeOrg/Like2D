@@ -13,8 +13,8 @@ Like2D separates **actions** from **physical inputs**.
 
 ```typescript
 // Map abstract actions to physical inputs
-like.input.map('jump', ['Space', 'ArrowUp', 'KeyW', 'GP ButtonBottom']);
-like.input.map('fire', ['MouseLeft', 'KeyZ', 'GP RT']);
+like.input.map('jump', ['Space', 'ArrowUp', 'KeyW', 'ButtonBottom']);
+like.input.map('fire', ['MouseLeft', 'KeyZ', 'RT']);
 
 // Query by action
 if (like.input.isDown('jump')) { /* ... */ }
@@ -49,5 +49,4 @@ Browser limitation: Only 4 bytes of GUID available (vendor + product). Matching 
 
 - Keyboard: `'Space'`, `'ArrowLeft'`, `'KeyW'` (scancodes)
 - Mouse: `'MouseLeft'`, `'MouseRight'`, `'MouseMiddle'`
-- Gamepad: `'GP ButtonBottom'`, `'GP RT'`, `'GP DPadLeft'`
-- Specific gamepad: `'GP0 ButtonBottom'` (gamepad 0 only)
+- Gamepad: `'ButtonBottom'`, `'RT'`, `'DPLeft'`
