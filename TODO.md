@@ -8,18 +8,6 @@
 
 ## Scene Adapter State Management
 
-### Centralize Event Listeners
-**Task**: Move global `window.addEventListener()` calls from Keyboard, Mouse, and Engine into a centralized system.
-- Investigate approach: Should Engine own all DOM events and dispatch to Keyboard/Mouse (simple state containers), or keep current structure with centralized setup/teardown?
-- **Goal**: Single point of cleanup, no scattered global side effects
-
-### Add Dispose/Cleanup Pattern
-**Task**: Implement proper lifecycle cleanup for SceneRunner and Engine.
-- Add `Engine.dispose()`: Remove all window event listeners, stop loop
-- Add `SceneRunner.dispose()`: Stop engine, cleanup references
-- Add dispose support to callback adapter (`like.dispose()`)
-- **Goal**: Enable tests to clean up, prevent memory leaks in SPAs
-
 ### Initialize Context References at Construction
 **Task**: Make Graphics.ctx and Mouse.canvas non-nullable by initializing in constructor.
 - Pass context/canvas as constructor parameters instead of using setX() methods post-construction
