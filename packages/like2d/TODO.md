@@ -611,6 +611,11 @@ export { Scene } from './scene';
 - Ensure all adapters can share the same canvas/context
 - Document which adapter is best for which use case
 
+## Future Work
+
+### Canvas Resolution Handling
+Current implementation passes width/height to `like.init()`. We should handle canvas resolution setting/updating in a more Love2D-like manner (similar to `love.window.setMode()`). This is deferred to a future version - don't implement this now.
+
 ## Migration Guide
 
 ### [DEPRECATED] Current API → New API

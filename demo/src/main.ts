@@ -433,7 +433,7 @@ like.handleEvent = demoScene.handleEvent?.bind(demoScene);
 
 // Initialize and start
 const container = document.getElementById('game-container')!;
-await like.init(container);
+await like.init(container, { showStartupScreen: true });
 
 // Setup fullscreen button
 const fullscreenBtn = document.getElementById('fullscreen-btn');

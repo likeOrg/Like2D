@@ -67,7 +67,10 @@ export class Source {
 
   play(): void {
     if (this.loaded) {
-      this.audio.play();
+      this.audio.play()?.catch(() => {
+        // Play failed (autoplay policy, etc.) - reset pending state
+        this.pending.playing = false;
+      });
     } else {
       this.pending.playing = true;
     }
@@ -93,7 +96,12 @@ export class Source {
 
   resume(): void {
     if (this.loaded) {
-      if (this.audio.paused) this.audio.play();
+      if (this.audio.paused) {
+        this.audio.play()?.catch(() => {
+          // Play failed (autoplay policy, etc.) - reset pending state
+          this.pending.playing = false;
+        });
+      }
     } else {
       this.pending.playing = true;
     }

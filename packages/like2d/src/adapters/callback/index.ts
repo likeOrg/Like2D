@@ -43,7 +43,12 @@ export const like = {
     engine?.toggleFullscreen();
   },
 
-  async init(container: HTMLElement, width = 800, height = 600) {
+  async init(
+    container: HTMLElement,
+    options: { width?: number; height?: number; showStartupScreen?: boolean; startupText?: string } = {}
+  ) {
+    const { width = 800, height = 600, showStartupScreen = false, startupText = 'Click to Start' } = options;
+
     engine = new Engine(container, { graphics, input, timer, audio });
     engine.setSize(width, height);
 
@@ -52,43 +57,75 @@ export const like = {
 
     await gamepad.init();
 
-    engine.onEvent((event: Event) => {
-      switch (event.type) {
-        case 'load':
-          this.load?.();
-          break;
-        case 'update':
-          this.update?.(event.dt);
-          break;
-        case 'draw':
-          this.draw?.();
-          break;
-        case 'keypressed':
-          this.keypressed?.(event.scancode, event.keycode);
-          break;
-        case 'keyreleased':
-          this.keyreleased?.(event.scancode, event.keycode);
-          break;
-        case 'mousepressed':
-          this.mousepressed?.(event.position[0], event.position[1], event.button);
-          break;
-        case 'mousereleased':
-          this.mousereleased?.(event.position[0], event.position[1], event.button);
-          break;
-        case 'gamepadpressed':
-          this.gamepadpressed?.(event.gamepadIndex, event.buttonIndex, event.buttonName);
-          break;
-        case 'gamepadreleased':
-          this.gamepadreleased?.(event.gamepadIndex, event.buttonIndex, event.buttonName);
-          break;
-        default:
-          // All other events (including custom events) go to handleEvent
-          this.handleEvent?.(event);
-          break;
-      }
-    });
+    const startGame = () => {
+      engine!.onEvent((event: Event) => {
+        switch (event.type) {
+          case 'load':
+            this.load?.();
+            break;
+          case 'update':
+            this.update?.(event.dt);
+            break;
+          case 'draw':
+            this.draw?.();
+            break;
+          case 'keypressed':
+            this.keypressed?.(event.scancode, event.keycode);
+            break;
+          case 'keyreleased':
+            this.keyreleased?.(event.scancode, event.keycode);
+            break;
+          case 'mousepressed':
+            this.mousepressed?.(event.position[0], event.position[1], event.button);
+            break;
+          case 'mousereleased':
+            this.mousereleased?.(event.position[0], event.position[1], event.button);
+            break;
+          case 'gamepadpressed':
+            this.gamepadpressed?.(event.gamepadIndex, event.buttonIndex, event.buttonName);
+            break;
+          case 'gamepadreleased':
+            this.gamepadreleased?.(event.gamepadIndex, event.buttonIndex, event.buttonName);
+            break;
+          default:
+            // All other events (including custom events) go to handleEvent
+            this.handleEvent?.(event);
+            break;
+        }
+      });
 
-    engine.start();
+      engine!.start();
+    };
+
+    if (showStartupScreen) {
+      const canvas = engine.getCanvas();
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        font-family: sans-serif;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 1000;
+      `;
+      overlay.textContent = startupText;
+      canvas.parentElement!.appendChild(overlay);
+
+      overlay.addEventListener('click', () => {
+        overlay.remove();
+        startGame();
+      });
+    } else {
+      startGame();
+    }
   }
 };
 
