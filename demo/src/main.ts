@@ -40,6 +40,7 @@ const demoScene: Scene = {
     input.map('move_down', ['ArrowDown', 'KeyS', 'GP DPadDown']);
     
     // Menu/system actions
+    // Space is also mapped to 'jump' above - this is fine because the action loop handles both
     input.map('audio_play_pause', ['Space']);
     input.map('audio_stop', ['KeyS']);
     input.map('audio_pause_resume', ['KeyP']);
