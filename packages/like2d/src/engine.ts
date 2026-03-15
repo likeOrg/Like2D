@@ -123,7 +123,6 @@ export class Engine {
               gamepadIndex: event.gamepadIndex,
               buttonIndex: event.buttonIndex,
               buttonName: event.buttonName,
-              rawButtonIndex: event.rawButtonIndex,
             });
           }
           for (const event of inputEvents.gamepadReleased) {
@@ -132,7 +131,6 @@ export class Engine {
               gamepadIndex: event.gamepadIndex,
               buttonIndex: event.buttonIndex,
               buttonName: event.buttonName,
-              rawButtonIndex: event.rawButtonIndex,
             });
           }
 

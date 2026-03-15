@@ -1,4 +1,4 @@
-import { love, graphics, audio, timer, keyboard, mouse, gamepad, input, ImageHandle, getButtonName, R, V2 } from "like2d/callback";
+import { love, graphics, audio, timer, keyboard, mouse, gamepad, input, ImageHandle, getGPName, R, V2 } from "like2d/callback";
 import type { Source, Event } from 'like2d';
 
 // Example demonstrating Like2D with Love2D-style callback API
@@ -297,7 +297,7 @@ love.draw = () => {
       keyY += 20;
       const pressedButtons = gamepad.getPressedButtons(gpIndex);
       if (pressedButtons.size > 0) {
-        const buttonNames = Array.from(pressedButtons).map(idx => getButtonName(idx));
+        const buttonNames = Array.from(pressedButtons).map(idx => getGPName(idx));
         graphics.print('lightgray', `  GP${gpIndex}: ${buttonNames.join(', ')}`, [20, keyY], { 
           font: '16px sans-serif'
         });

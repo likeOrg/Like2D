@@ -2,7 +2,7 @@ import type { Keyboard } from './keyboard';
 import type { Mouse } from './mouse';
 import type { Gamepad } from './gamepad';
 import { InputStateTracker } from './input-state';
-import { getButtonIndex } from './gamepad-button-map';
+import { GP_NAME_MAP } from './gamepad-buttons';
 
 export type InputType = 'keyboard' | 'mouse' | 'gamepad';
 
@@ -64,8 +64,8 @@ export class Input {
   update(): { 
     pressed: string[]; 
     released: string[]; 
-    gamepadPressed: Array<{ gamepadIndex: number; buttonIndex: number; buttonName: string; rawButtonIndex: number }>; 
-    gamepadReleased: Array<{ gamepadIndex: number; buttonIndex: number; buttonName: string; rawButtonIndex: number }>;
+    gamepadPressed: Array<{ gamepadIndex: number; buttonIndex: number; buttonName: string }>; 
+    gamepadReleased: Array<{ gamepadIndex: number; buttonIndex: number; buttonName: string }>;
   } {
     const { pressed: gamepadPressed, released: gamepadReleased } = this.gamepad.update();
 
@@ -124,7 +124,7 @@ export class Input {
         return false;
       }
       case 'gamepad': {
-        const buttonIndex = getButtonIndex(binding.code);
+        const buttonIndex = GP_NAME_MAP[binding.code];
         if (buttonIndex !== undefined) {
           if (binding.gamepadIndex !== undefined) {
             return this.gamepad.isButtonDown(binding.gamepadIndex, buttonIndex);

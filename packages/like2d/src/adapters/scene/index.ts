@@ -15,7 +15,7 @@ export { Input } from '../../core/input';
 export { Timer } from '../../core/timer';
 export { Keyboard } from '../../core/keyboard';
 export { Mouse } from '../../core/mouse';
-export { Gamepad, getButtonName } from '../../core/gamepad';
+export { Gamepad, getGPName, GP } from '../../core/gamepad';
 export type { Event } from '../../core/events';
 export type { Scene } from './scene';
 export type { Vector2 } from '../../core/vector2';

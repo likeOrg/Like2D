@@ -1,76 +1,155 @@
 // Gamepad button mapping layer
 // Bridges SDL database mappings with our internal button naming system
 
-import { gamepadDatabase, ControllerMapping } from './gamepad-db';
-import { getButtonIndex } from './gamepad-button-map';
+import { GP } from './gamepad-buttons';
 
-// Map SDL button names to our internal button names
-const SDL_TO_INTERNAL_BUTTON: Record<string, string> = {
-  // Face buttons
-  'a': 'ButtonBottom',
-  'b': 'ButtonRight',
-  'x': 'ButtonLeft',
-  'y': 'ButtonTop',
-
-  // Bumpers and triggers
-  'leftshoulder': 'LB',
-  'rightshoulder': 'RB',
-  'lefttrigger': 'LT',
-  'righttrigger': 'RT',
-
-  // Menu buttons
-  'back': 'Back',
-  'start': 'Start',
-  'guide': 'Guide',
-
-  // Stick presses
-  'leftstick': 'LS',
-  'rightstick': 'RS',
-
-  // D-Pad
-  'dpup': 'DPadUp',
-  'dpdown': 'DPadDown',
-  'dpleft': 'DPadLeft',
-  'dpright': 'DPadRight',
-
-  // Misc buttons
-  'misc1': 'Misc1',
-  'misc2': 'Misc2',
-  'paddle1': 'Paddle1',
-  'paddle2': 'Paddle2',
-  'paddle3': 'Paddle3',
-  'paddle4': 'Paddle4',
-  'touchpad': 'Touchpad',
+// Map SDL button names to our standard button indices
+const SDL_TO_GP: Record<string, number> = {
+  'a': GP.Bottom,
+  'b': GP.Right,
+  'x': GP.Left,
+  'y': GP.Top,
+  'leftshoulder': GP.LB,
+  'rightshoulder': GP.RB,
+  'lefttrigger': GP.LT,
+  'righttrigger': GP.RT,
+  'back': GP.Back,
+  'start': GP.Start,
+  'guide': GP.Guide,
+  'leftstick': GP.LS,
+  'rightstick': GP.RS,
+  'dpup': GP.DUp,
+  'dpdown': GP.DDown,
+  'dpleft': GP.DLeft,
+  'dpright': GP.DRight,
 };
 
-export interface ButtonMapping {
-  // Maps controller-specific button index to standard button index
+// Pre-built mapping that maps controller button index -> GP index
+interface ControllerMapping {
+  name: string;
   toStandard: Map<number, number>;
-  // Maps standard button index to controller-specific button index
-  fromStandard: Map<number, number>;
-  // Controller info
+}
+
+// Internal database for storing pre-built controller mappings
+class GamepadDatabase {
+  // vendorProductKey -> mapping
+  private mappings = new Map<number, ControllerMapping>();
+  private loaded = false;
+
+  load(dbContent: string): void {
+    this.mappings.clear();
+    
+    const lines = dbContent.split('\n');
+    
+    for (const line of lines) {
+      const trimmed = line.trim();
+      
+      if (!trimmed || trimmed.startsWith('#')) {
+        continue;
+      }
+      
+      const mapping = this.parseLine(trimmed);
+      if (mapping) {
+        // Extract vendor/product from GUID and store mapping
+        const guid = line.split(',')[0].toLowerCase().trim();
+        const vpKey = this.extractVendorProductKey(guid);
+        if (vpKey !== null && !this.mappings.has(vpKey)) {
+          this.mappings.set(vpKey, mapping);
+        }
+      }
+    }
+    
+    this.loaded = true;
+  }
+
+  private extractVendorProductKey(guid: string): number | null {
+    if (guid.length < 20) return null;
+    const vendorHex = guid.substring(8, 12);
+    const productHex = guid.substring(16, 20);
+    const vendor = parseInt(vendorHex.substring(2, 4) + vendorHex.substring(0, 2), 16);
+    const product = parseInt(productHex.substring(2, 4) + productHex.substring(0, 2), 16);
+    if (isNaN(vendor) || isNaN(product)) return null;
+    return 0x10000 * vendor + product;
+  }
+
+  isLoaded(): boolean {
+    return this.loaded;
+  }
+
+  getMappingCount(): number {
+    return this.mappings.size;
+  }
+
+  getMapping(vendor: number, product: number): ControllerMapping | undefined {
+    const key = 0x10000 * vendor + product;
+    return this.mappings.get(key);
+  }
+
+  private parseLine(line: string): ControllerMapping | null {
+    const parts = line.split(',');
+    
+    if (parts.length < 3) {
+      return null;
+    }
+    
+    const name = parts[1].trim();
+    const toStandard = new Map<number, number>();
+    
+    // Parse mapping pairs (key:value)
+    for (let i = 2; i < parts.length; i++) {
+      const part = parts[i].trim();
+      if (!part || part.startsWith('platform:')) continue;
+      
+      const colonIndex = part.indexOf(':');
+      if (colonIndex === -1) continue;
+      
+      const sdlName = part.substring(0, colonIndex).trim();
+      const value = part.substring(colonIndex + 1).trim();
+      
+      if (!sdlName || !value) continue;
+      
+      // Only handle button mappings (b0, b1, etc.)
+      if (value.startsWith('b')) {
+        const controllerIndex = parseInt(value.substring(1), 10);
+        const gpIndex = SDL_TO_GP[sdlName];
+        if (!isNaN(controllerIndex) && gpIndex !== undefined) {
+          toStandard.set(controllerIndex, gpIndex);
+        }
+      }
+    }
+    
+    return { name, toStandard };
+  }
+}
+
+// Singleton instance
+const gamepadDatabase = new GamepadDatabase();
+
+export interface ButtonMapping {
+  toStandard: Map<number, number>;
   controllerName: string;
   hasMapping: boolean;
+  vendor: number | null;
+  product: number | null;
 }
 
 export class GamepadMapping {
-  private mappings = new Map<string, ButtonMapping>();
   private dbLoaded = false;
 
   async loadDatabase(): Promise<void> {
     if (this.dbLoaded) return;
 
-    const sources = ['/like/gamecontrollerdb.txt', './gamecontrollerdb.txt'];
-    for (const src of sources) {
-      try {
-        const res = await fetch(src);
-        if (res.ok) {
-          gamepadDatabase.load(await res.text());
+    try {
+      const res = await fetch('./gamecontrollerdb.txt');
+      if (res.ok) {
+        const text = await res.text();
+        // Validate it's actually the DB file, not HTML error page
+        if (text.startsWith('# Game Controller DB') || text.includes('03000000')) {
+          gamepadDatabase.load(text);
           this.dbLoaded = true;
-          break;
         }
-      } catch {}
-    }
+      }
+    } catch {}
 
     if (!this.dbLoaded) {
       try {
@@ -88,103 +167,50 @@ export class GamepadMapping {
     }
   }
 
-  /**
-   * Load database from raw text content
-   */
   loadDatabaseFromText(content: string): void {
     gamepadDatabase.load(content);
     this.dbLoaded = true;
   }
 
   /**
-   * Get or create a button mapping for a specific gamepad
+   * Get button mapping for a specific gamepad
    */
   getMapping(gamepad: Gamepad): ButtonMapping {
-    // Use the gamepad's id as a key (this contains the GUID in most browsers)
-    const key = `${gamepad.id}_${gamepad.index}`;
+    const vp = this.extractVendorProduct(gamepad);
 
-    if (this.mappings.has(key)) {
-      return this.mappings.get(key)!;
-    }
-
-    const mapping = this.createMapping(gamepad);
-    this.mappings.set(key, mapping);
-    return mapping;
-  }
-
-  /**
-   * Clear all cached mappings
-   */
-  clear(): void {
-    this.mappings.clear();
-  }
-
-  /**
-   * Create a new button mapping for a gamepad
-   */
-  private createMapping(gamepad: Gamepad): ButtonMapping {
-    const toStandard = new Map<number, number>();
-    const fromStandard = new Map<number, number>();
-
-    // If browser provides "standard" mapping, trust it - don't override with DB
+    // If browser provides "standard" mapping, use identity mapping
     if (gamepad.mapping === 'standard') {
-      for (let i = 0; i < gamepad.buttons.length; i++) {
-        toStandard.set(i, i);
-        fromStandard.set(i, i);
-      }
       return {
-        toStandard,
-        fromStandard,
+        toStandard: IDENTITY_MAP,
         controllerName: gamepad.id,
         hasMapping: true,
+        vendor: vp?.vendor ?? null,
+        product: vp?.product ?? null,
       };
     }
 
-    // Try to find a mapping in the database
-    const dbMapping = this.findDatabaseMapping(gamepad);
-
-    if (dbMapping) {
-      for (const [sdlButton, controllerButtonIndex] of dbMapping.buttons) {
-        const internalName = SDL_TO_INTERNAL_BUTTON[sdlButton];
-        if (internalName) {
-          const standardIndex = getButtonIndex(internalName);
-          if (standardIndex !== undefined) {
-            toStandard.set(controllerButtonIndex, standardIndex);
-            fromStandard.set(standardIndex, controllerButtonIndex);
-          }
-        }
+    // Look up in database
+    if (vp && this.dbLoaded) {
+      const dbMapping = gamepadDatabase.getMapping(vp.vendor, vp.product);
+      if (dbMapping) {
+        return {
+          toStandard: dbMapping.toStandard,
+          controllerName: dbMapping.name,
+          hasMapping: true,
+          vendor: vp.vendor,
+          product: vp.product,
+        };
       }
-
-      return {
-        toStandard,
-        fromStandard,
-        controllerName: dbMapping.name,
-        hasMapping: true,
-      };
     }
 
-    // No database mapping found - use default layout
-    for (let i = 0; i < gamepad.buttons.length; i++) {
-      toStandard.set(i, i);
-      fromStandard.set(i, i);
-    }
-
+    // No mapping found - use identity
     return {
-      toStandard,
-      fromStandard,
+      toStandard: IDENTITY_MAP,
       controllerName: gamepad.id,
       hasMapping: false,
+      vendor: vp?.vendor ?? null,
+      product: vp?.product ?? null,
     };
-  }
-
-  private findDatabaseMapping(gamepad: Gamepad): ControllerMapping | undefined {
-    if (!this.dbLoaded) return undefined;
-
-    const vp = this.extractVendorProduct(gamepad);
-    if (vp) {
-      return gamepadDatabase.getMappingByVendorProduct(vp.vendor, vp.product);
-    }
-    return undefined;
   }
 
   private extractVendorProduct(gamepad: Gamepad): { vendor: number; product: number } | null {
@@ -211,6 +237,13 @@ export class GamepadMapping {
     return null;
   }
 }
+
+// Reusable identity map for standard/unmapped controllers
+const IDENTITY_MAP = new Map<number, number>([
+  [0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7],
+  [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13], [14, 14], [15, 15],
+  [16, 16], [17, 17], [18, 18], [19, 19],
+]);
 
 // Singleton instance
 export const gamepadMapping = new GamepadMapping();

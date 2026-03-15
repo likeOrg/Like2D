@@ -58,7 +58,6 @@ export type GamepadPressedEvent = BaseEvent & {
   gamepadIndex: number;
   buttonIndex: number;
   buttonName: string;
-  rawButtonIndex: number;
 };
 
 export type GamepadReleasedEvent = BaseEvent & {
@@ -66,7 +65,6 @@ export type GamepadReleasedEvent = BaseEvent & {
   gamepadIndex: number;
   buttonIndex: number;
   buttonName: string;
-  rawButtonIndex: number;
 };
 
 export type Event =

@@ -10,7 +10,7 @@ import type { Event } from '../../core/events';
 
 // Re-export types and utilities
 export { ImageHandle } from '../../core/graphics';
-export { getButtonName } from '../../core/gamepad';
+export { getGPName, GP } from '../../core/gamepad';
 export { V2 } from '../../core/vector2';
 export { R } from '../../core/rect';
 

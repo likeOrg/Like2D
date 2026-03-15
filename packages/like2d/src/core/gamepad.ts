@@ -1,14 +1,13 @@
-import { getButtonName, getButtonIndex } from './gamepad-button-map';
+import { getGPName, GP } from './gamepad-buttons';
 import { InputStateTracker } from './input-state';
 import { gamepadMapping, ButtonMapping } from './gamepad-mapping';
 
-export { getButtonName, getButtonIndex };
+export { GP, getGPName };
 
 export interface GamepadButtonEvent {
   gamepadIndex: number;
   buttonIndex: number;
   buttonName: string;
-  rawButtonIndex: number;
 }
 
 export interface StickPosition {
@@ -97,30 +96,6 @@ export class Gamepad {
     await gamepadMapping.loadDatabase();
   }
 
-  private extractVendorProduct(gamepad: globalThis.Gamepad): { vendor: number; product: number } | null {
-    const id = gamepad.id;
-
-    const vendorProductMatch = id.match(/Vendor:\s*([0-9a-fA-F]+)\s+Product:\s*([0-9a-fA-F]+)/i);
-    if (vendorProductMatch) {
-      const vendor = parseInt(vendorProductMatch[1], 16);
-      const product = parseInt(vendorProductMatch[2], 16);
-      if (!isNaN(vendor) && !isNaN(product)) {
-        return { vendor, product };
-      }
-    }
-
-    const hexMatch = id.match(/^([0-9a-fA-F]{4})[\s-]+([0-9a-fA-F]{4})/);
-    if (hexMatch) {
-      const vendor = parseInt(hexMatch[1], 16);
-      const product = parseInt(hexMatch[2], 16);
-      if (!isNaN(vendor) && !isNaN(product)) {
-        return { vendor, product };
-      }
-    }
-
-    return null;
-  }
-
   private onGamepadConnectedInternal(gamepad: globalThis.Gamepad): void {
     this.connectedGamepads.set(gamepad.index, gamepad);
     this.buttonTrackers.set(gamepad.index, new InputStateTracker<number>());
@@ -128,9 +103,8 @@ export class Gamepad {
     this.buttonMappings.set(gamepad.index, mapping);
     
     console.log(`[Gamepad] Connected: "${gamepad.id}"`);
-    const vp = this.extractVendorProduct(gamepad);
-    if (vp) {
-      console.log(`[Gamepad] Vendor: 0x${vp.vendor.toString(16).padStart(4, '0')}, Product: 0x${vp.product.toString(16).padStart(4, '0')}`);
+    if (mapping.vendor !== null && mapping.product !== null) {
+      console.log(`[Gamepad] Vendor: 0x${mapping.vendor.toString(16).padStart(4, '0')}, Product: 0x${mapping.product.toString(16).padStart(4, '0')}`);
     }
     const mappingType = gamepad.mapping === 'standard' ? 'browser standard' : (mapping.hasMapping ? 'SDL DB' : 'unmapped');
     console.log(`[Gamepad] Mapped as: "${mapping.controllerName}" (${mappingType})`);
@@ -182,16 +156,14 @@ export class Gamepad {
           pressed.push({ 
             gamepadIndex: i, 
             buttonIndex, 
-            buttonName: getButtonName(buttonIndex),
-            rawButtonIndex: mapping.fromStandard.get(buttonIndex) ?? buttonIndex,
+            buttonName: getGPName(buttonIndex),
           });
         }
         for (const buttonIndex of changes.justReleased) {
           released.push({ 
             gamepadIndex: i, 
             buttonIndex, 
-            buttonName: getButtonName(buttonIndex),
-            rawButtonIndex: mapping.fromStandard.get(buttonIndex) ?? buttonIndex,
+            buttonName: getGPName(buttonIndex),
           });
         }
       }
@@ -208,16 +180,12 @@ export class Gamepad {
    * Check if a button is currently pressed on a specific gamepad
    * Uses mapped button indices (standard layout)
    */
-  isButtonDown(gamepadIndex: number, button: number | string): boolean {
-    const buttonIndex = typeof button === 'string' ? getButtonIndex(button) : button;
-    if (buttonIndex === undefined) return false;
+  isButtonDown(gamepadIndex: number, buttonIndex: number): boolean {
     const tracker = this.buttonTrackers.get(gamepadIndex);
     return tracker ? tracker.isDown(buttonIndex) : false;
   }
 
-  isButtonDownOnAny(button: number | string): boolean {
-    const buttonIndex = typeof button === 'string' ? getButtonIndex(button) : button;
-    if (buttonIndex === undefined) return false;
+  isButtonDownOnAny(buttonIndex: number): boolean {
     for (const tracker of this.buttonTrackers.values()) {
       if (tracker.isDown(buttonIndex)) return true;
     }

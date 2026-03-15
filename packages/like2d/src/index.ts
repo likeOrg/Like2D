@@ -13,7 +13,7 @@ export type { Color, Quad, ShapeProps, DrawProps, PrintProps } from './core/grap
 export { ImageHandle } from './core/graphics';
 export type { Source, SourceOptions } from './core/audio';
 export type { Scene } from './adapters/scene/scene';
-export { getButtonName } from './core/gamepad';
+export { getGPName, GP } from './core/gamepad';
 
 // Export input event types for power users
 export type { KeyEvent } from './core/keyboard';

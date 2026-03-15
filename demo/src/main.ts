@@ -1,4 +1,4 @@
-import { SceneRunner, Scene, Event, V2, R, getButtonName, ImageHandle } from "like2d/scene";
+import { SceneRunner, Scene, Event, V2, R, getGPName, ImageHandle } from "like2d/scene";
 import type { Source } from 'like2d';
 
 // Example demonstrating Like2D graphics API with Scene-based architecture
@@ -368,7 +368,7 @@ const demoScene: Scene = {
         keyY += 20;
         const pressedButtons = gamepad.getPressedButtons(gpIndex);
         if (pressedButtons.size > 0) {
-          const buttonNames = Array.from(pressedButtons).map(idx => getButtonName(idx));
+          const buttonNames = Array.from(pressedButtons).map(idx => getGPName(idx));
           graphics.print('lightgray', `  GP${gpIndex}: ${buttonNames.join(', ')}`, [20, keyY], { 
             font: '16px sans-serif'
           });

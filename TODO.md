@@ -67,4 +67,10 @@
 - Focus on structural changes, not content
 - Ensure backward compatibility where possible
 
+## Cleanup Tasks
+- [x] Remove legacy `/like/gamecontrollerdb.txt` fetch from `gamepad-mapping.ts` - the `/like/` path is dead code from old directory structure
+- [x] Simplify button mapping to unidirectional (`toStandard` only) - reverse mapping can be computed on demand for debugging
+- [x] Remove `rawButtonIndex` from `GamepadButtonEvent` - if needed, use a debug feature to iterate the mapping
+- [x] Consolidate mapping logic into `gamepad-mapping.ts` - remove `extractVendorProduct` duplication from `gamepad.ts` and simplify `gamepad.ts` to just pass browser strings and receive usable mappings
+
 ## All non-future tasks completed! 🎉
