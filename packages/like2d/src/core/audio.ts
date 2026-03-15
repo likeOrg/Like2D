@@ -47,8 +47,9 @@ export class Source {
 
     this.ready = new Promise((resolve, reject) => {
       this.audio.oncanplaythrough = () => {
-        this.applyPendingState();
+        if (this.loadState.loaded) return;
         this.loadState = { loaded: true };
+        this.applyPendingState();
         resolve();
       };
       this.audio.onerror = () => reject(new Error(`Failed to load audio: ${path}`));
