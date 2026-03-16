@@ -15,7 +15,6 @@ export type Canvas = {
 };
 
 export type ShapeProps = {
-  color?: Color;
   lineWidth?: number;
   lineCap?: 'butt' | 'round' | 'square';
   lineJoin?: 'bevel' | 'miter' | 'round';
@@ -33,6 +32,12 @@ export type PrintProps = {
   font?: string;
   limit?: number;
   align?: 'left' | 'center' | 'right';
+};
+
+export type GraphicsState = {
+  screenCtx: CanvasRenderingContext2D;
+  currentCtx: CanvasRenderingContext2D;
+  canvases: Map<Canvas, true>;
 };
 
 export class ImageHandle {
@@ -76,301 +81,251 @@ export class ImageHandle {
 }
 
 function parseColor(color: Color): string {
-  if (typeof color === 'string') {
-    return color;
-  }
-  
+  if (typeof color === 'string') return color;
   const [r, g, b, a = 1] = color;
   return `rgba(${r * 255}, ${g * 255}, ${b * 255}, ${a})`;
 }
 
-export class Graphics {
-  private ctx: CanvasRenderingContext2D;
-  private readonly screenCtx: CanvasRenderingContext2D;
+function applyColor(color?: Color): string {
+  return parseColor(color ?? [1, 1, 1, 1]);
+}
 
-  private canvases = new Map<Canvas, true>();
-  private backgroundColor: Color = [0, 0, 0, 1];
-  private images = new Map<string, ImageHandle>();
-  private defaultFont = '16px sans-serif';
+function setStrokeProps(ctx: CanvasRenderingContext2D, props?: ShapeProps): void {
+  ctx.lineWidth = props?.lineWidth ?? 1;
+  ctx.lineCap = props?.lineCap ?? 'butt';
+  ctx.lineJoin = props?.lineJoin ?? 'miter';
+  ctx.miterLimit = props?.miterLimit ?? 10;
+}
 
-  constructor(ctx: CanvasRenderingContext2D) {
-    this.screenCtx = ctx;
-    this.ctx = ctx;
-    ctx.font = this.defaultFont;
+export function newState(ctx: CanvasRenderingContext2D): GraphicsState {
+  return {
+    screenCtx: ctx,
+    currentCtx: ctx,
+    canvases: new Map(),
+  };
+}
+
+export function clear(s: GraphicsState, color: Color = [0, 0, 0, 1]): void {
+  const ctx = s.currentCtx;
+  ctx.fillStyle = parseColor(color);
+  ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+}
+
+export function rectangle(s: GraphicsState, mode: DrawMode, color: Color, rect: Rect, props?: ShapeProps): void {
+  const ctx = s.currentCtx;
+  const [x, y, w, h] = rect;
+  const c = applyColor(color);
+  if (mode === 'fill') {
+    ctx.fillStyle = c;
+    ctx.fillRect(x, y, w, h);
+  } else {
+    setStrokeProps(ctx, props);
+    ctx.strokeStyle = c;
+    ctx.strokeRect(x, y, w, h);
   }
+}
 
-  private applyColor(color?: Color): string {
-    return parseColor(color ?? [1, 1, 1, 1]);
+export function circle(
+  s: GraphicsState,
+  mode: DrawMode,
+  color: Color,
+  position: Vector2,
+  radii: number | Vector2,
+  props?: ShapeProps & { angle?: number; arc?: [number, number] }
+): void {
+  const ctx = s.currentCtx;
+  const [x, y] = position;
+  const c = applyColor(color);
+  const [rx, ry] = typeof radii === 'number' ? [radii, radii] : radii;
+  const [startAngle, endAngle] = props?.arc ?? [0, Math.PI * 2];
+  const rotation = props?.angle ?? 0;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+  ctx.scale(rx, ry);
+  ctx.beginPath();
+  ctx.arc(0, 0, 1, startAngle, endAngle);
+  ctx.closePath();
+  ctx.restore();
+
+  if (mode === 'fill') {
+    ctx.fillStyle = c;
+    ctx.fill();
+  } else {
+    setStrokeProps(ctx, props);
+    ctx.strokeStyle = c;
+    ctx.stroke();
   }
+}
 
-  private setStrokeProps(props?: ShapeProps): void {
-    if (!this.ctx) return;
-    // Always reset to defaults first, then apply any custom props
-    this.ctx.lineWidth = props?.lineWidth ?? 1;
-    this.ctx.lineCap = props?.lineCap ?? 'butt';
-    this.ctx.lineJoin = props?.lineJoin ?? 'miter';
-    this.ctx.miterLimit = props?.miterLimit ?? 10;
-  }
+export function line(s: GraphicsState, color: Color, points: Vector2[], props?: ShapeProps): void {
+  const ctx = s.currentCtx;
+  if (points.length < 2) return;
+  setStrokeProps(ctx, props);
+  ctx.beginPath();
+  const [[x0, y0], ...rest] = points;
+  ctx.moveTo(x0, y0);
+  rest.forEach(([x, y]) => ctx.lineTo(x, y));
+  ctx.strokeStyle = applyColor(color);
+  ctx.stroke();
+}
 
-  clear(): void {
-    if (!this.ctx) return;
-    this.ctx.fillStyle = parseColor(this.backgroundColor);
-    this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-  }
+export function print(s: GraphicsState, color: Color, text: string, position: Vector2, props?: PrintProps): void {
+  const ctx = s.currentCtx;
+  const [x, y] = position;
+  const { font = '16px sans-serif', limit, align = 'left' } = props ?? {};
+  ctx.fillStyle = parseColor(color);
+  ctx.font = font;
 
-  setBackgroundColor(color: Color): void {
-    this.backgroundColor = color;
-    this.clear();
-  }
-
-  rectangle(mode: DrawMode, color: Color, rect: Rect, props?: ShapeProps): void {
-    if (!this.ctx) return;
-    
-    const [x, y, width, height] = rect;
-    const parsedColor = this.applyColor(color);
-    
-    if (mode === 'fill') {
-      this.ctx.fillStyle = parsedColor;
-      this.ctx.fillRect(x, y, width, height);
-    } else {
-      this.setStrokeProps(props);
-      this.ctx.strokeStyle = parsedColor;
-      this.ctx.strokeRect(x, y, width, height);
-    }
-  }
-
-  circle(mode: DrawMode, color: Color, position: Vector2, radii: number | Vector2, props?: ShapeProps & { angle?: number; arc?: [number, number] }): void {
-    if (!this.ctx) return;
-    
-    const [x, y] = position;
-    const parsedColor = this.applyColor(color);
-    const [rx, ry] = typeof radii === 'number' ? [radii, radii] : radii;
-    const [startAngle, endAngle] = props?.arc ?? [0, Math.PI * 2];
-    const rotation = props?.angle ?? 0;
-    
-    this.ctx.save();
-    this.ctx.translate(x, y);
-    this.ctx.rotate(rotation);
-    this.ctx.scale(rx, ry);
-    this.ctx.beginPath();
-    this.ctx.arc(0, 0, 1, startAngle, endAngle);
-    this.ctx.closePath();
-    this.ctx.restore();
-    
-    if (mode === 'fill') {
-      this.ctx.fillStyle = parsedColor;
-      this.ctx.fill();
-    } else {
-      this.setStrokeProps(props);
-      this.ctx.strokeStyle = parsedColor;
-      this.ctx.stroke();
-    }
-  }
-
-  line(color: Color, points: Vector2[], props?: ShapeProps): void {
-    if (!this.ctx || points.length < 2) return;
-    
-    const parsedColor = this.applyColor(color);
-    
-    this.setStrokeProps(props);
-    this.ctx.beginPath();
-    const [[x0, y0], ...rest] = points;
-    this.ctx.moveTo(x0, y0);
-    rest.forEach(([x, y]) => this.ctx!.lineTo(x, y));
-    
-    this.ctx.strokeStyle = parsedColor;
-    this.ctx.stroke();
-  }
-
-  print(color: Color, text: string, position: Vector2, props?: PrintProps): void {
-    if (!this.ctx) return;
-    
-    const [x, y] = position;
-    const { font = this.defaultFont, limit, align = 'left' } = props ?? {};
-    this.ctx.fillStyle = parseColor(color);
-    this.ctx.font = font;
-    
-    if (limit !== undefined) {
-      const lines = this.wrapText(text, limit);
-      const lineHeight = this.getFontHeight();
-      
-      lines.forEach((line, index) => {
-        const lineWidth = this.ctx!.measureText(line).width;
-        const drawX = align === 'center' ? x + (limit - lineWidth) / 2 :
-                      align === 'right' ? x + limit - lineWidth : x;
-        this.ctx!.fillText(line, drawX, y + index * lineHeight);
-      });
-    } else {
-      this.ctx.fillText(text, x, y);
-    }
-  }
-
-  private wrapText(text: string, maxWidth: number): string[] {
-    if (!this.ctx) return [text];
-    
-    const words = text.split(' ');
-    const [first, ...rest] = words;
-    const lines: string[] = [];
-    let currentLine = first ?? '';
-
-    rest.forEach((word) => {
-      const width = this.ctx!.measureText(currentLine + ' ' + word).width;
-      if (width < maxWidth) {
-        currentLine += ' ' + word;
-      } else {
-        lines.push(currentLine);
-        currentLine = word;
-      }
+  if (limit !== undefined) {
+    const lines = wrapText(ctx, text, limit);
+    const lineHeight = getFontHeight(ctx);
+    lines.forEach((line, i) => {
+      const lineWidth = ctx.measureText(line).width;
+      const drawX = align === 'center' ? x + (limit - lineWidth) / 2
+                  : align === 'right' ? x + limit - lineWidth
+                  : x;
+      ctx.fillText(line, drawX, y + i * lineHeight);
     });
-    lines.push(currentLine);
-    return lines;
+  } else {
+    ctx.fillText(text, x, y);
   }
+}
 
-  private getFontHeight(): number {
-    if (!this.ctx) return 16;
-    const match = this.ctx.font.match(/(\d+)px/);
-    return match ? parseInt(match[1]) : 16;
-  }
-
-  setFont(size: number, font: string = 'sans-serif'): void {
-    if (!this.ctx) return;
-    this.defaultFont = `${size}px ${font}`;
-    this.ctx.font = this.defaultFont;
-  }
-
-  getFont(): string {
-    return this.defaultFont;
-  }
-
-  newImage(path: string): ImageHandle {
-    let handle = this.images.get(path);
-    if (!handle) {
-      handle = new ImageHandle(path);
-      this.images.set(path, handle);
-    }
-    return handle;
-  }
-
-  draw(
-    handle: ImageHandle,
-    position: Vector2,
-    props?: DrawProps
-  ): void {
-    if (!this.ctx) return;
-
-    const imageHandle = this.images.get(handle.path);
-    if (!imageHandle?.isReady()) return;
-
-    const element = imageHandle.getElement();
-    if (!element) return;
-
-    const [x, y] = position;
-    const { r = 0, scale = 1, origin = 0, quad } = props ?? {};
-    const [sx, sy] = typeof scale === 'number' ? [scale, scale] : scale;
-    const [ox, oy] = typeof origin === 'number' ? [origin, origin] : origin;
-
-    this.ctx.save();
-    this.ctx.translate(x, y);
-    this.ctx.rotate(r);
-    this.ctx.scale(sx, sy);
-
-    if (quad) {
-      const [qx, qy, qw, qh] = quad;
-      this.ctx.drawImage(element, qx, qy, qw, qh, -ox, -oy, qw, qh);
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(' ');
+  const [first, ...rest] = words;
+  const lines: string[] = [];
+  let current = first ?? '';
+  rest.forEach(word => {
+    if (ctx.measureText(current + ' ' + word).width < maxWidth) {
+      current += ' ' + word;
     } else {
-      this.ctx.drawImage(element, -ox, -oy);
+      lines.push(current);
+      current = word;
     }
+  });
+  lines.push(current);
+  return lines;
+}
 
-    this.ctx.restore();
+function getFontHeight(ctx: CanvasRenderingContext2D): number {
+  const match = ctx.font.match(/(\d+)px/);
+  return match ? parseInt(match[1]) : 16;
+}
+
+export function drawImage(s: GraphicsState, handle: ImageHandle, position: Vector2, props?: DrawProps): void {
+  const ctx = s.currentCtx;
+  if (!handle.isReady()) return;
+  const element = handle.getElement();
+  if (!element) return;
+
+  const [x, y] = position;
+  const { r = 0, scale = 1, origin = 0, quad } = props ?? {};
+  const [sx, sy] = typeof scale === 'number' ? [scale, scale] : scale;
+  const [ox, oy] = typeof origin === 'number' ? [origin, origin] : origin;
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(r);
+  ctx.scale(sx, sy);
+  if (quad) {
+    const [qx, qy, qw, qh] = quad;
+    ctx.drawImage(element, qx, qy, qw, qh, -ox, -oy, qw, qh);
+  } else {
+    ctx.drawImage(element, -ox, -oy);
   }
+  ctx.restore();
+}
 
-  getCanvasSize(): Vector2 {
-    const width = this.ctx?.canvas.width ?? 800;
-    const height = this.ctx?.canvas.height ?? 600;
-    return [width, height];
+export function getCanvasSize(s: GraphicsState): Vector2 {
+  return [s.currentCtx.canvas.width, s.currentCtx.canvas.height];
+}
+
+export function newCanvas(s: GraphicsState, size: Vector2): Canvas {
+  const [w, h] = size;
+  const element = document.createElement('canvas');
+  element.width = w;
+  element.height = h;
+  const ctx = element.getContext('2d');
+  if (!ctx) throw new Error('Failed to create canvas context');
+  const canvas: Canvas = { size, element, ctx };
+  s.canvases.set(canvas, true);
+  return canvas;
+}
+
+export function setCanvas(s: GraphicsState, canvas?: Canvas | null): void {
+  s.currentCtx = canvas?.ctx ?? s.screenCtx;
+}
+
+export function clip(s: GraphicsState, rect?: Rect): void {
+  const ctx = s.currentCtx;
+  ctx.beginPath();
+  if (rect) {
+    const [x, y, w, h] = rect;
+    ctx.rect(x, y, w, h);
+  } else {
+    ctx.rect(0, 0, ctx.canvas.width, ctx.canvas.height);
   }
+  ctx.clip();
+}
 
-  newCanvas(size: Vector2): Canvas {
-    const [width, height] = size;
-    const element = document.createElement('canvas');
-    element.width = width;
-    element.height = height;
-    const ctx = element.getContext('2d');
-    if (!ctx) {
-      throw new Error('Failed to create canvas context');
+export function polygon(s: GraphicsState, mode: DrawMode, color: Color, points: Vector2[], props?: ShapeProps): void {
+  const ctx = s.currentCtx;
+  if (points.length < 3) return;
+  const c = applyColor(color);
+  ctx.beginPath();
+  const [[x0, y0], ...rest] = points;
+  ctx.moveTo(x0, y0);
+  rest.forEach(([x, y]) => ctx.lineTo(x, y));
+  ctx.closePath();
+  if (mode === 'fill') {
+    ctx.fillStyle = c;
+    ctx.fill();
+  } else {
+    setStrokeProps(ctx, props);
+    ctx.strokeStyle = c;
+    ctx.stroke();
+  }
+}
+
+export function points(s: GraphicsState, color: Color, pts: Vector2[]): void {
+  const ctx = s.currentCtx;
+  ctx.fillStyle = applyColor(color);
+  pts.forEach(([x, y]) => ctx.fillRect(x, y, 1, 1));
+}
+
+export function newImage(path: string): ImageHandle {
+  return new ImageHandle(path);
+}
+
+export type BoundGraphics = {
+  clear: (color?: Color) => void;
+  rectangle: (mode: DrawMode, color: Color, rect: Rect, props?: ShapeProps) => void;
+  circle: (mode: DrawMode, color: Color, position: Vector2, radii: number | Vector2, props?: ShapeProps & { angle?: number; arc?: [number, number] }) => void;
+  line: (color: Color, points: Vector2[], props?: ShapeProps) => void;
+  print: (color: Color, text: string, position: Vector2, props?: PrintProps) => void;
+  draw: (handle: ImageHandle, position: Vector2, props?: DrawProps) => void;
+  getCanvasSize: () => Vector2;
+  newCanvas: (size: Vector2) => Canvas;
+  setCanvas: (canvas?: Canvas | null) => void;
+  clip: (rect?: Rect) => void;
+  polygon: (mode: DrawMode, color: Color, points: Vector2[], props?: ShapeProps) => void;
+  points: (color: Color, pts: Vector2[]) => void;
+};
+
+const graphicsFns = {
+  clear, rectangle, circle, line, print,
+  draw: drawImage, getCanvasSize, newCanvas, setCanvas,
+  clip, polygon, points,
+} as const;
+
+export function bindGraphics(s: GraphicsState): BoundGraphics {
+  return new Proxy({} as BoundGraphics, {
+    get(_, prop: string) {
+      const fn = (graphicsFns as Record<string, (s: GraphicsState, ...args: any[]) => any>)[prop];
+      return fn ? (...args: any[]) => fn(s, ...args) : undefined;
     }
-    const canvas: Canvas = { size, element, ctx };
-    this.canvases.set(canvas, true);
-    return canvas;
-  }
-
-  setCanvas(canvas?: Canvas | null): void {
-    if (canvas) {
-      this.ctx = canvas.ctx;
-    } else {
-      this.ctx = this.screenCtx;
-    }
-  }
-
-  clip(rect?: Rect): void {
-    if (!this.ctx) return;
-    
-    if (rect) {
-      const [x, y, w, h] = rect;
-      this.ctx.beginPath();
-      this.ctx.rect(x, y, w, h);
-      this.ctx.clip();
-    } else {
-      this.ctx.beginPath();
-      this.ctx.rect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-      this.ctx.clip();
-    }
-  }
-
-  polygon(mode: DrawMode, color: Color, points: Vector2[], props?: ShapeProps): void {
-    if (!this.ctx || points.length < 3) return;
-    
-    const parsedColor = this.applyColor(color);
-    
-    this.ctx.beginPath();
-    const [[x0, y0], ...rest] = points;
-    this.ctx.moveTo(x0, y0);
-    rest.forEach(([x, y]) => this.ctx!.lineTo(x, y));
-    this.ctx.closePath();
-    
-    if (mode === 'fill') {
-      this.ctx.fillStyle = parsedColor;
-      this.ctx.fill();
-    } else {
-      this.setStrokeProps(props);
-      this.ctx.strokeStyle = parsedColor;
-      this.ctx.stroke();
-    }
-  }
-
-  arc(mode: DrawMode, x: number, y: number, radius: number, angle1: number, angle2: number, props?: ShapeProps): void {
-    if (!this.ctx) return;
-    
-    const color = this.applyColor(props?.color);
-    
-    this.ctx.beginPath();
-    this.ctx.arc(x, y, radius, angle1, angle2);
-    
-    if (mode === 'fill') {
-      this.ctx.fillStyle = color;
-      this.ctx.fill();
-    } else {
-      this.setStrokeProps(props);
-      this.ctx.strokeStyle = color;
-      this.ctx.stroke();
-    }
-  }
-
-  points(color: Color, points: Vector2[]): void {
-    if (!this.ctx) return;
-    
-    const parsedColor = this.applyColor(color);
-    this.ctx.fillStyle = parsedColor;
-    points.forEach(([x, y]) => this.ctx!.fillRect(x, y, 1, 1));
-  }
+  });
 }

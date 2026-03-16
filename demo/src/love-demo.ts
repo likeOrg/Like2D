@@ -1,5 +1,6 @@
 import { love, graphics, audio, timer, keyboard, mouse, gamepad, input, ImageHandle, getGPName, Vec2 } from "like2d/callback";
 import type { Source, Like2DEvent } from 'like2d';
+import type { GraphicsContext } from 'like2d/callback';
 
 // Example demonstrating Like2D with Love2D-style callback API
 // This uses the traditional load/update/draw callback pattern directly
@@ -27,10 +28,6 @@ love.load = () => {
   
   console.log('Game loaded! Assets loading in background...');
   gameStartTime = timer.getTime();
-  
-  // Set initial background color (dark gray)
-  graphics.setBackgroundColor([0.1, 0.1, 0.15, 1]);
-  graphics.setFont(24);
   
   // Setup input mappings for game actions
   input.map('jump', ['Space', 'ArrowUp', 'KeyW', 'ButtonBottom']);
@@ -63,18 +60,19 @@ love.update = (dt: number) => {
   player.pos = Vec2.add(player.pos, Vec2.mul(moveDelta, player.speed * dt));
   
   // Keep player in bounds using Vec2.clamp
-  const canvasSize = graphics.getCanvasSize();
+  const canvasSize = love.getCanvasSize();
   player.pos = Vec2.clamp(player.pos, [15, 15], Vec2.sub(canvasSize, [15, 15]));
 };
 
 // Love2D-style draw callback - called every frame
-love.draw = (_canvas) => {
-  const canvasSize = graphics.getCanvasSize();
+love.draw = (g: GraphicsContext) => {
+  g.clear([0.1, 0.1, 0.15, 1]);
+  const canvasSize = love.getCanvasSize();
   const center = Vec2.mul(canvasSize, 0.5);
   const [canvasWidth, canvasHeight] = canvasSize;
   
   // Draw title
-  graphics.print('white', 'Love2D-style API Demo', [20, 30], { 
+  g.print('white', 'Love2D-style API Demo', [20, 30], { 
     font: '28px sans-serif'
   });
   
@@ -85,51 +83,51 @@ love.draw = (_canvas) => {
   const elapsedTime = currentTime - gameStartTime;
   const isSleeping = timer.isSleeping();
   
-  graphics.print('lime', `FPS: ${fps}`, [canvasWidth - 100, 30]);
-  graphics.print('lime', `Delta: ${(delta * 1000).toFixed(2)}ms`, [canvasWidth - 160, 50]);
-  graphics.print('lime', `Time: ${elapsedTime.toFixed(1)}s`, [canvasWidth - 160, 70]);
+  g.print('lime', `FPS: ${fps}`, [canvasWidth - 100, 30]);
+  g.print('lime', `Delta: ${(delta * 1000).toFixed(2)}ms`, [canvasWidth - 160, 50]);
+  g.print('lime', `Time: ${elapsedTime.toFixed(1)}s`, [canvasWidth - 160, 70]);
   
   if (isSleeping) {
-    graphics.print('red', 'SLEEPING', [canvasWidth - 160, 90]);
+    g.print('red', 'SLEEPING', [canvasWidth - 160, 90]);
   }
   
   if (sleepStatus) {
-    graphics.print('orange', sleepStatus, [20, 580]);
+    g.print('orange', sleepStatus, [20, 580]);
   }
   
   // Draw filled red rectangle
-  graphics.rectangle('fill', 'red', [50, 100, 100, 80]);
+  g.rectangle('fill', 'red', [50, 100, 100, 80]);
   
   // Draw outlined rectangle
-  graphics.rectangle('line', 'lime', [50, 100, 100, 80]);
+  g.rectangle('line', 'lime', [50, 100, 100, 80]);
   
   // Draw filled blue circle
-  graphics.circle('fill', 'blue', center, 50);
+  g.circle('fill', 'blue', center, 50);
   
   // Draw outlined circle
-  graphics.circle('line', 'yellow', center, 60);
+  g.circle('line', 'yellow', center, 60);
   
   // Draw lines
-  graphics.line('gray', [[200, 100], [350, 180]]);
-  graphics.line('gray', [[200, 180], [350, 100], [400, 140]]);
+  g.line('gray', [[200, 100], [350, 180]]);
+  g.line('gray', [[200, 180], [350, 100], [400, 140]]);
   
   // Draw polygon
-  graphics.polygon('fill', 'magenta', [[500, 100], [550, 150], [500, 200], [450, 150]]);
+  g.polygon('fill', 'magenta', [[500, 100], [550, 150], [500, 200], [450, 150]]);
   
   // Draw outlined polygon
-  graphics.polygon('line', 'orange', [[600, 100], [650, 150], [600, 200], [550, 150]]);
+  g.polygon('line', 'orange', [[600, 100], [650, 150], [600, 200], [550, 150]]);
   
   // Draw images if loaded (draw() skips silently if not ready)
   if (pepperImage && pepperImage.isReady()) {
     const [imgWidth, imgHeight] = pepperImage.size;
     
-    graphics.draw(pepperImage, [650, 350]);
+    g.draw(pepperImage, [650, 350]);
     
     // Draw scaled down image
-    graphics.draw(pepperImage, [650, 350], { scale: 0.5 });
+    g.draw(pepperImage, [650, 350], { scale: 0.5 });
     
     // Image info
-    graphics.print('lightgray', `Image: ${imgWidth}x${imgHeight}`, [20, 80], { 
+    g.print('lightgray', `Image: ${imgWidth}x${imgHeight}`, [20, 80], { 
       font: '14px sans-serif'
     });
   }
@@ -138,7 +136,7 @@ love.draw = (_canvas) => {
   if (audioSource && audioSource.isReady()) {
     const isPlaying = audioSource.isPlaying();
     const statusText = isPlaying ? 'Playing' : audioSource.isPaused() ? 'Paused' : 'Stopped';
-    graphics.print(
+    g.print(
       'darkorange',
       `Audio: ${statusText} (${Math.round(audioSource.tell() * 10) / 10}s / ${Math.round(audioSource.getDuration() * 10) / 10}s)`, 
       [20, 520], 
@@ -147,39 +145,39 @@ love.draw = (_canvas) => {
   }
   
   // Input action system demo
-  graphics.print('gold', 'Input Actions (mapped):', [canvasWidth - 250, 130], { 
+  g.print('gold', 'Input Actions (mapped):', [canvasWidth - 250, 130], { 
     font: '16px sans-serif'
   });
   
   const jumpActive = input.isDown('jump');
   const fireActive = input.isDown('fire');
   
-  graphics.print(
+  g.print(
     jumpActive ? 'lime' : 'gray',
     `Jump: ${jumpActive ? 'PRESSED' : 'up'}`, 
     [canvasWidth - 250, 155]
   );
   
-  graphics.print(
+  g.print(
     fireActive ? 'red' : 'gray',
     `Fire: ${fireActive ? 'PRESSED' : 'up'}`, 
     [canvasWidth - 250, 175]
   );
   
   // Print instructions
-  graphics.print('silver', 'Press any key to see it logged', [20, canvasHeight - 120], { 
+  g.print('silver', 'Press any key to see it logged', [20, canvasHeight - 120], { 
     font: '16px sans-serif'
   });
-  graphics.print('silver', 'Click anywhere for mouse position', [20, canvasHeight - 100], { 
+  g.print('silver', 'Click anywhere for mouse position', [20, canvasHeight - 100], { 
     font: '16px sans-serif'
   });
-  graphics.print('silver', 'Audio: Space=Play/Stop, S=Stop, P=Pause/Resume', [20, canvasHeight - 80], { 
+  g.print('silver', 'Audio: Space=Play/Stop, S=Stop, P=Pause/Resume', [20, canvasHeight - 80], { 
     font: '16px sans-serif'
   });
-  graphics.print('silver', 'Timer: L=Sleep 2 seconds', [20, canvasHeight - 60], { 
+  g.print('silver', 'Timer: L=Sleep 2 seconds', [20, canvasHeight - 60], { 
     font: '16px sans-serif'
   });
-  graphics.print('silver', 'Input: WASD/Arrows to move, Space/W/Up to jump', [20, canvasHeight - 20], { 
+  g.print('silver', 'Input: WASD/Arrows to move, Space/W/Up to jump', [20, canvasHeight - 20], { 
     font: '16px sans-serif'
   });
   
@@ -187,20 +185,20 @@ love.draw = (_canvas) => {
   
   // Display mouse position
   const mousePos = mouse.getPosition();
-  graphics.print('cyan', `Mouse: (${Math.round(mousePos[0])}, ${Math.round(mousePos[1])})`, [20, 180], { 
+  g.print('cyan', `Mouse: (${Math.round(mousePos[0])}, ${Math.round(mousePos[1])})`, [20, 180], { 
     font: '16px sans-serif'
   });
   
   // Draw mouse position indicator on canvas
-  graphics.circle('line', 'cyan', mousePos, 10);
-  graphics.line('cyan', [[mousePos[0] - 15, mousePos[1]], [mousePos[0] + 15, mousePos[1]]]);
-  graphics.line('cyan', [[mousePos[0], mousePos[1] - 15], [mousePos[0], mousePos[1] + 15]]);
+  g.circle('line', 'cyan', mousePos, 10);
+  g.line('cyan', [[mousePos[0] - 15, mousePos[1]], [mousePos[0] + 15, mousePos[1]]]);
+  g.line('cyan', [[mousePos[0], mousePos[1] - 15], [mousePos[0], mousePos[1] + 15]]);
   
   // Display mouse button states
   const lmb = mouse.isDown(1) ? 'L' : '_';
   const mmb = mouse.isDown(2) ? 'M' : '_';
   const rmb = mouse.isDown(3) ? 'R' : '_';
-  graphics.print('yellow', `Mouse Buttons: [${lmb}] [${mmb}] [${rmb}]`, [20, 200], { 
+  g.print('yellow', `Mouse Buttons: [${lmb}] [${mmb}] [${rmb}]`, [20, 200], { 
     font: '16px sans-serif'
   });
   
@@ -208,7 +206,7 @@ love.draw = (_canvas) => {
   let keyY = 230;
   
   // Arrow keys display
-  graphics.print('darkgray', 'Keyboard (hold to see):', [20, keyY], { 
+  g.print('darkgray', 'Keyboard (hold to see):', [20, keyY], { 
     font: '18px sans-serif'
   });
   keyY += 25;
@@ -219,17 +217,17 @@ love.draw = (_canvas) => {
   const left = input.isDown('move_left');
   const right = input.isDown('move_right');
   
-  graphics.rectangle(up ? 'fill' : 'line', up ? 'lime' : 'gray', [170, keyY - 5, 25, 25]);
-  graphics.print(up ? 'lime' : 'lightgreen', '↑', [175, keyY]);
+  g.rectangle(up ? 'fill' : 'line', up ? 'lime' : 'gray', [170, keyY - 5, 25, 25]);
+  g.print(up ? 'lime' : 'lightgreen', '↑', [175, keyY]);
   
-  graphics.rectangle(left ? 'fill' : 'line', left ? 'lime' : 'gray', [135, keyY + 20, 25, 25]);
-  graphics.print(left ? 'lime' : 'lightgreen', '←', [140, keyY + 25]);
+  g.rectangle(left ? 'fill' : 'line', left ? 'lime' : 'gray', [135, keyY + 20, 25, 25]);
+  g.print(left ? 'lime' : 'lightgreen', '←', [140, keyY + 25]);
   
-  graphics.rectangle(down ? 'fill' : 'line', down ? 'lime' : 'gray', [170, keyY + 20, 25, 25]);
-  graphics.print(down ? 'lime' : 'lightgreen', '↓', [175, keyY + 25]);
+  g.rectangle(down ? 'fill' : 'line', down ? 'lime' : 'gray', [170, keyY + 20, 25, 25]);
+  g.print(down ? 'lime' : 'lightgreen', '↓', [175, keyY + 25]);
   
-  graphics.rectangle(right ? 'fill' : 'line', right ? 'lime' : 'gray', [205, keyY + 20, 25, 25]);
-  graphics.print(right ? 'lime' : 'lightgreen', '→', [210, keyY + 25]);
+  g.rectangle(right ? 'fill' : 'line', right ? 'lime' : 'gray', [205, keyY + 20, 25, 25]);
+  g.print(right ? 'lime' : 'lightgreen', '→', [210, keyY + 25]);
   
   // Show active keys list
   keyY += 70;
@@ -242,7 +240,7 @@ love.draw = (_canvas) => {
   if (keyboard.isDown('Escape')) activeKeys.push('Esc');
   
   if (activeKeys.length > 0) {
-    graphics.print('orangered', `Active: ${activeKeys.join(', ')}`, [20, keyY], { 
+    g.print('orangered', `Active: ${activeKeys.join(', ')}`, [20, keyY], { 
       font: '16px sans-serif'
     });
   }
@@ -251,7 +249,7 @@ love.draw = (_canvas) => {
   keyY += 30;
   const connectedGamepads = gamepad.getConnectedGamepads();
   if (connectedGamepads.length > 0) {
-    graphics.print('limegreen', `Gamepads connected: ${connectedGamepads.length}`, [20, keyY], { 
+    g.print('limegreen', `Gamepads connected: ${connectedGamepads.length}`, [20, keyY], { 
       font: '16px sans-serif'
     });
     
@@ -261,7 +259,7 @@ love.draw = (_canvas) => {
       const pressedButtons = gamepad.getPressedButtons(gpIndex);
       if (pressedButtons.size > 0) {
         const buttonNames = Array.from(pressedButtons).map(idx => getGPName(idx));
-        graphics.print('lightgray', `  GP${gpIndex}: ${buttonNames.join(', ')}`, [20, keyY], { 
+        g.print('lightgray', `  GP${gpIndex}: ${buttonNames.join(', ')}`, [20, keyY], { 
           font: '16px sans-serif'
         });
       }
@@ -273,7 +271,7 @@ love.draw = (_canvas) => {
       const rightStick = gamepad.getRightStick(gpIndex);
       
       keyY += 25;
-      graphics.print('lightsteelblue', `GP${gpIndex} Sticks:`, [20, keyY], { 
+      g.print('lightsteelblue', `GP${gpIndex} Sticks:`, [20, keyY], { 
         font: '16px sans-serif'
       });
       
@@ -282,12 +280,12 @@ love.draw = (_canvas) => {
       const leftStickCenterY = keyY + 40;
       const stickRadius = 25;
       
-      graphics.circle('line', 'dimgray', [leftStickCenterX, leftStickCenterY], stickRadius);
-      graphics.circle('fill', 'dodgerblue', 
+      g.circle('line', 'dimgray', [leftStickCenterX, leftStickCenterY], stickRadius);
+      g.circle('fill', 'dodgerblue', 
         [leftStickCenterX + leftStick.x * stickRadius, leftStickCenterY + leftStick.y * stickRadius], 
         5
       );
-      graphics.print('darkgray', 'L', [leftStickCenterX - 4, leftStickCenterY + stickRadius + 5], { 
+      g.print('darkgray', 'L', [leftStickCenterX - 4, leftStickCenterY + stickRadius + 5], { 
         font: '12px sans-serif'
       });
       
@@ -295,35 +293,35 @@ love.draw = (_canvas) => {
       const rightStickCenterX = leftStickCenterX + 70;
       const rightStickCenterY = leftStickCenterY;
       
-      graphics.circle('line', 'dimgray', [rightStickCenterX, rightStickCenterY], stickRadius);
-      graphics.circle('fill', 'darkorange', 
+      g.circle('line', 'dimgray', [rightStickCenterX, rightStickCenterY], stickRadius);
+      g.circle('fill', 'darkorange', 
         [rightStickCenterX + rightStick.x * stickRadius, rightStickCenterY + rightStick.y * stickRadius], 
         5
       );
-      graphics.print('darkgray', 'R', [rightStickCenterX - 4, rightStickCenterY + stickRadius + 5], { 
+      g.print('darkgray', 'R', [rightStickCenterX - 4, rightStickCenterY + stickRadius + 5], { 
         font: '12px sans-serif'
       });
       
       keyY += stickRadius * 2 + 15;
     }
   } else {
-    graphics.print('gray', 'No gamepads connected', [20, keyY], { 
+    g.print('gray', 'No gamepads connected', [20, keyY], { 
       font: '16px sans-serif'
     });
   }
   
   // Interactive element - move a circle with WASD/Arrows
   keyY += 40;
-  graphics.print('gray', 'Move player with WASD or Arrow keys:', [20, keyY], { 
+  g.print('gray', 'Move player with WASD or Arrow keys:', [20, keyY], { 
     font: '16px sans-serif'
   });
-  graphics.print('gray', `Player: (${Math.round(player.pos[0])}, ${Math.round(player.pos[1])})`, [20, keyY + 20], { 
+  g.print('gray', `Player: (${Math.round(player.pos[0])}, ${Math.round(player.pos[1])})`, [20, keyY + 20], { 
     font: '16px sans-serif'
   });
   
   // Draw player at actual position
-  graphics.circle('fill', 'springgreen', player.pos, 15);
-  graphics.circle('line', 'lime', player.pos, 15);
+  g.circle('fill', 'springgreen', player.pos, 15);
+  g.circle('line', 'lime', player.pos, 15);
 };
 
 // Love2D-style keypressed callback

@@ -1,4 +1,17 @@
-import { Graphics } from '../../core/graphics';
+import {
+  newState,
+  bindGraphics,
+  clear,
+  newImage,
+  type GraphicsState,
+  type BoundGraphics,
+  ImageHandle,
+  type Color,
+  type ShapeProps,
+  type DrawProps,
+  type PrintProps,
+  type Canvas,
+} from '../../core/graphics';
 import { Audio } from '../../core/audio';
 import { Input } from '../../core/input';
 import { Timer } from '../../core/timer';
@@ -11,7 +24,8 @@ import type { CanvasMode, PartialCanvasMode } from '../../core/canvas-config';
 import { StartupScene } from './startup-scene';
 import type { Like2DEvent } from '../../core/events';
 
-export { Graphics, ImageHandle } from '../../core/graphics';
+export { ImageHandle, newImage };
+export type { BoundGraphics as GraphicsContext, Color, ShapeProps, DrawProps, PrintProps, Canvas };
 export { StartupScene };
 export { Audio } from '../../core/audio';
 export { Input } from '../../core/input';
@@ -27,11 +41,14 @@ export { Rect } from '../../core/rect';
 export type { CanvasMode, PartialCanvasMode } from '../../core/canvas-config';
 export { calcFixedScale } from '../../core/canvas-config';
 
+export const graphics = { newImage };
+
 export class SceneRunner {
   private engine: Engine;
   private scene: Scene | null = null;
+  private gfxState: GraphicsState;
+  private gfx: BoundGraphics;
 
-  readonly graphics: Graphics;
   readonly audio: Audio;
   readonly timer: Timer;
   readonly input: Input;
@@ -41,7 +58,8 @@ export class SceneRunner {
 
   constructor(container: HTMLElement) {
     this.engine = new Engine(container);
-    this.graphics = new Graphics(this.engine.getContext());
+    this.gfxState = newState(this.engine.getContext());
+    this.gfx = bindGraphics(this.gfxState);
     this.keyboard = new Keyboard();
     this.mouse = new Mouse((cssX, cssY) => this.engine.transformMousePosition(cssX, cssY));
     this.gamepad = new Gamepad();
@@ -58,6 +76,10 @@ export class SceneRunner {
     return this.engine.getMode();
   }
 
+  getCanvasSize(): [number, number] {
+    return this.engine.getCanvasSize();
+  }
+
   setScene(scene: Scene) {
     this.scene = scene;
     this.scene.load?.();
@@ -65,17 +87,25 @@ export class SceneRunner {
 
   async start(scene: Scene) {
     this.setScene(scene);
-    this.engine.setDeps({ graphics: this.graphics, input: this.input, timer: this.timer, audio: this.audio, keyboard: this.keyboard, mouse: this.mouse, gamepad: this.gamepad });
+    this.engine.setDeps({
+      input: this.input,
+      timer: this.timer,
+      keyboard: this.keyboard,
+      mouse: this.mouse,
+      gamepad: this.gamepad,
+      clear: () => clear(this.gfxState),
+    });
     await this.gamepad.init();
     
     this.engine.start((event: Like2DEvent) => {
-      // 1. handleEvent runs first
       this.scene?.handleEvent?.(event);
-
-      // 2. Direct handlers
       const handler = this.scene?.[event.type as keyof Scene] as Function | undefined;
       if (handler) {
-        handler.apply(this.scene, event.args);
+        if (event.type === 'draw') {
+          handler.apply(this.scene, [this.gfx]);
+        } else {
+          handler.apply(this.scene, event.args);
+        }
       }
     });
   }

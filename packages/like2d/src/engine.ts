@@ -1,5 +1,3 @@
-import type { Graphics } from './core/graphics';
-import type { Audio } from './core/audio';
 import type { Input } from './core/input';
 import type { Timer } from './core/timer';
 import type { Keyboard } from './core/keyboard';
@@ -10,13 +8,12 @@ import type { CanvasMode, PartialCanvasMode } from './core/canvas-config';
 import { CanvasManager } from './core/canvas-manager';
 
 export type EngineDeps = {
-  graphics: Graphics;
   input: Input;
   timer: Timer;
-  audio: Audio;
   keyboard: Keyboard;
   mouse: Mouse;
   gamepad: Gamepad;
+  clear: () => void;
 };
 
 export class Engine {
@@ -137,7 +134,7 @@ export class Engine {
         this.dispatchEvent('update', [dt]);
       }
 
-      this.deps!.graphics.clear();
+      this.deps!.clear();
       this.dispatchEvent('draw', [this.canvas]);
       this.canvasManager.present();
       requestAnimationFrame(loop);
@@ -170,6 +167,10 @@ export class Engine {
 
   transformMousePosition(cssX: number, cssY: number): [number, number] {
     return this.canvasManager.transformMousePosition(cssX, cssY);
+  }
+
+  getCanvasSize(): [number, number] {
+    return [this.canvas.width, this.canvas.height];
   }
 
 }

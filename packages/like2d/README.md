@@ -12,9 +12,9 @@ LIKE is a **curated toolkit** around browser APIs.
 
 It does less, because it **does the right thing**. And when that's not the right thing for you, we hand you the wrench.
 
-- **Stateless Graphics:** Canvas remembers everything—colors, transforms, alpha. Forget to reset between calls and things break mysteriously. We make drawing explicit: what you see is what you set.
+- **Stateless Graphics:** Forget to reset native Canvas state (like LineCap) between calls and things break mysteriously. We make drawing explicit: what you see is what you set.
 
-- **Fire-and-forget Assets:** Using async asset loading directly on realtime web games is annoying. We let you pretend it's instant and synchronous.
+- **Fire-and-forget Assets:** Async asset loading directly on realtime web games is annoying. We let you pretend it's instant and synchronous.
 
 - **Physical Joypad:** Our gamepad module auto-maps to physical buttons like "bottom" and "top". Because A isn't always in the same spot.
 
