@@ -48,11 +48,6 @@ export class CanvasManager {
   }
 
   setConfig(config: CanvasConfig): void {
-    if (this.isPixelArtMode(this.config) && !this.isPixelArtMode(config)) {
-      if (this.pixelArtCanvas?.parentElement) {
-        this.pixelArtCanvas.parentElement.removeChild(this.pixelArtCanvas);
-      }
-    }
     this.config = config;
     this.applyConfig();
   }
@@ -63,6 +58,12 @@ export class CanvasManager {
 
   private isPixelArtMode(config: CanvasConfig): boolean {
     return config.mode === 'fixed' && !!(config as { pixelArt?: boolean }).pixelArt;
+  }
+
+  private removePixelArtCanvas(): void {
+    if (this.pixelArtCanvas?.parentElement) {
+      this.pixelArtCanvas.parentElement.removeChild(this.pixelArtCanvas);
+    }
   }
 
   private applyConfig(): void {
@@ -82,16 +83,16 @@ export class CanvasManager {
         break;
     }
 
-    const pixelSize: Vector2 = this.isPixelArtMode(this.config) && this.pixelArtCanvas
-      ? [this.pixelArtCanvas.width, this.pixelArtCanvas.height]
-      : [this.canvas.width, this.canvas.height];
+    const displayCanvas = this.isPixelArtMode(this.config) && this.pixelArtCanvas
+      ? this.pixelArtCanvas
+      : this.canvas;
 
     const isFullscreen = !!document.fullscreenElement;
 
     this.emitResize?.({
       type: 'resize',
       size: containerSize,
-      pixelSize,
+      pixelSize: [displayCanvas.width, displayCanvas.height],
       wasFullscreen: this.wasFullscreen,
       fullscreen: isFullscreen,
     });
@@ -126,9 +127,7 @@ export class CanvasManager {
         this.container.appendChild(pac);
       }
     } else {
-      if (this.pixelArtCanvas?.parentElement) {
-        this.pixelArtCanvas.parentElement.removeChild(this.pixelArtCanvas);
-      }
+      this.removePixelArtCanvas();
       setCanvasSize(this.canvas, gameSize);
       this.canvas.style.display = 'block';
       setCanvasDisplaySize(this.canvas, V2.mul(gameSize, scale));
@@ -139,9 +138,7 @@ export class CanvasManager {
   }
 
   private applyScaledOrNativeMode(mode: 'scaled' | 'native', csize: Vector2): void {
-    if (this.pixelArtCanvas?.parentElement) {
-      this.pixelArtCanvas.parentElement.removeChild(this.pixelArtCanvas);
-    }
+    this.removePixelArtCanvas();
 
     const pixelRatio = window.devicePixelRatio || 1;
     const gameSize: Vector2 = mode === 'scaled'
@@ -165,18 +162,14 @@ export class CanvasManager {
       const scaledGame = V2.mul(gameSize, scale);
       const offset = V2.mul(V2.sub([this.canvas.width, this.canvas.height], scaledGame), 0.5);
       this.ctx.setTransform(scale, 0, 0, scale, offset[0], offset[1]);
-      (this.ctx as any).__baseTransform = { scale, offsetX: offset[0], offsetY: offset[1] };
     } else {
       this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-      delete (this.ctx as any).__baseTransform;
     }
   }
 
   dispose(): void {
     this.resizeObserver?.disconnect();
-    if (this.pixelArtCanvas?.parentElement) {
-      this.pixelArtCanvas.parentElement.removeChild(this.pixelArtCanvas);
-    }
+    this.removePixelArtCanvas();
     this.pixelArtCanvas = null;
     this.pixelArtCtx = null;
     this.emitResize = null;
@@ -202,34 +195,29 @@ export class CanvasManager {
   }
 
   transformMousePosition(cssX: number, cssY: number): Vector2 {
-    const targetCanvas = this.getDisplayCanvas();
-    const rect = targetCanvas.getBoundingClientRect();
+    const displayCanvas = this.getDisplayCanvas();
+    const rect = displayCanvas.getBoundingClientRect();
     const relative: Vector2 = [cssX - rect.left, cssY - rect.top];
 
     switch (this.config.mode) {
       case 'fixed': {
-        const scale: Vector2 = [targetCanvas.width / rect.width, targetCanvas.height / rect.height];
+        const scale: Vector2 = [displayCanvas.width / rect.width, displayCanvas.height / rect.height];
         return V2.mul(relative, scale);
       }
 
       case 'scaled': {
-        const { size: gameSize } = this.config as { mode: 'scaled'; size: Vector2 };
-        const pixelRatio = window.devicePixelRatio || 1;
-        const containerSize: Vector2 = document.fullscreenElement
-          ? [document.fullscreenElement.clientWidth, document.fullscreenElement.clientHeight]
-          : [this.container.clientWidth, this.container.clientHeight];
-
-        const canvasSize = V2.mul(containerSize, pixelRatio);
-        const scale = Math.min(canvasSize[0] / gameSize[0], canvasSize[1] / gameSize[1]);
-        const offset = V2.mul(V2.sub(canvasSize, V2.mul(gameSize, scale)), 0.5);
-
-        return V2.div(V2.sub(V2.mul(relative, pixelRatio), offset), scale);
+        // Reverse the transform applied in applyScaledOrNativeMode
+        const invTransform = this.ctx.getTransform().invertSelf();
+        const canvasPos = V2.mul(relative, window.devicePixelRatio || 1);
+        return [
+          invTransform.a * canvasPos[0] + invTransform.c * canvasPos[1] + invTransform.e,
+          invTransform.b * canvasPos[0] + invTransform.d * canvasPos[1] + invTransform.f,
+        ];
       }
 
       case 'native':
       default: {
-        const pixelRatio = window.devicePixelRatio || 1;
-        return V2.mul(relative, pixelRatio);
+        return V2.mul(relative, window.devicePixelRatio || 1);
       }
     }
   }
