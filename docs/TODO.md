@@ -2,13 +2,14 @@
 
 ## Active Work
 
-### 1. Startup Screen as Scene (Scene Adapter)
-Move the built-in startup screen from engine.ts into a reusable scene class in the scene adapter:
-- Create `StartupScene` class that accepts:
-  - `nextScene: Scene` - the scene to load after click
-  - `draw?: (ctx: CanvasRenderingContext2D) => void` - optional custom draw function
-- Update demo/src/main.ts to use this feature
-- For callback adapter: add note "pause until click - future consideration"
+### 1. Startup Scene ✅ COMPLETED
+Created `StartupScene` class in scene adapter:
+- Accepts `nextScene: Scene` - the scene to load after click
+- Accepts `text?: string` - custom text to display
+- Handles `mousepressed` event to trigger transition
+- Usage: Create instance and pass to `runner.start()`
+
+**Future consideration:** Callback adapter could use a similar pattern (pause until click), but not implemented today.
 
 ### 4. Graphics Simplification ✅ COMPLETED
 - Removed transform wrapper methods (`push`, `pop`, `translate`, `rotate`, `scale`, `resetTransform`) from Graphics class
@@ -103,12 +104,6 @@ The current action system is designed for single-player use. We need a multiplay
 - Handles controller disconnect/reconnect with graceful player reassignment
 - Provides clean API for networked multiplayer (input prediction, reconciliation)
 - Consider: Should we have a `PlayerManager` that maps physical controllers to logical player slots?
-
-### Custom Startup Screen
-The startup screen currently displays simple text. Future versions should support:
-- Custom background images for the startup screen
-- Custom styling/fonts
-- Animation/transitions
 
 ### Camera System with Mouse Transform
 Tenuous idea for camera systems with automatic mouse coordinate transformation:

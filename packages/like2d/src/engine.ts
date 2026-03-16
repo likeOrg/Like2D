@@ -68,64 +68,38 @@ export class Engine {
     }));
   }
 
-  start(
-    onUpdate?: (dt: number) => void,
-    onDraw?: () => void,
-    options: { showStartupScreen?: boolean; startupText?: string } = {}
-  ) {
-    const { showStartupScreen = false, startupText = 'Click to Start' } = options;
-
+  start(onUpdate?: (dt: number) => void, onDraw?: () => void) {
     if (!this.deps) throw new Error('Engine dependencies not set. Call setDeps() before start().');
 
-    const doStart = () => {
-      this.isRunning = true;
-      this.lastTime = performance.now();
+    this.isRunning = true;
+    this.lastTime = performance.now();
 
-      const loop = () => {
-        if (!this.isRunning) return;
+    const loop = () => {
+      if (!this.isRunning) return;
 
-        const currentTime = performance.now();
-        const dt = (currentTime - this.lastTime) / 1000;
-        this.lastTime = currentTime;
+      const currentTime = performance.now();
+      const dt = (currentTime - this.lastTime) / 1000;
+      this.lastTime = currentTime;
 
-        this.deps!.timer.update(dt);
+      this.deps!.timer.update(dt);
 
-        if (!this.deps!.timer.isSleeping()) {
-          const inputEvents = this.deps!.input.update();
-          inputEvents.pressed.forEach(action => this.dispatchEvent('like2d:actionpressed', { action }));
-          inputEvents.released.forEach(action => this.dispatchEvent('like2d:actionreleased', { action }));
-          this.dispatchEvent('like2d:update', { dt });
-          onUpdate?.(dt);
-        }
+      if (!this.deps!.timer.isSleeping()) {
+        const inputEvents = this.deps!.input.update();
+        inputEvents.pressed.forEach(action => this.dispatchEvent('like2d:actionpressed', { action }));
+        inputEvents.released.forEach(action => this.dispatchEvent('like2d:actionreleased', { action }));
+        this.dispatchEvent('like2d:update', { dt });
+        onUpdate?.(dt);
+      }
 
-        this.deps!.graphics.clear();
-        this.dispatchEvent('like2d:draw', {});
-        onDraw?.();
-        this.canvasManager.present();
-        requestAnimationFrame(loop);
-      };
-
-      this.dispatchEvent('like2d:load', {});
+      this.deps!.graphics.clear();
+      this.dispatchEvent('like2d:draw', {});
+      onDraw?.();
+      this.canvasManager.present();
       requestAnimationFrame(loop);
     };
 
-    if (showStartupScreen) {
-      this.ctx.fillStyle = '#000';
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.fillStyle = '#fff';
-      this.ctx.font = '32px sans-serif';
-      this.ctx.textAlign = 'center';
-      this.ctx.textBaseline = 'middle';
-      this.ctx.fillText(startupText, this.canvas.width / 2, this.canvas.height / 2);
-
-      const onClick = () => {
-        this.canvas.removeEventListener('click', onClick);
-        doStart();
-      };
-      this.canvas.addEventListener('click', onClick);
-    } else {
-      doStart();
-    }
+    this.dispatchEvent('like2d:load', {});
+    requestAnimationFrame(loop);
   }
 
   stop() {

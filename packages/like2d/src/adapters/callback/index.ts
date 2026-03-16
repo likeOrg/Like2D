@@ -45,9 +45,7 @@ export const like = {
     engine?.setScaling(config);
   },
 
-  async init(container: HTMLElement, options: { showStartupScreen?: boolean; startupText?: string } = {}) {
-    const { showStartupScreen = true, startupText = 'Click to Start' } = options;
-
+  async init(container: HTMLElement) {
     engine = new Engine(container);
     graphics = new Graphics(engine.getContext());
 
@@ -87,8 +85,7 @@ export const like = {
     await gamepad.init();
     engine.start(
       (dt) => like.update?.(dt),
-      () => like.draw?.(engine!.getCanvas()),
-      { showStartupScreen, startupText }
+      () => like.draw?.(engine!.getCanvas())
     );
   },
 

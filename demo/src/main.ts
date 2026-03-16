@@ -1,4 +1,4 @@
-import { SceneRunner, Scene, type SceneEvent, V2, R, getGPName, ImageHandle, type CanvasConfig } from "like2d/scene";
+import { SceneRunner, Scene, type SceneEvent, V2, R, getGPName, ImageHandle, type CanvasConfig, StartupScene } from "like2d/scene";
 import type { Source } from 'like2d';
 
 // Example demonstrating Like2D graphics API with Scene-based architecture
@@ -444,5 +444,10 @@ if (fullscreenBtn) {
   });
 }
 
-// Start the scene with startup screen (required for audio autoplay)
-await runner.start(demoScene, { showStartupScreen: true });
+// Start with a startup scene that transitions to the demo on click
+// This defeats browser autoplay restrictions for audio
+const startupScene = new StartupScene(graphics, { nextScene: demoScene }, () => {
+  runner.setScene(demoScene);
+  demoScene.load?.();
+});
+await runner.start(startupScene);

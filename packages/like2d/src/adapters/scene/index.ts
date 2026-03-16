@@ -8,8 +8,10 @@ import { Gamepad } from '../../core/gamepad';
 import { Engine } from '../../engine';
 import type { Scene } from './scene';
 import type { CanvasConfig } from '../../core/canvas-config';
+import { StartupScene } from './startup-scene';
 
 export { Graphics, ImageHandle } from '../../core/graphics';
+export { StartupScene };
 export { Audio } from '../../core/audio';
 export { Input } from '../../core/input';
 export { Timer } from '../../core/timer';
@@ -96,14 +98,13 @@ export class SceneRunner {
     this.scene = scene;
   }
 
-  async start(scene: Scene, options: { showStartupScreen?: boolean; startupText?: string } = {}) {
+  async start(scene: Scene) {
     this.setScene(scene);
     this.engine.setDeps({ graphics: this.graphics, input: this.input, timer: this.timer, audio: this.audio, keyboard: this.keyboard, mouse: this.mouse, gamepad: this.gamepad });
     await this.gamepad.init();
     this.engine.start(
       (dt) => this.scene?.update(dt),
-      () => this.scene?.draw(this.engine.getCanvas()),
-      options
+      () => this.scene?.draw(this.engine.getCanvas())
     );
   }
 
