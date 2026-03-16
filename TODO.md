@@ -1,28 +1,13 @@
 # Like2D TODO
 
-## Canvas Size System (In Progress)
+## Canvas Size System ✅
 
-Implementation of the canvas sizing system per CANVAS_DESIGN.md.
+Implementation complete. Canvas sizing system with three modes:
+- **fixed**: Fixed internal resolution, CSS-scaled to fit container
+- **scaled**: Canvas matches container, content scaled via ctx.transform
+- **native**: Full control, programmer handles everything
 
-### Implementation Tasks
-- [ ] Create `CanvasConfig` type with three modes: `fixed`, `scaled`, `native`
-- [ ] Create `CanvasManager` class in `packages/like2d/src/core/canvas-manager.ts`
-- [ ] Implement `fixed` mode with CSS scaling and letterboxing
-- [ ] Implement `pixelArt` two-step scaling (sharp integer scale, then linear)
-- [ ] Implement `scaled` mode with ctx.setTransform()
-- [ ] Implement `native` mode (no automatic scaling)
-- [ ] Add `setScaling()` to Engine class
-- [ ] Add `setScaling()` to SceneRunner class  
-- [ ] Remove width/height from Scene interface
-- [ ] Remove width/height/config parameters from SceneRunner constructor
-- [ ] Update mouse coordinate conversion for all modes
-- [ ] Update demos to use new API (set scaling in load())
-- [ ] Add ResizeObserver for responsive updates
-
-### Breaking Changes Required
-- SceneRunner constructor: `new SceneRunner(container)` only (no width/height)
-- Scene interface: remove `width` and `height` properties
-- Scenes must call `runner.setScaling()` in `load()`
+All modes preserve aspect ratio with letterboxing (no stretch/crop).
 
 ## Publishing Preparation
 - [ ] Add JSR configuration (`jsr.json`)
