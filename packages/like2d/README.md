@@ -8,12 +8,21 @@ A web-native 2D game framework inspired by [LÖVE](https://love2d.org/), built f
 
 ## What it is
 
-Like2D is a thin, performant wrapper around the browser's Canvas and Web Audio APIs. It provides:
-- **Stateless Graphics:** No more `ctx.save()` and `ctx.restore()` for colors and transforms.
-- **Fire-and-forget Assets:** Synchronous handles for images and audio that load in the background.
-- **Unified Input:** Normalized keyboard, mouse, and gamepad support with action mapping.
-- **Scaling Modes:** Built-in support for "pixel" resolution with pixel-perfect scaling.
-- **Flexible Patterns:** Use Love2D-style global callbacks or class-based scenes.
+LIKE is a **curated toolkit** around browser APIs.
+
+It does less, because it **does the right thing**. And when that's not the right thing for you, we hand you the wrench.
+
+- **Stateless Graphics:** Canvas remembers everything—colors, transforms, alpha. Forget to reset between calls and things break mysteriously. We make drawing explicit: what you see is what you set.
+
+- **Fire-and-forget Assets:** Using async asset loading directly on realtime web games is annoying. We let you pretend it's instant and synchronous.
+
+- **Physical Joypad:** Our gamepad module auto-maps to physical buttons like "bottom" and "top". Because A isn't always in the same spot.
+
+- **Actions System:** Of course you can use device input callbacks just like love2d -- but you can also map inputs to actions and get callbacks on that.
+
+- **Scaling Modes:** Pixel art games need pixel-perfect scaling. So we do that: integer nearest -> linear. Or not; turn off pixelart mode to have a canvas that stays at native resolution.
+
+- **Sane Architecture:** Everything is built around a centralized event handler for browser-native events. We won't reinvent the wheel.
 
 ## Installation
 
@@ -77,15 +86,15 @@ const runner = new SceneRunner(document.body);
 await runner.start(new MyScene());
 ```
 
-## API Overview
+## Module Overview
 
-Like2D exports pure library functions for math and geometry that work with native arrays.
+Pick your pattern, import what you need:
 
-- **Vec2:** Vector operations using `[number, number]` tuples.
-- **Rect:** Rectangle operations using `[x, y, w, h]` tuples.
-- **Graphics:** Stateless drawing commands.
-- **Audio:** Simple source/playback management.
-- **Input:** Action-based input mapping.
+```typescript
+import { love, graphics, input } from 'like2d/callback';  // Love2D-style
+import { SceneRunner, type Scene } from 'like2d/scene';    // Class-based scenes
+import { Vec2, Rect } from 'like2d/math';                  // Pure math functions
+```
 
 See the [PHILOSOPHY.md](./docs/PHILOSOPHY.md) for the principles behind the design.
 
