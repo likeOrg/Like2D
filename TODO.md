@@ -1,5 +1,13 @@
 # Like2D TODO
 
+## Bugs 🐛
+
+### Pixel Art Canvas Stretching
+The pixel art canvas is getting stretched. The target canvas should maintain the same aspect ratio as the input canvas to prevent distortion.
+
+### Mouse Position in Fixed Modes
+The mouse position is incorrect in all fixed modes (both regular and pixel art). The reported coordinates don't properly map to the scaled/letterboxed game canvas.
+
 ## Canvas Size System ✅
 
 Implementation complete. Canvas sizing system with three modes:
