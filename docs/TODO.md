@@ -21,9 +21,6 @@ Created `StartupScene` class in scene adapter:
 - Removed "scaled" mode from CanvasConfig (keep only "fixed" and "native")
 - Added helper function `calcFixedScale()` in `canvas-config.ts` for fixed-to-native rendering
 
-### BUG: Browser Zoom with Pixel Art Mode
-Browser zooming does not update the pixel canvas resolution. When the user zooms the browser (Ctrl +/-), the pixel art canvas needs to recalculate its internal resolution based on the new pixel ratio, but currently it only responds to container resize events, not zoom events.
-
 ### 7. Event System: Native Events Pilot ✅ COMPLETED
 **Status:** Implemented - native DOM CustomEvents now used throughout  
 **Changes:**
@@ -39,16 +36,90 @@ Browser zooming does not update the pixel canvas resolution. When the user zooms
 - Zero custom event infrastructure to maintain
 - Better tree-shaking potential
 
-### 8. Package.json Exports & Naming (Later)
-Remove wildcard exports (`core/*`) from package.json:
-- Keep only: `.`, `./callback`, `./scene`
-- Root index.ts re-exports pure libraries (`Vec2`, `Rect`, etc.) - this is fine
-- Users who want internals must type `like2d/core/...` explicitly
-- "Core" in the path acts as the gate into internals
+---
 
-**Naming changes:**
-- `V2` → `Vec2` (V2 sounds like "version 2")
-- `R` → `Rect` (R conflicts with Ramda library convention)
+## V2 Release!
+
+Execution order: naming cleanup → bug fix → unified event dispatch → tests → docs → publishing infra → version bump + tag.
+
+### 1. API Naming Cleanup
+- [ ] `V2` → `Vec2` (V2 sounds like "version 2") — `vector2.ts`, `index.ts`, both adapters, both demos
+- [ ] `R` → `Rect` (R conflicts with Ramda convention) — `rect.ts`, `index.ts`, both adapters, both demos
+- [ ] Remove wildcard `"./core/*"` export from package.json — keep only `.`, `./callback`, `./scene`
+- [ ] Root index.ts re-exports pure libraries (`Vec2`, `Rect`, etc.) — users who want internals type `like2d/core/...` explicitly
+
+### 2. Fix Browser Zoom Bug with Pixel Art
+- [ ] `CanvasManager` only recalculates resolution on container resize, not on browser zoom
+- [ ] Add `window` resize listener + check for `devicePixelRatio` changes
+- [ ] Recalculate pixel art canvas internal resolution when ratio changes
+
+### 3. Automated Tests
+- [ ] Add Vitest (zero config, ESM-native, TypeScript)
+- [ ] Unit tests for `Timer`: sleep, time tracking, FPS calc
+- [ ] Unit tests for `Vector2`: all ops
+- [ ] Unit tests for `Rect`: create, contains, intersect
+- [ ] Unit tests for `InputState`: action mapping
+- [ ] No canvas/DOM tests — those are covered by the demo
+
+### 4. README & Docs
+- [ ] Complete `packages/like2d/README.md` (currently has TODO placeholder)
+- [ ] Structure: what it is, install, quick start (both patterns), API overview, link to PHILOSOPHY.md
+- [ ] Add inline JSDoc to public API types in `index.ts` exports
+
+### 5. Publishing Infrastructure
+- [ ] Add `LICENSE` file (MIT) to `packages/like2d/`
+- [ ] Add `jsr.json` config for JSR publishing
+- [ ] Add GitHub Actions workflow: typecheck → build → publish on tag
+- [ ] Update `package.json` version to `2.0.0`
+
+### 6. Unified Event Dispatch API
+
+Engine dispatches all events through a single callback: `engine.start(onEvent)`. No more separate `onKey`/`onMouse`/`onGamepad` callback chains or `update`/`draw` split. The engine normalizes all event sources — lifecycle, input, actions — into one stream.
+
+**Event shape** (all events share this pattern):
+```typescript
+{ type: 'keypressed', args: [scancode, keycode], timestamp }
+{ type: 'update', args: [dt], timestamp }
+{ type: 'actionpressed', args: [action], timestamp }
+// etc.
+```
+
+**Callback adapter** — auto-dispatches by event type:
+```typescript
+// like.type?.(...args) for direct handlers
+like.keypressed = (scancode, keycode) => { ... };
+
+// like.handleEvent for pre-processing — return value feeds into the type handler
+like.handleEvent = (event) => {
+  if (event.type === 'update') return { ...event, args: [event.args[0] * timeScale] };
+  return event;
+};
+```
+
+**Scene adapter** — same shape, swappable object:
+```typescript
+const scene: Scene = {
+  update(dt) { ... },                          // direct: scene.update(...event.args)
+  keypressed(scancode, keycode) { ... },       // direct: scene.keypressed(...event.args)
+  handleEvent(event) { ... },                  // OR use switch-case on event.type
+};
+runner.setScene(scene);                        // swap at any time
+```
+
+Scene implementors choose: `myScene.someEvent` for direct handling, or `myScene.handleEvent` with a switch-case for unified processing. Both can coexist — `handleEvent` runs first, then the direct handler if the event wasn't consumed.
+
+**Implementation changes:**
+- [ ] Engine: add `onEvent` callback to `start()`, dispatch all events through it (lifecycle + input + actions)
+- [ ] Engine: remove `onKey()`, `onMouse()`, `onGamepad()` — engine owns input listening
+- [ ] Engine: remove separate `update`/`draw` callbacks from `start()`
+- [ ] Events: define unified `Like2DEvent` discriminated union with `{ type, args, timestamp }`
+- [ ] Callback adapter: implement `like[type]?.(...args)` dispatch + `handleEvent` pre-processing
+- [ ] Scene adapter: implement same dispatch over scene object + `handleEvent` first
+- [ ] Update both demos to new API
+
+### 7. Release
+- [ ] Tag `v2.0.0`
+- [ ] Publish to JSR
 
 ---
 
@@ -80,11 +151,10 @@ Use `calcFixedScale()` helper to implement scaled rendering in native mode.
 
 All modes preserve aspect ratio with letterboxing (no stretch/crop).
 
-## Publishing Preparation
-- [ ] Add JSR configuration (`jsr.json`)
-- [ ] Set up GitHub Actions for publishing
+## After V2
+
+### Publishing Preparation
 - [ ] Configure GitHub Pages deployment for website
-- [ ] Add LICENSE file to packages/like2d
 
 ### Website work
 
