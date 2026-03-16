@@ -1,6 +1,6 @@
 {
   "name": "like2d",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "A web-native game framework inspired by Love2D",
   "type": "module",
   "main": "./dist/index.js",

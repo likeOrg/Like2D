@@ -35,7 +35,7 @@ like.keypressed = (scancode, keycode) => {
 // Start the game
 const container = document.getElementById('game-container');
 await like.init(container);
-like.setMode({ type: 'fixed', size: [800, 600] });
+like.setMode({ pixelResolution: [800, 600] });
 ```
 
 ## Available Callbacks
@@ -88,7 +88,7 @@ Set the canvas display mode. Mode is partial - only specified fields are updated
 
 ```typescript
 // Set resolution
-like.setMode({ type: 'fixed', size: [800, 600] });
+like.setMode({ pixelResolution: [800, 600] });
 
 // Toggle fullscreen (preserves other settings)
 like.setMode({ fullscreen: true });

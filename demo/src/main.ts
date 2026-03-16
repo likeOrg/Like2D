@@ -27,13 +27,13 @@ const player = {
 
 // Scaling mode cycling
 const scalingModes: CanvasMode[] = [
-  { type: 'fixed', size: [320, 320], pixelArt: true },  // Default: Pixel art mode
-  { type: 'fixed', size: [800, 300] },  // Wide fixed
-  { type: 'fixed', size: [240, 320] },  // Portrait fixed
-  { type: 'native' },                          // Native
+  { pixelResolution: [320, 320], fullscreen: false },  // Default: Pixel art mode
+  { pixelResolution: [800, 300], fullscreen: false },  // Wide pixel
+  { pixelResolution: [240, 320], fullscreen: false },  // Portrait pixel
+  { pixelResolution: null, fullscreen: false },        // Native
 ];
 let currentScalingIndex = 0;
-let scalingModeName = 'Fixed 480x320 (Pixel Art)';
+let scalingModeName = 'Pixel 320x320';
 
 const demoScene: Scene = {
   load: () => {
@@ -448,9 +448,8 @@ if (fullscreenBtn) {
   });
 }
 
-// Start with a startup scene that transitions to the demo on click
+// Start with a startup screen in native mode for crisp text/logo rendering
 // This defeats browser autoplay restrictions for audio
-const startupScene = new StartupScene(graphics, { nextScene: demoScene }, () => {
-  runner.setScene(demoScene);
-});
+runner.setMode({ pixelResolution: null, fullscreen: false });
+const startupScene = new StartupScene(graphics, { nextScene: demoScene }, runner.setScene.bind(runner));
 await runner.start(startupScene);

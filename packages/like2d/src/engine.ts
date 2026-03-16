@@ -40,7 +40,7 @@ export class Engine {
 
     this.container = container;
     this.container.appendChild(this.canvas);
-    this.canvasManager = new CanvasManager(this.canvas, this.container, this.ctx, { type: 'native', fullscreen: false });
+    this.canvasManager = new CanvasManager(this.canvas, this.container, this.ctx, { pixelResolution: null, fullscreen: false });
 
     // Internal listener to forward to onEvent
     this.canvasManager.onResize = (size, pixelSize, fullscreen) => {

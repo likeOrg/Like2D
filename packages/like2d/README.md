@@ -12,7 +12,7 @@ Like2D is a thin, performant wrapper around the browser's Canvas and Web Audio A
 - **Stateless Graphics:** No more `ctx.save()` and `ctx.restore()` for colors and transforms.
 - **Fire-and-forget Assets:** Synchronous handles for images and audio that load in the background.
 - **Unified Input:** Normalized keyboard, mouse, and gamepad support with action mapping.
-- **Scaling Modes:** Built-in support for "fixed" resolution with pixel-perfect stretching.
+- **Scaling Modes:** Built-in support for "pixel" resolution with pixel-perfect scaling.
 - **Flexible Patterns:** Use Love2D-style global callbacks or class-based scenes.
 
 ## Installation
@@ -33,7 +33,7 @@ Ideal for small games, jams, or prototyping.
 import { love, graphics, input } from 'like2d/callback';
 
 love.load = () => {
-  love.setMode({ type: 'fixed', size: [800, 600] });
+  love.setMode({ pixelResolution: [800, 600] });
   input.map('jump', ['Space', 'ButtonBottom']);
 };
 

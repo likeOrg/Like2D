@@ -25,7 +25,7 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="0.86565679"
-     inkscape:cx="542.36275"
+     inkscape:cx="542.94035"
      inkscape:cy="116.09682"
      inkscape:window-width="1864"
      inkscape:window-height="1163"
@@ -60,73 +60,73 @@
        width="280"
        height="83.543648"
        x="10.000002"
-       y="11.229642" />
+       y="14.404639" />
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect7"
        width="52.516361"
        height="46.237232"
        x="97.483658"
-       y="11.229642" />
+       y="14.404639" />
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.999998;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect7-0"
        width="35.010902"
        height="46.237232"
        x="150"
-       y="11.229642" />
+       y="14.404639" />
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect7-0-4"
        width="52.516361"
        height="46.237232"
        x="185.01091"
-       y="11.229642" />
+       y="14.404639" />
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect7-9"
        width="52.516361"
        height="46.237232"
        x="237.52722"
-       y="11.229642" />
+       y="14.404639" />
     <rect
        style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect8"
        width="17.505455"
        height="27.460892"
        x="132.49457"
-       y="11.229642" />
+       y="14.404639" />
     <rect
        style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect9"
        width="8.7527285"
        height="18.776356"
        x="150"
-       y="29.302338" />
+       y="32.477341" />
     <rect
        style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:1;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect9-0"
        width="8.7527285"
        height="18.776356"
        x="176.25818"
-       y="29.302357" />
+       y="32.47736" />
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.999998;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect11"
        width="17.505453"
        height="8.6845322"
        x="150"
-       y="11.229642" />
+       y="14.404639" />
     <rect
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.999998;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect11-4"
        width="17.505453"
        height="8.6845322"
        x="167.50545"
-       y="11.229642" />
+       y="14.404639" />
     <path
        style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999998;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-       d="m 237.52727,38.690533 -17.50544,-9.388181 v 0 l 17.50544,-18.072708 z"
+       d="m 237.52727,41.865535 -17.50544,-9.388181 v 0 l 17.50544,-18.072708 z"
        id="path11"
        sodipodi:nodetypes="ccccc" />
     <rect
@@ -135,54 +135,54 @@
        width="16.771759"
        height="9.388155"
        x="202.88322"
-       y="48.07869" />
+       y="51.253693" />
     <rect
        style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999998;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect12-9-9"
        width="16.771759"
        height="9.388155"
        x="272.53812"
-       y="20.266006" />
+       y="23.44101" />
     <rect
        style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999998;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
        id="rect12-9-9-9"
        width="16.771759"
        height="9.388155"
        x="272.53812"
-       y="38.69054" />
+       y="41.865543" />
     <path
        style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.999998;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-       d="m 202.51637,29.302352 0.36685,-18.072708 h 17.13859 z"
+       d="m 202.51637,32.477354 0.36685,-18.072708 h 17.13859 z"
        id="path12" />
     <path
        id="rect3"
        style="fill:#80c3e4;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
-       d="m 64.077715,1.0041568 -33.374839,33.3748322 -0.01743,0.0174 a 23.611767,23.611767 0 0 0 0,33.392271 23.611767,23.611767 0 0 0 30.012041,2.802217 23.611767,23.611767 0 0 1 0.007,0.570339 23.611767,23.611767 0 0 1 -23.612067,23.612061 h 53.96995 a 23.611767,23.611767 0 0 1 -23.611369,-23.612061 23.611767,23.611767 0 0 1 0.007,-0.570339 23.611767,23.611767 0 0 0 30.012033,-2.802919 23.611767,23.611767 0 0 0 -6.88e-4,-33.392257 z" />
+       d="m 64.077715,4.179157 -33.374839,33.374834 -0.01743,0.0174 a 23.611767,23.611767 0 0 0 0,33.392271 23.611767,23.611767 0 0 0 30.012041,2.802217 23.611767,23.611767 0 0 1 0.007,0.570339 23.611767,23.611767 0 0 1 -23.612067,23.612061 h 53.96995 a 23.611767,23.611767 0 0 1 -23.611369,-23.612061 23.611767,23.611767 0 0 1 0.007,-0.570339 23.611767,23.611767 0 0 0 30.012033,-2.802919 23.611767,23.611767 0 0 0 -6.88e-4,-33.392257 z" />
     <circle
        style="fill:none;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"
        id="path1"
-       cx="-20.988014"
-       cy="-93.243469"
+       cx="-18.742947"
+       cy="-95.488525"
        r="23.611769"
        transform="rotate(135)" />
     <circle
        style="fill:none;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"
        id="path1-8"
-       cx="2.6237588"
-       cy="-69.631683"
+       cx="4.8688235"
+       cy="-71.87674"
        r="23.611769"
        transform="rotate(135)" />
     <circle
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"
        id="path1-8-2"
        cx="91.062447"
-       cy="71.161194"
+       cy="74.336197"
        r="23.611767" />
     <circle
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.5;stroke-dasharray:none;stroke-opacity:1"
        id="path1-8-2-3"
        cx="37.092701"
-       cy="71.161194"
+       cy="74.336197"
        r="23.611767" />
   </g>
 </svg>

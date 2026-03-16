@@ -38,7 +38,7 @@ class MyScene implements Scene {
 
 // Create runner and start
 const runner = new SceneRunner(document.body);
-runner.setMode({ type: 'fixed', size: [800, 600] });
+runner.setMode({ pixelResolution: [800, 600] });
 await runner.start(new MyScene());
 ```
 
@@ -146,6 +146,6 @@ class GameScene implements Scene {
 }
 
 const runner = new SceneRunner(document.body);
-runner.setMode({ type: 'fixed', size: [800, 600] });
+runner.setMode({ pixelResolution: [800, 600] });
 await runner.start(new MenuScene());
 ```

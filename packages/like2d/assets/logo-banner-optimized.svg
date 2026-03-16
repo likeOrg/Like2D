@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="300mm" height="105mm" version="1.1" viewBox="0 0 300 105" xmlns="http://www.w3.org/2000/svg">
+ <rect x="10" y="11.23" width="280" height="83.544" fill="#e48080" stroke="#000" stroke-linejoin="round" stroke-width="2"/>
+ <g fill="none" stroke="#000" stroke-linejoin="round">
+  <rect x="97.484" y="11.23" width="52.516" height="46.237"/>
+  <rect x="150" y="11.23" width="35.011" height="46.237"/>
+  <rect x="185.01" y="11.23" width="52.516" height="46.237"/>
+  <rect x="237.53" y="11.23" width="52.516" height="46.237"/>
+ </g>
+ <g>
+  <rect x="132.49" y="11.23" width="17.505" height="27.461"/>
+  <rect x="150" y="29.302" width="8.7527" height="18.776"/>
+  <rect x="176.26" y="29.302" width="8.7527" height="18.776"/>
+ </g>
+ <rect x="150" y="11.23" width="17.505" height="8.6845" fill="none" stroke="#000" stroke-linejoin="round"/>
+ <rect x="167.51" y="11.23" width="17.505" height="8.6845" fill="none" stroke="#000" stroke-linejoin="round"/>
+ <g>
+  <path d="m237.53 38.691-17.505-9.3882 17.505-18.073z"/>
+  <rect x="202.88" y="48.079" width="16.772" height="9.3882"/>
+  <rect x="272.54" y="20.266" width="16.772" height="9.3882"/>
+  <rect x="272.54" y="38.691" width="16.772" height="9.3882"/>
+  <path d="m202.52 29.302 0.36685-18.073h17.139z"/>
+ </g>
+ <path d="m64.078 1.0042-33.375 33.375-0.01743 0.0174a23.612 23.612 0 0 0 0 33.392 23.612 23.612 0 0 0 30.012 2.8022 23.612 23.612 0 0 1 7e-3 0.57034 23.612 23.612 0 0 1-23.612 23.612h53.97a23.612 23.612 0 0 1-23.611-23.612 23.612 23.612 0 0 1 7e-3 -0.57034 23.612 23.612 0 0 0 30.012-2.8029 23.612 23.612 0 0 0-6.88e-4 -33.392z" fill="#80c3e4" stroke="#000" stroke-linejoin="round"/>
+ <g fill="none" stroke="#000" stroke-width=".5">
+  <circle transform="rotate(135)" cx="-20.988" cy="-93.243" r="23.612"/>
+  <circle transform="rotate(135)" cx="2.6238" cy="-69.632" r="23.612"/>
+  <circle cx="91.062" cy="71.161" r="23.612"/>
+  <circle cx="37.093" cy="71.161" r="23.612"/>
+ </g>
+</svg>

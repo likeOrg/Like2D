@@ -20,8 +20,8 @@ function centerElement(el: HTMLElement): void {
 
 export class CanvasManager {
   private resizeObserver: ResizeObserver | null = null;
-  private pixelArtCanvas: HTMLCanvasElement | null = null;
-  private pixelArtCtx: CanvasRenderingContext2D | null = null;
+  private pixelCanvas: HTMLCanvasElement | null = null;
+  private pixelCtx: CanvasRenderingContext2D | null = null;
 
   private onWindowResize = () => this.applyConfig();
 
@@ -31,7 +31,7 @@ export class CanvasManager {
     private canvas: HTMLCanvasElement,
     private container: HTMLElement,
     private ctx: CanvasRenderingContext2D,
-    private config: CanvasMode = { type: 'native', fullscreen: false }
+    private config: CanvasMode = { pixelResolution: null, fullscreen: false }
   ) {
     this.resizeObserver = new ResizeObserver(() => this.applyConfig());
     this.resizeObserver.observe(this.container);
@@ -64,62 +64,50 @@ export class CanvasManager {
       ? [document.fullscreenElement.clientWidth, document.fullscreenElement.clientHeight]
       : [this.container.clientWidth, this.container.clientHeight];
 
-    // Always clean up pixel art canvas first
-    if (this.pixelArtCanvas) {
-      this.pixelArtCanvas.remove();
-      this.pixelArtCanvas = null;
-      this.pixelArtCtx = null;
+    // Always clean up pixel canvas first
+    if (this.pixelCanvas) {
+      this.pixelCanvas.remove();
+      this.pixelCanvas = null;
+      this.pixelCtx = null;
     }
 
-    switch (this.config.type) {
-      case 'fixed':
-        this.applyFixedMode(containerSize);
-        break;
-      case 'native':
-        this.applyNativeMode(containerSize);
-        break;
+    if (this.config.pixelResolution) {
+      this.applyPixelMode(containerSize);
+    } else {
+      this.applyNativeMode(containerSize);
     }
 
-    const displayCanvas = this.pixelArtCanvas ?? this.canvas;
+    const displayCanvas = this.pixelCanvas ?? this.canvas;
 
     this.onResize?.(
       containerSize,
       [displayCanvas.width, displayCanvas.height] as Vector2,
-      this.config.fullscreen ?? false
+      this.config.fullscreen
     );
   }
 
-  private applyFixedMode(csize: Vector2): void {
-    const { size: gameSize, pixelArt } = this.config as { type: 'fixed'; size: Vector2; pixelArt?: boolean };
+  private applyPixelMode(csize: Vector2): void {
+    const gameSize = this.config.pixelResolution!;
     const pixelRatio = window.devicePixelRatio || 1;
     const scale = Math.min(csize[0] / gameSize[0], csize[1] / gameSize[1]);
 
-    if (pixelArt) {
-      const physicalScale = scale * pixelRatio;
-      const intScale = Math.max(1, Math.floor(physicalScale));
+    const physicalScale = scale * pixelRatio;
+    const intScale = Math.max(1, Math.floor(physicalScale));
 
-      this.pixelArtCanvas = document.createElement('canvas');
-      this.pixelArtCtx = this.pixelArtCanvas.getContext('2d');
+    this.pixelCanvas = document.createElement('canvas');
+    this.pixelCtx = this.pixelCanvas.getContext('2d');
 
-      setCanvasSize(this.pixelArtCanvas, Vec2.mul(gameSize, intScale));
-      setCanvasSize(this.canvas, gameSize);
-      this.canvas.style.display = 'none';
+    setCanvasSize(this.pixelCanvas, Vec2.mul(gameSize, intScale));
+    setCanvasSize(this.canvas, gameSize);
+    this.canvas.style.display = 'none';
 
-      const pac = this.pixelArtCanvas;
-      setCanvasDisplaySize(pac, Vec2.mul(gameSize, scale));
-      pac.style.maxWidth = '100%';
-      pac.style.maxHeight = '100%';
-      pac.style.imageRendering = 'auto';
-      centerElement(pac);
-      this.container.appendChild(pac);
-    } else {
-      setCanvasSize(this.canvas, gameSize);
-      this.canvas.style.display = 'block';
-      setCanvasDisplaySize(this.canvas, Vec2.mul(gameSize, scale));
-      this.canvas.style.imageRendering = pixelArt ? 'pixelated' : 'auto';
-      this.ctx.imageSmoothingEnabled = !pixelArt;
-      centerElement(this.canvas);
-    }
+    const pc = this.pixelCanvas;
+    setCanvasDisplaySize(pc, Vec2.mul(gameSize, scale));
+    pc.style.maxWidth = '100%';
+    pc.style.maxHeight = '100%';
+    pc.style.imageRendering = 'auto';
+    centerElement(pc);
+    this.container.appendChild(pc);
   }
 
   private applyNativeMode(csize: Vector2): void {
@@ -143,26 +131,26 @@ export class CanvasManager {
   dispose(): void {
     this.resizeObserver?.disconnect();
     window.removeEventListener('resize', this.onWindowResize);
-    this.pixelArtCanvas?.remove();
-    this.pixelArtCanvas = null;
-    this.pixelArtCtx = null;
+    this.pixelCanvas?.remove();
+    this.pixelCanvas = null;
+    this.pixelCtx = null;
   }
 
   present(): void {
-    if (!this.pixelArtCtx || !this.pixelArtCanvas) {
+    if (!this.pixelCtx || !this.pixelCanvas) {
       return;
     }
 
-    this.pixelArtCtx.imageSmoothingEnabled = false;
-    this.pixelArtCtx.drawImage(
+    this.pixelCtx.imageSmoothingEnabled = false;
+    this.pixelCtx.drawImage(
       this.canvas,
       0, 0, this.canvas.width, this.canvas.height,
-      0, 0, this.pixelArtCanvas.width, this.pixelArtCanvas.height
+      0, 0, this.pixelCanvas.width, this.pixelCanvas.height
     );
   }
 
   getDisplayCanvas(): HTMLCanvasElement {
-    return this.pixelArtCanvas ?? this.canvas;
+    return this.pixelCanvas ?? this.canvas;
   }
 
   transformMousePosition(cssX: number, cssY: number): Vector2 {
@@ -170,21 +158,16 @@ export class CanvasManager {
     const rect = displayCanvas.getBoundingClientRect();
     const relative: Vector2 = [cssX - rect.left, cssY - rect.top];
 
-    switch (this.config.type) {
-      case 'fixed': {
-        // In fixed mode: CSS position (as fraction of CSS size) × game size = game position
-        const { size: gameSize } = this.config as { type: 'fixed'; size: Vector2 };
-        return Vec2.mul(relative, [gameSize[0] / rect.width, gameSize[1] / rect.height]);
-      }
-
-      case 'native':
-      default: {
-        // In native mode, canvas fills the container completely at position 0,0
-        // Mouse coordinates should be relative to the canvas, accounting for the fact
-        // that the canvas internal pixel size != CSS size
-        const pixelRatio = window.devicePixelRatio || 1;
-        return Vec2.mul(relative, pixelRatio);
-      }
+    if (this.config.pixelResolution) {
+      // In pixel mode: CSS position (as fraction of CSS size) × game size = game position
+      const gameSize = this.config.pixelResolution;
+      return Vec2.mul(relative, [gameSize[0] / rect.width, gameSize[1] / rect.height]);
+    } else {
+      // In native mode, canvas fills the container completely at position 0,0
+      // Mouse coordinates should be relative to the canvas, accounting for the fact
+      // that the canvas internal pixel size != CSS size
+      const pixelRatio = window.devicePixelRatio || 1;
+      return Vec2.mul(relative, pixelRatio);
     }
   }
 }
