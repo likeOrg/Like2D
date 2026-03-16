@@ -106,7 +106,7 @@ export class SceneRunner {
           this.currentScene.update(event.dt);
           break;
         case 'draw':
-          this.currentScene.draw();
+          this.currentScene.draw(this.engine.getCanvas());
           break;
         default:
           this.currentScene.handleEvent?.(event);

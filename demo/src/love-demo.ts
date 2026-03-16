@@ -68,7 +68,7 @@ love.update = (dt: number) => {
 };
 
 // Love2D-style draw callback - called every frame
-love.draw = () => {
+love.draw = (canvas) => {
   const canvasSize = graphics.getCanvasSize();
   const center = V2.mul(canvasSize, 0.5);
   const [canvasWidth, canvasHeight] = canvasSize;
@@ -119,53 +119,14 @@ love.draw = () => {
   // Draw outlined polygon
   graphics.polygon('line', 'orange', [[600, 100], [650, 150], [600, 200], [550, 150]]);
   
-  // Demo coordinate transformations
-  const ctx = graphics.getContext();
-  ctx.save();
-  ctx.translate(center[0], 300);
-  ctx.rotate(rotation);
-  graphics.rectangle('fill', 'dodgerblue', R.create(-40, -40, 80, 80));
-  ctx.restore();
-  
   // Draw images if loaded (draw() skips silently if not ready)
-  if (pepperImage) {
+  if (pepperImage && pepperImage.isReady()) {
+    const [imgWidth, imgHeight] = pepperImage.size;
+    
     graphics.draw(pepperImage, [650, 350]);
     
     // Draw scaled down image
     graphics.draw(pepperImage, [650, 350], { scale: 0.5 });
-  }
-  
-  // Draw rotated image (using handle if available)
-  if (pepperImage && pepperImage.isReady()) {
-    const [imgWidth, imgHeight] = pepperImage.size;
-    
-    ctx.save();
-    ctx.translate(200, 400);
-    ctx.rotate(rotation * 0.5);
-    graphics.draw(pepperImage, [0, 0], { 
-      scale: 0.4, 
-      origin: [imgWidth / 2, imgHeight / 2] 
-    });
-    ctx.restore();
-    
-    // Draw image quad (sub-region) - just the center portion
-    ctx.save();
-    ctx.translate(400, 400);
-    ctx.rotate(-rotation * 0.3);
-    graphics.draw(
-      pepperImage,
-      [0, 0],
-      {
-        quad: [
-          imgWidth * 0.25, 
-          imgHeight * 0.25, 
-          imgWidth * 0.5, 
-          imgHeight * 0.5 
-        ],
-        scale: 1.2
-      }
-    );
-    ctx.restore();
     
     // Image info
     graphics.print('lightgray', `Image: ${imgWidth}x${imgHeight}`, [20, 80], { 

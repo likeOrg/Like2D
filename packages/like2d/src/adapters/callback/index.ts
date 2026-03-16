@@ -32,7 +32,13 @@ export let input: Input;
 export const like = {
   load: undefined as (() => void) | undefined,
   update: undefined as ((dt: number) => void) | undefined,
-  draw: undefined as (() => void) | undefined,
+  /**
+   * Draw callback. Called every frame.
+   * @param canvas - The current canvas element. WARNING: Do not save this reference!
+   * The canvas can change (e.g., when switching scaling modes or entering fullscreen),
+   * so always use the passed canvas parameter rather than storing it.
+   */
+  draw: undefined as ((canvas: HTMLCanvasElement) => void) | undefined,
   keypressed: undefined as ((scancode: string, keycode: string) => void) | undefined,
   keyreleased: undefined as ((scancode: string, keycode: string) => void) | undefined,
   mousepressed: undefined as ((x: number, y: number, button: number) => void) | undefined,
@@ -113,7 +119,7 @@ export const like = {
           this.update?.(event.dt);
           break;
         case 'draw':
-          this.draw?.();
+          this.draw?.(engine!.getCanvas());
           break;
         case 'keypressed':
           this.keypressed?.(event.scancode, event.keycode);

@@ -172,7 +172,7 @@ const demoScene: Scene = {
     }
   },
 
-  draw: () => {
+  draw: (canvas) => {
     const canvasSize = graphics.getCanvasSize();
     const center = V2.mul(canvasSize, 0.5);
     const [canvasWidth, canvasHeight] = canvasSize;
@@ -228,53 +228,14 @@ const demoScene: Scene = {
     // Draw outlined polygon
     graphics.polygon('line', 'orange', [[430, 100], [460, 150], [430, 200], [400, 150]]);
     
-    // Demo coordinate transformations
-    const ctx = graphics.getContext();
-    ctx.save();
-    ctx.translate(center[0], center[1]);
-    ctx.rotate(rotation);
-    graphics.rectangle('fill', 'dodgerblue', R.create(-40, -40, 80, 80));
-    ctx.restore();
-    
     // Draw images if loaded (draw() skips silently if not ready)
-    if (pepperImage) {
+    if (pepperImage && pepperImage.isReady()) {
+      const [imgWidth, imgHeight] = pepperImage.size;
+      
       graphics.draw(pepperImage, [380, 220]);
       
       // Draw scaled down image
       graphics.draw(pepperImage, [420, 220], { scale: 0.5 });
-    }
-    
-    // Draw rotated image (using handle if available)
-    if (pepperImage && pepperImage.isReady()) {
-      const [imgWidth, imgHeight] = pepperImage.size;
-      
-      ctx.save();
-      ctx.translate(120, 250);
-      ctx.rotate(rotation * 0.5);
-      graphics.draw(pepperImage, [0, 0], { 
-        scale: 0.3, 
-        origin: [imgWidth / 2, imgHeight / 2] 
-      });
-      ctx.restore();
-      
-      // Draw image quad (sub-region) - just the center portion
-      ctx.save();
-      ctx.translate(280, 250);
-      ctx.rotate(-rotation * 0.3);
-      graphics.draw(
-        pepperImage,
-        [0, 0],
-        {
-          quad: [
-            imgWidth * 0.25, 
-            imgHeight * 0.25, 
-            imgWidth * 0.5, 
-            imgHeight * 0.5 
-          ],
-          scale: 0.8
-        }
-      );
-      ctx.restore();
       
       // Image info
       graphics.print('lightgray', `Image: ${imgWidth}x${imgHeight}`, [20, 80], { 

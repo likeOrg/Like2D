@@ -290,15 +290,6 @@ export class Graphics {
     return [width, height];
   }
 
-  /**
-   * Get the current canvas rendering context.
-   * Use this to access raw canvas API methods like ctx.save(), ctx.restore(),
-   * ctx.translate(), ctx.rotate(), ctx.scale(), ctx.setTransform(), etc.
-   */
-  getContext(): CanvasRenderingContext2D {
-    return this.ctx;
-  }
-
   newCanvas(size: Vector2): Canvas {
     const [width, height] = size;
     const element = document.createElement('canvas');
