@@ -1,5 +1,9 @@
 # LÏKE2D
 
+<p align="center">
+  <img src="packages/like2d/assets/logo.svg" alt="Like2D Logo" width="150">
+</p>
+
 Want to make a 2D browser game? Well like, do it!
 
 LIKE is in the same family as LÖVE or Raylib, but only for web.
