@@ -1,28 +1,25 @@
 import type { CanvasConfig } from './canvas-config';
+import { V2, type Vector2 } from './vector2';
 
 export class CanvasManager {
-  private canvas: HTMLCanvasElement;
-  private container: HTMLElement;
-  private ctx: CanvasRenderingContext2D;
-  private config: CanvasConfig;
   private resizeObserver: ResizeObserver | null = null;
+  private pixelArtCanvas: HTMLCanvasElement | null = null;
+  private pixelArtCtx: CanvasRenderingContext2D | null = null;
 
   constructor(
-    canvas: HTMLCanvasElement,
-    container: HTMLElement,
-    ctx: CanvasRenderingContext2D,
-    config: CanvasConfig = { mode: 'native' }
+    private canvas: HTMLCanvasElement,
+    private container: HTMLElement,
+    private ctx: CanvasRenderingContext2D,
+    private config: CanvasConfig = { mode: 'native' }
   ) {
-    this.canvas = canvas;
-    this.container = container;
-    this.ctx = ctx;
-    this.config = config;
-
     this.setupResizeObserver();
     this.applyConfig();
   }
 
   setConfig(config: CanvasConfig): void {
+    if (this.isPixelArtMode(this.config) && !this.isPixelArtMode(config)) {
+      this.removePixelArtCanvas();
+    }
     this.config = config;
     this.applyConfig();
   }
@@ -31,137 +28,151 @@ export class CanvasManager {
     return { ...this.config };
   }
 
+  private isPixelArtMode(config: CanvasConfig): boolean {
+    return config.mode === 'fixed' && !!(config as { pixelArt?: boolean }).pixelArt;
+  }
+
+  private removePixelArtCanvas(): void {
+    if (this.pixelArtCanvas?.parentElement) {
+      this.pixelArtCanvas.parentElement.removeChild(this.pixelArtCanvas);
+    }
+  }
+
   private setupResizeObserver(): void {
-    this.resizeObserver = new ResizeObserver(() => {
-      this.applyConfig();
-    });
+    this.resizeObserver = new ResizeObserver(() => this.applyConfig());
     this.resizeObserver.observe(this.container);
   }
 
+  private getScale(container: Vector2, game: Vector2): number {
+    return Math.min(container[0] / game[0], container[1] / game[1]);
+  }
+
   private applyConfig(): void {
-    const rect = this.container.getBoundingClientRect();
-    const containerWidth = rect.width;
-    const containerHeight = rect.height;
+    // Use screen size when in fullscreen, otherwise use container size
+    const containerSize: Vector2 = document.fullscreenElement
+      ? [window.screen.width, window.screen.height]
+      : [this.container.getBoundingClientRect().width, this.container.getBoundingClientRect().height];
 
     switch (this.config.mode) {
       case 'fixed':
-        this.applyFixedMode(containerWidth, containerHeight);
+        this.applyFixedMode(containerSize);
         break;
       case 'scaled':
-        this.applyScaledMode(containerWidth, containerHeight);
+        this.applyScaledOrNativeMode('scaled', containerSize);
         break;
       case 'native':
-        this.applyNativeMode(containerWidth, containerHeight);
+        this.applyScaledOrNativeMode('native', containerSize);
         break;
     }
   }
 
-  private applyFixedMode(containerWidth: number, containerHeight: number): void {
-    const { width: gameWidth, height: gameHeight, pixelArt } = this.config as { mode: 'fixed'; width: number; height: number; pixelArt?: boolean };
+  private applyFixedMode(csize: Vector2): void {
+    const { size: gameSize, pixelArt } = this.config as { mode: 'fixed'; size: Vector2; pixelArt?: boolean };
+    const scale = this.getScale(csize, gameSize);
 
-    // Set internal resolution
-    this.canvas.width = gameWidth;
-    this.canvas.height = gameHeight;
-
-    // Calculate scale to fit while preserving aspect ratio
-    const scaleX = containerWidth / gameWidth;
-    const scaleY = containerHeight / gameHeight;
-    const scale = Math.min(scaleX, scaleY);
-
-    // For pixel art: use two-step scaling
-    // Step 1: sharp integer scaling to largest integer multiple
-    // Step 2: linear scaling for the remainder
     if (pixelArt && scale > 1) {
-      const integerScale = Math.floor(scale);
-      const cssScale = scale / integerScale;
+      const intScale = Math.floor(scale);
+      const cssScale = scale / intScale;
+
+      if (!this.pixelArtCanvas) {
+        this.pixelArtCanvas = document.createElement('canvas');
+        this.pixelArtCtx = this.pixelArtCanvas.getContext('2d');
+      }
+
+      const pacSize = V2.mul(gameSize, intScale);
+      this.pixelArtCanvas.width = pacSize[0];
+      this.pixelArtCanvas.height = pacSize[1];
+
+      this.canvas.width = gameSize[0];
+      this.canvas.height = gameSize[1];
+      this.canvas.style.display = 'none';
+
+      const pac = this.pixelArtCanvas;
+      let displaySize = V2.mul(pacSize, cssScale);
       
-      // Create an offscreen canvas for the sharp-scaled version
-      const sharpCanvas = document.createElement('canvas');
-      sharpCanvas.width = gameWidth * integerScale;
-      sharpCanvas.height = gameHeight * integerScale;
-      const sharpCtx = sharpCanvas.getContext('2d')!;
-      sharpCtx.imageSmoothingEnabled = false;
+      // Ensure it fits within container (prevents overflow/cropping)
+      displaySize = V2.min(displaySize, csize);
       
-      // Draw the main canvas to sharp canvas at integer scale
-      sharpCtx.drawImage(this.canvas, 0, 0, sharpCanvas.width, sharpCanvas.height);
-      
-      // Now apply CSS scaling with linear interpolation for the fractional part
-      this.canvas.style.width = `${sharpCanvas.width * cssScale}px`;
-      this.canvas.style.height = `${sharpCanvas.height * cssScale}px`;
-      this.canvas.style.imageRendering = 'auto';
+      pac.style.width = `${displaySize[0]}px`;
+      pac.style.height = `${displaySize[1]}px`;
+      pac.style.maxWidth = '100%';
+      pac.style.maxHeight = '100%';
+      pac.style.imageRendering = 'auto';
+      this.centerElement(pac);
+
+      if (pac.parentElement !== this.container) {
+        this.container.appendChild(pac);
+      }
     } else {
-      // Regular scaling
-      this.canvas.style.width = `${gameWidth * scale}px`;
-      this.canvas.style.height = `${gameHeight * scale}px`;
+      this.removePixelArtCanvas();
+      this.canvas.width = gameSize[0];
+      this.canvas.height = gameSize[1];
+      this.canvas.style.display = 'block';
+      const displaySize = V2.mul(gameSize, scale);
+      this.canvas.style.width = `${displaySize[0]}px`;
+      this.canvas.style.height = `${displaySize[1]}px`;
       this.canvas.style.imageRendering = pixelArt ? 'pixelated' : 'auto';
+      this.ctx.imageSmoothingEnabled = !pixelArt;
+      this.centerElement(this.canvas);
     }
+  }
 
-    // Center the canvas
-    this.canvas.style.marginLeft = 'auto';
-    this.canvas.style.marginRight = 'auto';
+  private applyScaledOrNativeMode(mode: 'scaled' | 'native', csize: Vector2): void {
+    this.removePixelArtCanvas();
+    
+    const pixelRatio = window.devicePixelRatio || 1;
+    const gameSize: Vector2 = mode === 'scaled'
+      ? (this.config as { size: Vector2 }).size
+      : csize;
+
+    const canvasSize = V2.mul(csize, pixelRatio);
+    this.canvas.width = Math.floor(canvasSize[0]);
+    this.canvas.height = Math.floor(canvasSize[1]);
+    this.canvas.style.width = `${csize[0]}px`;
+    this.canvas.style.height = `${csize[1]}px`;
+
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.left = '0';
+    this.canvas.style.top = '0';
+    this.canvas.style.transform = 'none';
+    this.canvas.style.margin = '0';
     this.canvas.style.display = 'block';
-    this.canvas.style.position = 'absolute';
-    this.canvas.style.left = '50%';
-    this.canvas.style.top = '50%';
-    this.canvas.style.transform = 'translate(-50%, -50%)';
+    this.canvas.style.imageRendering = 'auto';
+
+    if (mode === 'scaled') {
+      const scale = Math.min(this.canvas.width / gameSize[0], this.canvas.height / gameSize[1]);
+      const scaledGame = V2.mul(gameSize, scale);
+      const offset = V2.mul(V2.sub([this.canvas.width, this.canvas.height], scaledGame), 0.5);
+      this.ctx.setTransform(scale, 0, 0, scale, offset[0], offset[1]);
+    } else {
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
   }
 
-  private applyScaledMode(containerWidth: number, containerHeight: number): void {
-    const { width: gameWidth, height: gameHeight } = this.config as { mode: 'scaled'; width: number; height: number };
-    const pixelRatio = window.devicePixelRatio || 1;
-
-    // Set canvas pixel resolution to match container (with pixel ratio for sharpness)
-    this.canvas.width = Math.floor(containerWidth * pixelRatio);
-    this.canvas.height = Math.floor(containerHeight * pixelRatio);
-
-    // Set CSS size to match container exactly
-    this.canvas.style.width = `${containerWidth}px`;
-    this.canvas.style.height = `${containerHeight}px`;
-    this.canvas.style.position = 'absolute';
-    this.canvas.style.left = '0';
-    this.canvas.style.top = '0';
-    this.canvas.style.transform = 'none';
-    this.canvas.style.margin = '0';
-
-    // Calculate scale to fit game resolution into canvas while preserving aspect ratio
-    const scaleX = this.canvas.width / gameWidth;
-    const scaleY = this.canvas.height / gameHeight;
-    const scale = Math.min(scaleX, scaleY);
-
-    // Center the game area
-    const gameWidthScaled = gameWidth * scale;
-    const gameHeightScaled = gameHeight * scale;
-    const offsetX = (this.canvas.width - gameWidthScaled) / 2;
-    const offsetY = (this.canvas.height - gameHeightScaled) / 2;
-
-    // Apply transform for scaling and centering
-    this.ctx.setTransform(scale, 0, 0, scale, offsetX, offsetY);
-  }
-
-  private applyNativeMode(containerWidth: number, containerHeight: number): void {
-    const pixelRatio = window.devicePixelRatio || 1;
-
-    // Set canvas to match container exactly
-    this.canvas.width = Math.floor(containerWidth * pixelRatio);
-    this.canvas.height = Math.floor(containerHeight * pixelRatio);
-
-    // Set CSS size to match container exactly
-    this.canvas.style.width = `${containerWidth}px`;
-    this.canvas.style.height = `${containerHeight}px`;
-    this.canvas.style.position = 'absolute';
-    this.canvas.style.left = '0';
-    this.canvas.style.top = '0';
-    this.canvas.style.transform = 'none';
-    this.canvas.style.margin = '0';
-
-    // Reset transform
-    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+  private centerElement(el: HTMLElement): void {
+    el.style.position = 'absolute';
+    el.style.left = '50%';
+    el.style.top = '50%';
+    el.style.transform = 'translate(-50%, -50%)';
   }
 
   dispose(): void {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-      this.resizeObserver = null;
+    this.resizeObserver?.disconnect();
+    this.removePixelArtCanvas();
+    this.pixelArtCanvas = null;
+    this.pixelArtCtx = null;
+  }
+
+  present(): void {
+    if (!this.isPixelArtMode(this.config) || !this.pixelArtCanvas || !this.pixelArtCtx) {
+      return;
     }
+
+    this.pixelArtCtx.imageSmoothingEnabled = false;
+    this.pixelArtCtx.drawImage(
+      this.canvas,
+      0, 0, this.canvas.width, this.canvas.height,
+      0, 0, this.pixelArtCanvas.width, this.pixelArtCanvas.height
+    );
   }
 }

@@ -20,7 +20,7 @@ const player = {
 
 // Love2D-style load callback - called once at startup
 love.load = () => {
-  love.setScaling({ mode: 'fixed', width: 800, height: 600 });
+  love.setScaling({ mode: 'fixed', size: [800, 600] });
   // Start loading assets - they return immediately
   pepperImage = graphics.newImage('pepper.png');
   audioSource = audio.newSource('./test.ogg');

@@ -1,4 +1,4 @@
-import { SceneRunner, Scene, Event, V2, R, getGPName, ImageHandle } from "like2d/scene";
+import { SceneRunner, Scene, Event, V2, R, getGPName, ImageHandle, type CanvasConfig } from "like2d/scene";
 import type { Source } from 'like2d';
 
 // Example demonstrating Like2D graphics API with Scene-based architecture
@@ -21,13 +21,24 @@ let sleepStatus = '';
 
 // Player state for movement demo using Vector2
 const player = {
-  pos: [250, 350] as [number, number],
+  pos: [240, 160] as [number, number],
   speed: 200, // pixels per second
 };
 
+// Scaling mode cycling
+const scalingModes: CanvasConfig[] = [
+  { mode: 'fixed', size: [480, 320], pixelArt: true },  // Default: Pixel art mode
+  { mode: 'fixed', size: [800, 300] },  // Wide fixed
+  { mode: 'fixed', size: [240, 320] },  // Portrait fixed
+  { mode: 'scaled', size: [800, 600] }, // Scaled
+  { mode: 'native' },                          // Native
+];
+let currentScalingIndex = 0;
+let scalingModeName = 'Fixed 480x320 (Pixel Art)';
+
 const demoScene: Scene = {
   load: () => {
-    runner.setScaling({ mode: 'fixed', width: 800, height: 600 });
+    runner.setScaling(scalingModes[0]);
     // Start loading assets - they return immediately
     pepperImage = graphics.newImage('pepper.png');
     audioSource = audio.newSource('./test.ogg');
@@ -41,7 +52,7 @@ const demoScene: Scene = {
     
     // Setup input mappings for game actions
     input.map('jump', ['Space', 'ArrowUp', 'KeyW', 'ButtonBottom']);
-    input.map('fire', ['MouseLeft', 'KeyZ', 'RT']);
+    input.map('fire', ['MouseLeft', 'RT']);
     input.map('move_left', ['ArrowLeft', 'KeyA', 'DPLeft']);
     input.map('move_right', ['ArrowRight', 'KeyD', 'DPRight']);
     input.map('move_up', ['ArrowUp', 'KeyW', 'DPUp']);
@@ -75,6 +86,35 @@ const demoScene: Scene = {
 
   handleEvent: async (event: Event) => {
     switch (event.type) {
+      case 'keypressed': {
+        // Cycle scaling modes with Z key
+        if (event.scancode === 'KeyZ') {
+          currentScalingIndex = (currentScalingIndex + 1) % scalingModes.length;
+          const newConfig = scalingModes[currentScalingIndex];
+          runner.setScaling(newConfig);
+          
+          // Update display name
+          switch (currentScalingIndex) {
+            case 0:
+              scalingModeName = 'Fixed 480x320 (Pixel Art)';
+              break;
+            case 1:
+              scalingModeName = 'Fixed 800x300 (Wide)';
+              break;
+            case 2:
+              scalingModeName = 'Fixed 240x320 (Portrait)';
+              break;
+            case 3:
+              scalingModeName = 'Scaled 800x600';
+              break;
+            case 4:
+              scalingModeName = 'Native (No Scaling)';
+              break;
+          }
+          console.log('Scaling mode:', scalingModeName);
+        }
+        break;
+      }
       case 'actionpressed': {
         console.log('Action pressed:', event.action);
 
@@ -146,6 +186,11 @@ const demoScene: Scene = {
       font: '28px sans-serif'
     });
     
+    // Draw current scaling mode
+    graphics.print('yellow', `Scaling: ${scalingModeName} (Press Z to cycle)`, [20, 60], { 
+      font: '14px sans-serif'
+    });
+    
     // Draw FPS and timer info
     const fps = timer.getFPS();
     const delta = timer.getDelta();
@@ -153,16 +198,16 @@ const demoScene: Scene = {
     const elapsedTime = currentTime - gameStartTime;
     const isSleeping = timer.isSleeping();
     
-    graphics.print('lime', `FPS: ${fps}`, [canvasWidth - 100, 30]);
-    graphics.print('lime', `Delta: ${(delta * 1000).toFixed(2)}ms`, [canvasWidth - 160, 50]);
-    graphics.print('lime', `Time: ${elapsedTime.toFixed(1)}s`, [canvasWidth - 160, 70]);
+    graphics.print('lime', `FPS: ${fps}`, [canvasWidth - 80, 30]);
+    graphics.print('lime', `${(delta * 1000).toFixed(1)}ms`, [canvasWidth - 80, 48]);
+    graphics.print('lime', `${elapsedTime.toFixed(1)}s`, [canvasWidth - 80, 66]);
     
     if (isSleeping) {
-      graphics.print('red', 'SLEEPING', [canvasWidth - 160, 90]);
+      graphics.print('red', 'SLEEPING', [canvasWidth - 100, 84]);
     }
     
     if (sleepStatus) {
-      graphics.print('orange', sleepStatus, [20, 580]);
+      graphics.print('orange', sleepStatus, [20, canvasHeight - 140]);
     }
     
     // Draw filled red rectangle
@@ -182,24 +227,24 @@ const demoScene: Scene = {
     graphics.line('gray', [[200, 180], [350, 100], [400, 140]]);
     
     // Draw polygon
-    graphics.polygon('fill', 'magenta', [[500, 100], [550, 150], [500, 200], [450, 150]]);
+    graphics.polygon('fill', 'magenta', [[350, 100], [400, 150], [350, 200], [300, 150]]);
     
     // Draw outlined polygon
-    graphics.polygon('line', 'orange', [[600, 100], [650, 150], [600, 200], [550, 150]]);
+    graphics.polygon('line', 'orange', [[430, 100], [460, 150], [430, 200], [400, 150]]);
     
     // Demo coordinate transformations
     graphics.push();
-    graphics.translate([center[0], 300]);
+    graphics.translate([center[0], center[1]]);
     graphics.rotate(rotation);
     graphics.rectangle('fill', 'dodgerblue', R.create(-40, -40, 80, 80));
     graphics.pop();
     
     // Draw images if loaded (draw() skips silently if not ready)
     if (pepperImage) {
-      graphics.draw(pepperImage, [650, 350]);
+      graphics.draw(pepperImage, [380, 220]);
       
       // Draw scaled down image
-      graphics.draw(pepperImage, [650, 350], { scale: 0.5 });
+      graphics.draw(pepperImage, [420, 220], { scale: 0.5 });
     }
     
     // Draw rotated image (using handle if available)
@@ -207,17 +252,17 @@ const demoScene: Scene = {
       const [imgWidth, imgHeight] = pepperImage.size;
       
       graphics.push();
-      graphics.translate([200, 400]);
+      graphics.translate([120, 250]);
       graphics.rotate(rotation * 0.5);
       graphics.draw(pepperImage, [0, 0], { 
-        scale: 0.4, 
+        scale: 0.3, 
         origin: [imgWidth / 2, imgHeight / 2] 
       });
       graphics.pop();
       
       // Draw image quad (sub-region) - just the center portion
       graphics.push();
-      graphics.translate([400, 400]);
+      graphics.translate([280, 250]);
       graphics.rotate(-rotation * 0.3);
       graphics.draw(
         pepperImage,
@@ -229,7 +274,7 @@ const demoScene: Scene = {
             imgWidth * 0.5, 
             imgHeight * 0.5 
           ],
-          scale: 1.2
+          scale: 0.8
         }
       );
       graphics.pop();
@@ -246,15 +291,15 @@ const demoScene: Scene = {
       const statusText = isPlaying ? 'Playing' : audioSource.isPaused() ? 'Paused' : 'Stopped';
       graphics.print(
         'darkorange',
-        `Audio: ${statusText} (${Math.round(audioSource.tell() * 10) / 10}s / ${Math.round(audioSource.getDuration() * 10) / 10}s)`, 
-        [20, 520], 
-        { font: '18px sans-serif' }
+        `Audio: ${statusText}`, 
+        [20, canvasHeight - 160], 
+        { font: '14px sans-serif' }
       );
     }
     
     // Input action system demo
-    graphics.print('gold', 'Input Actions (mapped):', [canvasWidth - 250, 130], { 
-      font: '16px sans-serif'
+    graphics.print('gold', 'Actions:', [canvasWidth - 120, 130], { 
+      font: '14px sans-serif'
     });
     
     const jumpActive = input.isDown('jump');
@@ -262,14 +307,14 @@ const demoScene: Scene = {
     
     graphics.print(
       jumpActive ? 'lime' : 'gray',
-      `Jump: ${jumpActive ? 'PRESSED' : 'up'}`, 
-      [canvasWidth - 250, 155]
+      `Jump: ${jumpActive ? 'ON' : 'off'}`, 
+      [canvasWidth - 120, 150]
     );
     
     graphics.print(
       fireActive ? 'red' : 'gray',
-      `Fire: ${fireActive ? 'PRESSED' : 'up'}`, 
-      [canvasWidth - 250, 175]
+      `Fire: ${fireActive ? 'ON' : 'off'}`, 
+      [canvasWidth - 120, 168]
     );
     
     // Print instructions

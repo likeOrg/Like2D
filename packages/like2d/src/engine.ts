@@ -155,6 +155,9 @@ export class Engine {
         this.deps!.graphics.clear();
         this.emit({ type: 'draw' });
         if (onDraw) onDraw();
+        
+        // Present frame (handles two-step pixel art scaling if enabled)
+        this.canvasManager.present();
 
         requestAnimationFrame(loop);
       };
@@ -208,7 +211,7 @@ export class Engine {
 
   toggleFullscreen(): void {
     if (!document.fullscreenElement) {
-      this.canvas.requestFullscreen().catch(err => {
+      this.container.requestFullscreen().catch(err => {
         console.error('Error attempting to enable fullscreen:', err);
       });
     } else {
