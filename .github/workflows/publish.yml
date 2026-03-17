@@ -13,14 +13,13 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
           registry-url: 'https://registry.npmjs.org'
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
       
       - name: Install dependencies
         run: pnpm install
@@ -35,7 +34,9 @@ jobs:
         run: pnpm --filter like2d test
       
       - name: Publish to NPM
-        run: npm publish --provenance --access public
+        run: |
+          npm install -g npm@latest
+          npm publish --provenance --access public
         working-directory: like
       
       - name: Publish to JSR
