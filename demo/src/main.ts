@@ -1,5 +1,5 @@
 import { SceneRunner, type Scene, StartupScene } from "like2d/scene";
-import { Vec2, getGPName, newImage, type ImageHandle, type CanvasMode, type Source } from 'like2d';
+import { Vec2, getGPName, type ImageHandle, type CanvasMode, type Source } from 'like2d';
 
 // Example demonstrating Like2D graphics API with Scene-based architecture
 // This uses the SceneRunner class with Scene objects
@@ -39,7 +39,7 @@ const demoScene: Scene = {
     const { audio, timer, input } = like;
     runner.like.setMode(scalingModes[0]);
     // Start loading assets - they return immediately
-    pepperImage = newImage('pepper.png');
+    pepperImage = like.gfx.newImage('pepper.png');
     audioSource = audio.newSource('./test.ogg');
     
     console.log('Game loaded! Assets loading in background...');

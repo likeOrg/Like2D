@@ -13,11 +13,11 @@ Like2D uses **fire-and-forget loading**: request assets and use them immediately
 
 ```typescript
 // In scene.load() - returns immediately
-const playerImage = like.graphics.newImage('player.png');
+const playerImage = like.gfx.newImage('player.png');
 const jumpSound = like.audio.newSource('jump.ogg');
 
 // In scene.draw() - silently skips if not ready
-like.graphics.draw(playerImage, x, y);
+like.gfx.draw(playerImage, x, y);
 
 // In scene.update() - silently returns false if not ready
 jumpSound.play();

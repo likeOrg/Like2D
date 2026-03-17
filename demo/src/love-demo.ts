@@ -1,6 +1,6 @@
 import { createLike } from "like2d/callback";
 import type { Source, Like2DEvent, ImageHandle } from 'like2d';
-import { Vec2, newImage, getGPName } from 'like2d';
+import { Vec2, getGPName } from 'like2d';
 
 // Example demonstrating Like2D with Love2D-style callback API
 // This uses the traditional load/update/draw callback pattern directly
@@ -26,7 +26,7 @@ const like = createLike(container);
 like.load = () => {
   like.setMode({ pixelResolution: [800, 600] });
   // Start loading assets - they return immediately
-  pepperImage = newImage('pepper.png');
+  pepperImage = like.gfx.newImage('pepper.png');
   audioSource = like.audio.newSource('./test.ogg');
   
   console.log('Game loaded! Assets loading in background...');

@@ -6,14 +6,13 @@ Love2D-style callback pattern for Like2D. This adapter provides a familiar, simp
 
 ```typescript
 import { createLike } from 'like2d/callback';
-import { newImage } from 'like2d';
 
 const like = createLike(document.getElementById('game-container'));
 
 let image;
 
 like.load = () => {
-  image = newImage('sprite.png');
+  image = like.gfx.newImage('sprite.png');
 };
 
 like.update = (dt) => {

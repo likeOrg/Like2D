@@ -243,6 +243,10 @@ export function getCanvasSize(s: GraphicsState): Vector2 {
   return [s.currentCtx.canvas.width, s.currentCtx.canvas.height];
 }
 
+export function newImage(_s: GraphicsState, path: string): ImageHandle {
+  return new ImageHandle(path);
+}
+
 export function newCanvas(s: GraphicsState, size: Vector2): Canvas {
   const [w, h] = size;
   const element = document.createElement('canvas');
@@ -296,36 +300,24 @@ export function points(s: GraphicsState, color: Color, pts: Vector2[]): void {
   pts.forEach(([x, y]) => ctx.fillRect(x, y, 1, 1));
 }
 
-export function newImage(path: string): ImageHandle {
-  return new ImageHandle(path);
-}
+
+
+type Bind<F> = F extends (s: GraphicsState, ...args: infer A) => infer R ? (...args: A) => R : never;
 
 export type BoundGraphics = {
-  clear: (color?: Color) => void;
-  rectangle: (mode: DrawMode, color: Color, rect: Rect, props?: ShapeProps) => void;
-  circle: (mode: DrawMode, color: Color, position: Vector2, radii: number | Vector2, props?: ShapeProps & { angle?: number; arc?: [number, number] }) => void;
-  line: (color: Color, points: Vector2[], props?: ShapeProps) => void;
-  print: (color: Color, text: string, position: Vector2, props?: PrintProps) => void;
-  draw: (handle: ImageHandle, position: Vector2, props?: DrawProps) => void;
-  getCanvasSize: () => Vector2;
-  newCanvas: (size: Vector2) => Canvas;
-  setCanvas: (canvas?: Canvas | null) => void;
-  clip: (rect?: Rect) => void;
-  polygon: (mode: DrawMode, color: Color, points: Vector2[], props?: ShapeProps) => void;
-  points: (color: Color, pts: Vector2[]) => void;
+  [K in keyof typeof graphicsFns]: Bind<(typeof graphicsFns)[K]>;
 };
 
 const graphicsFns = {
   clear, rectangle, circle, line, print,
   draw: drawImage, getCanvasSize, newCanvas, setCanvas,
-  clip, polygon, points,
+  clip, polygon, points, newImage,
 } as const;
 
 export function bindGraphics(s: GraphicsState): BoundGraphics {
-  return new Proxy({} as BoundGraphics, {
-    get(_, prop: string) {
-      const fn = (graphicsFns as Record<string, (s: GraphicsState, ...args: any[]) => any>)[prop];
-      return fn ? (...args: any[]) => fn(s, ...args) : undefined;
-    }
-  });
+  const bound = {} as BoundGraphics;
+  for (const [name, fn] of Object.entries(graphicsFns)) {
+    (bound as Record<string, any>)[name] = (...args: any[]) => (fn as any)(s, ...args);
+  }
+  return bound;
 }

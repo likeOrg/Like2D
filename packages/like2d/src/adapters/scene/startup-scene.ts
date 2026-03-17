@@ -1,5 +1,5 @@
 import type { Scene } from './scene';
-import { ImageHandle, newImage } from '../../core/graphics';
+import { ImageHandle } from '../../core/graphics';
 import { Vec2 } from '../../core/vector2';
 import { Rect } from '../../core/rect';
 import type { Like } from '../../core/like';
@@ -44,7 +44,7 @@ export class StartupScene implements Scene {
     private config: StartupSceneConfig,
     private setScene: (scene: Scene) => void
   ) {
-    this.logo = config.logo ?? newImage(LOGO_DATA_URI);
+    this.logo = config.logo ?? new ImageHandle(LOGO_DATA_URI);
   }
 
   draw(like: Like): void {

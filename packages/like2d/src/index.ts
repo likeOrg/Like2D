@@ -39,7 +39,7 @@ export type { Color, Quad, ShapeProps, DrawProps, PrintProps } from './core/grap
 /**
  * Handle to an image asset that may be loading in the background.
  */
-export { ImageHandle, newImage } from './core/graphics';
+export { ImageHandle } from './core/graphics';
 
 /**
  * Audio source types for sound playback.
