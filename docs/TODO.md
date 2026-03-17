@@ -1,24 +1,15 @@
 # Like2D TODO
 
-## V2.6.0 - Non-Global Graphics Module
+## V2.6.0 - Released
 
-### Architecture Change
+### Completed Changes
 
-- **Graphics module** - static, only `newImage()` for asset loading
-- **GraphicsContext** - bound to canvas, passed to `draw()` callback
-
-```typescript
-import { graphics } from 'like2d/callback';
-const image = graphics.newImage('sprite.png');  // static
-
-like.draw = (g) => {
-  g.circle('fill', 'red', [100, 100], 50);  // bound context
-};
-```
+- **Callback adapter redesign** - `createLike()` returns `Like` synchronously, callbacks assigned as properties
+- **Graphics module split** - Static `graphics` for asset loading, bound `GraphicsContext` passed to callbacks
+- Removed stateful APIs (`setBackgroundColor`, `setFont`, etc.)
+- `routeEvents()` exported for custom event handling
 
 ### Status: ✅ Complete
-
-All implementation tasks completed for V2.6.0. Build and type checking pass.
 
 ---
 
