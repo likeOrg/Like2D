@@ -1,7 +1,7 @@
 # LÏKE2D
 
 <p align="center">
-  <img src="packages/like2d/assets/logo-banner.svg" alt="Like2D Logo" width="400">
+  <img src="like/assets/logo-banner.svg" alt="Like2D Logo" width="400">
 </p>
 
 Want to make a 2D browser game? Well like, do it!
