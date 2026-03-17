@@ -43,26 +43,28 @@ pnpm add like2d
 Ideal for small games, jams, or prototyping.
 
 ```typescript
-import { love, graphics, input } from 'like2d/callback';
+import { createLike } from 'like2d/callback';
 
-love.load = () => {
-  love.setMode({ pixelResolution: [800, 600] });
-  input.map('jump', ['Space', 'ButtonBottom']);
+const like = createLike(document.body);
+
+like.load = () => {
+  like.setMode({ pixelResolution: [800, 600] });
+  like.input.map('jump', ['Space', 'ButtonBottom']);
 };
 
-love.update = (dt) => {
-  if (input.justPressed('jump')) {
+like.update = (dt) => {
+  if (like.input.justPressed('jump')) {
     console.log('Jump!');
   }
 };
 
-love.draw = () => {
-  graphics.clear([0.1, 0.1, 0.1, 1]);
-  graphics.circle('fill', 'dodgerblue', [400, 300], 50);
-  graphics.print('white', 'Hello Like2D!', [20, 20]);
+like.draw = () => {
+  like.gfx.clear([0.1, 0.1, 0.1, 1]);
+  like.gfx.circle('fill', 'dodgerblue', [400, 300], 50);
+  like.gfx.print('white', 'Hello Like2D!', [20, 20]);
 };
 
-love.init(document.body);
+await like.start();
 ```
 
 ### Scene Pattern (Class-based)
@@ -70,19 +72,21 @@ love.init(document.body);
 Ideal for larger projects with menus, levels, and explicit state management.
 
 ```typescript
-import { SceneRunner, type Scene, Vec2 } from 'like2d/scene';
+import { SceneRunner, type Scene } from 'like2d/scene';
+import type { Like } from 'like2d';
 
 class MyScene implements Scene {
-  load() {
+  load(like: Like) {
     console.log('Scene loaded!');
   }
 
-  update(dt: number) {
+  update(like: Like, dt: number) {
     // update logic
   }
 
-  draw(canvas: HTMLCanvasElement) {
-    // draw logic
+  draw(like: Like) {
+    like.gfx.clear([0.1, 0.1, 0.1, 1]);
+    like.gfx.print('white', 'Hello Like2D!', [20, 20]);
   }
 }
 
@@ -95,9 +99,9 @@ await runner.start(new MyScene());
 Pick your pattern, import what you need:
 
 ```typescript
-import { love, graphics, input } from 'like2d/callback';  // Love2D-style
-import { SceneRunner, type Scene } from 'like2d/scene';    // Class-based scenes
-import { Vec2, Rect } from 'like2d/math';                  // Pure math functions
+import { createLike } from 'like2d/callback';           // Love2D-style
+import { SceneRunner, type Scene } from 'like2d/scene'; // Class-based scenes
+import { Vec2, Rect, type Like } from 'like2d';         // Core types and math
 ```
 
 See the [PHILOSOPHY.md](../../docs/PHILOSOPHY.md) for the principles behind the design.

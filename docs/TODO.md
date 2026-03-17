@@ -1,6 +1,6 @@
 # Like2D TODO
 
-## V2.6.0 - Released
+## V2.5.0 - Released
 
 ### Completed Changes
 

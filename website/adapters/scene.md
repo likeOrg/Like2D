@@ -5,19 +5,20 @@ Class-based scene pattern for Like2D. This adapter provides an instance-based AP
 ## Quick Start
 
 ```typescript
-import { SceneRunner, Scene } from 'like2d/scene';
+import { SceneRunner, type Scene } from 'like2d/scene';
+import type { Like } from 'like2d';
 
 class MyScene implements Scene {
-  load() {
+  load(like: Like) {
     console.log('Scene loaded!');
   }
 
-  update(dt: number) {
+  update(like: Like, dt: number) {
     // Update logic here
   }
 
-  draw() {
-    graphics.print('Hello, World!', [100, 100]);
+  draw(like: Like) {
+    like.gfx.print('white', 'Hello, World!', [100, 100]);
   }
 }
 
@@ -35,25 +36,23 @@ A scene is a class that implements the `Scene` interface. All callbacks are opti
 
 ```typescript
 interface Scene {
-  load?(): void;
-  update?(dt: number): void;
-  draw?(g: GraphicsContext): void;
-  resize?(size: Vector2, pixelSize: Vector2, fullscreen: boolean): void;
-  keypressed?(scancode: string, keycode: string): void;
-  keyreleased?(scancode: string, keycode: string): void;
-  mousepressed?(x: number, y: number, button: number): void;
-  mousereleased?(x: number, y: number, button: number): void;
-  gamepadpressed?(gamepadIndex: number, buttonIndex: number, buttonName: string): void;
-  gamepadreleased?(gamepadIndex: number, buttonIndex: number, buttonName: string): void;
-  actionpressed?(action: string): void;
-  actionreleased?(action: string): void;
-  
-  // handleEvent is special - it returns the event
-  handleEvent?(event: Like2DEvent): Like2DEvent;
+  load?(like: Like): void;
+  update?(like: Like, dt: number): void;
+  draw?(like: Like): void;
+  resize?(like: Like, size: Vector2, pixelSize: Vector2, fullscreen: boolean): void;
+  keypressed?(like: Like, scancode: string, keycode: string): void;
+  keyreleased?(like: Like, scancode: string, keycode: string): void;
+  mousepressed?(like: Like, x: number, y: number, button: number): void;
+  mousereleased?(like: Like, x: number, y: number, button: number): void;
+  gamepadpressed?(like: Like, gamepadIndex: number, buttonIndex: number, buttonName: string): void;
+  gamepadreleased?(like: Like, gamepadIndex: number, buttonIndex: number, buttonName: string): void;
+  actionpressed?(like: Like, action: string): void;
+  actionreleased?(like: Like, action: string): void;
+  handleEvent?(like: Like, event: Like2DEvent): void;
 }
 ```
 
-Every callback except `handleEvent` is a method that receives unpacked arguments. The `handleEvent` method receives the full event object and must return it (possibly modified).
+All methods receive `like` as the first argument, giving access to all systems (`like.gfx`, `like.input`, etc.).
 
 Canvas size is controlled via `runner.setMode()`, not scene properties.
 
@@ -66,19 +65,9 @@ The runner manages the canvas, engine loop, and scene lifecycle. Create it with 
 The scene adapter re-exports all core classes for convenience:
 
 ```typescript
-import { 
-  SceneRunner, 
-  Scene,
-  Graphics,
-  Audio,
-  Input,
-  Timer,
-  Keyboard,
-  Mouse,
-  Gamepad,
-  Vec2,
-  Rect
-} from 'like2d/scene';
+import { SceneRunner, type Scene } from 'like2d/scene';
+import type { Like } from 'like2d';
+import { Vec2, Rect } from 'like2d';
 ```
 
 ## When to Use This Adapter
@@ -96,11 +85,11 @@ For a simpler Love2D-style callback pattern, consider the [Callback Adapter](./c
 
 ```typescript
 class MenuScene implements Scene {
-  draw() {
-    graphics.print('Press SPACE to start', [350, 300]);
+  draw(like: Like) {
+    like.gfx.print('white', 'Press SPACE to start', [350, 300]);
   }
   
-  keypressed(scancode: string, keycode: string) {
+  keypressed(like: Like, scancode: string, keycode: string) {
     if (keycode === ' ') {
       runner.setScene(new GameScene());
     }
@@ -108,12 +97,13 @@ class MenuScene implements Scene {
 }
 
 class GameScene implements Scene {
-  update(dt: number) {
+  update(like: Like, dt: number) {
     // Game logic
   }
   
-  draw() {
-    // Render game
+  draw(like: Like) {
+    like.gfx.clear([0, 0, 0, 1]);
+    like.gfx.print('white', 'Game Running!', [350, 300]);
   }
 }
 

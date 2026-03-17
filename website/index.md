@@ -62,10 +62,10 @@ Create an `index.html` file:
 Create a `main.ts` file that binds to the DOM element:
 
 ```typescript
-import { like, graphics } from 'like2d/callback';
+import { createLike } from 'like2d/callback';
 
-// Bind the engine to a DOM element
-await like.init(document.getElementById('game')!);
+// Create the engine attached to a DOM element
+const like = createLike(document.getElementById('game')!);
 
 // Set up callbacks (Love2D style)
 like.load = () => {
@@ -77,17 +77,20 @@ like.update = (dt) => {
   // dt is delta time in seconds
 };
 
-like.draw = (g) => {
+like.draw = () => {
   // Clear screen with dark color
-  g.clear([0.1, 0.1, 0.1]);
+  like.gfx.clear([0.1, 0.1, 0.1]);
   
   // Draw some text
-  g.print('Hello, Like2D!', 100, 100);
+  like.gfx.print('white', 'Hello, Like2D!', [100, 100]);
 };
 
 like.keypressed = (scancode, keycode) => {
   console.log(`Key pressed: ${keycode}`);
 };
+
+// Start the game loop
+await like.start();
 ```
 
 ### 3. Using the Scene Adapter
@@ -95,16 +98,17 @@ like.keypressed = (scancode, keycode) => {
 For class-based architecture:
 
 ```typescript
-import { SceneRunner, Scene, type GraphicsContext } from 'like2d/scene';
+import { SceneRunner, type Scene } from 'like2d/scene';
+import type { Like } from 'like2d';
 
-class MyScene extends Scene {
-  update(dt: number) {
+class MyScene implements Scene {
+  update(like: Like, dt: number) {
     // Update logic
   }
   
-  draw(g: GraphicsContext) {
-    g.clear([0.1, 0.1, 0.1]);
-    g.print('Hello from Scene!', 100, 100);
+  draw(like: Like) {
+    like.gfx.clear([0.1, 0.1, 0.1]);
+    like.gfx.print('white', 'Hello from Scene!', [100, 100]);
   }
 }
 

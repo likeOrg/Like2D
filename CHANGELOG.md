@@ -5,13 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.6.0] - Unreleased
+## [2.5.1] - Unreleased
+
+### Fixed
+
+- Updated all documentation (README, website docs) to reflect the actual v2.5.0 API
+
+## [2.5.0]
 
 ### Breaking Changes
 
 - **Callback adapter**: Complete API redesign. `createLike()` now returns `Like` synchronously. Callbacks assigned as properties (`like.load`, `like.update`, `like.draw`). Callbacks receive no parameters - they close over `like`. Start loop with `await like.start()`.
-- **Scene adapter**: `draw` callback no longer receives `g` parameter - use `like.gfx`
-- **Graphics module split**: Static `graphics` module for `newImage()`, bound `GraphicsContext` passed to `draw()` callback
+- **Scene adapter**: All scene methods receive `like: Like` as first parameter. Use `like.gfx` for drawing.
+- **Graphics module split**: Static `newImage()` for asset loading, bound graphics context accessed via `like.gfx`
 - Removed stateful methods: `setBackgroundColor()`, `setFont()`, `getFont()`
 - Removed `arc()` - use `circle()` with `arc` option
 - `ShapeProps` no longer includes `color` (now positional)
@@ -25,8 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `LikeInstance` interface
-- `like` parameter from callback adapter callbacks
-- `g` parameter from scene adapter `draw` callback
+- `like` parameter from callback adapter callbacks (now closed over)
+- `g` parameter from scene adapter `draw` callback (use `like.gfx`)
 - Adapter re-exports of core utilities - import from `'like2d'` directly
 
 ## [2.4.0]
