@@ -13,13 +13,13 @@ import { CanvasManager } from './core/canvas-manager';
 
 export class Engine {
   private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
   private isRunning = false;
   private lastTime = 0;
   private container: HTMLElement;
   private canvasManager: CanvasManager;
   private handleEvent: ((event: Like2DEvent) => void) | null = null;
   private currentScene: Scene | null = null;
+  private gfxState: ReturnType<typeof newState>;
 
   readonly like: Like;
 
@@ -30,14 +30,14 @@ export class Engine {
 
     const ctx = this.canvas.getContext('2d');
     if (!ctx) throw new Error('Failed to get 2D context');
-    this.ctx = ctx;
 
     this.container = container;
     this.container.appendChild(this.canvas);
-    this.canvasManager = new CanvasManager(this.canvas, this.container, this.ctx, { pixelResolution: null, fullscreen: false });
+    this.canvasManager = new CanvasManager(this.canvas, this.container, ctx, { pixelResolution: null, fullscreen: false });
 
-    const gfxState = newState(this.ctx);
-    const gfx = bindGraphics(gfxState);
+    const renderTarget = this.canvasManager.getRenderTarget();
+    this.gfxState = newState(renderTarget.ctx);
+    let gfx = bindGraphics(this.gfxState);
 
     const audio = new Audio();
     const timer = new Timer();
@@ -63,12 +63,17 @@ export class Engine {
       },
     };
 
+    this.canvasManager.onResize = () => {
+      const target = this.canvasManager.getRenderTarget();
+      this.gfxState = newState(target.ctx);
+      this.like.gfx = bindGraphics(this.gfxState);
+    };
+
     keyboard.onKeyEvent = (scancode, keycode, type) => {
       this.dispatch(type === 'keydown' ? 'keypressed' : 'keyreleased', [scancode, keycode]);
     };
 
-    mouse.onMouseEvent = (clientX, clientY, button, type) => {
-      const [x, y] = this.canvasManager.transformMousePosition(clientX, clientY);
+    mouse.onMouseEvent = (x, y, button, type) => {
       this.dispatch(type === 'mousedown' ? 'mousepressed' : 'mousereleased', [x, y, (button ?? 0) + 1]);
     };
 
@@ -76,9 +81,21 @@ export class Engine {
       this.dispatch(pressed ? 'gamepadpressed' : 'gamepadreleased', [gpIndex, buttonIndex, buttonName]);
     };
 
-    this.canvasManager.onResize = (size, pixelSize, fullscreen) => {
-      this.dispatch('resize', [size, pixelSize, fullscreen]);
-    };
+    window.addEventListener('focus', () => {
+      this.dispatch('focus', []);
+    });
+
+    window.addEventListener('blur', () => {
+      this.dispatch('blur', []);
+    });
+
+    this.canvas.addEventListener('focus', () => {
+      this.dispatch('focus', []);
+    });
+
+    this.canvas.addEventListener('blur', () => {
+      this.dispatch('blur', []);
+    });
 
     document.addEventListener('fullscreenchange', () => {
       const mode = this.canvasManager.getMode();
@@ -105,13 +122,12 @@ export class Engine {
 
   setMode(mode: PartialCanvasMode): void {
     const currentMode = this.canvasManager.getMode();
-    const mergedMode = { ...currentMode, ...mode };
-
-    if (mode.fullscreen !== undefined && mode.fullscreen !== currentMode.fullscreen) {
-      mergedMode.fullscreen ? this.container.requestFullscreen().catch(console.error) : document.exitFullscreen();
+    
+    if ('fullscreen' in mode && mode.fullscreen !== currentMode.fullscreen) {
+      mode.fullscreen ? this.container.requestFullscreen().catch(console.error) : document.exitFullscreen();
     }
 
-    this.canvasManager.setMode(mode);
+    this.canvasManager.setMode({ ...currentMode, ...mode });
   }
 
   async start(handleEvent: (event: Like2DEvent) => void): Promise<void> {

@@ -64,7 +64,6 @@ export class CanvasManager {
       ? [document.fullscreenElement.clientWidth, document.fullscreenElement.clientHeight]
       : [this.container.clientWidth, this.container.clientHeight];
 
-    // Always clean up pixel canvas first
     if (this.pixelCanvas) {
       this.pixelCanvas.remove();
       this.pixelCanvas = null;
@@ -77,11 +76,9 @@ export class CanvasManager {
       this.applyNativeMode(containerSize);
     }
 
-    const displayCanvas = this.pixelCanvas ?? this.canvas;
-
     this.onResize?.(
       containerSize,
-      [displayCanvas.width, displayCanvas.height] as Vector2,
+      [this.canvas.width, this.canvas.height] as Vector2,
       this.config.fullscreen
     );
   }
@@ -92,22 +89,19 @@ export class CanvasManager {
     const scale = Math.min(csize[0] / gameSize[0], csize[1] / gameSize[1]);
 
     const physicalScale = scale * pixelRatio;
-    const intScale = Math.max(1, Math.floor(physicalScale));
+    const intScale = Math.max(1, Math.ceil(physicalScale));
 
     this.pixelCanvas = document.createElement('canvas');
     this.pixelCtx = this.pixelCanvas.getContext('2d');
 
-    setCanvasSize(this.pixelCanvas, Vec2.mul(gameSize, intScale));
-    setCanvasSize(this.canvas, gameSize);
-    this.canvas.style.display = 'none';
+    setCanvasSize(this.pixelCanvas, gameSize);
+    setCanvasSize(this.canvas, Vec2.mul(gameSize, intScale));
 
-    const pc = this.pixelCanvas;
-    setCanvasDisplaySize(pc, Vec2.mul(gameSize, scale));
-    pc.style.maxWidth = '100%';
-    pc.style.maxHeight = '100%';
-    pc.style.imageRendering = 'auto';
-    centerElement(pc);
-    this.container.appendChild(pc);
+    setCanvasDisplaySize(this.canvas, Vec2.mul(gameSize, scale));
+    this.canvas.style.maxWidth = '100%';
+    this.canvas.style.maxHeight = '100%';
+    this.canvas.style.imageRendering = 'auto';
+    centerElement(this.canvas);
   }
 
   private applyNativeMode(csize: Vector2): void {
@@ -141,33 +135,38 @@ export class CanvasManager {
       return;
     }
 
-    this.pixelCtx.imageSmoothingEnabled = false;
-    this.pixelCtx.drawImage(
-      this.canvas,
-      0, 0, this.canvas.width, this.canvas.height,
-      0, 0, this.pixelCanvas.width, this.pixelCanvas.height
+    this.ctx.imageSmoothingEnabled = false;
+    this.ctx.drawImage(
+      this.pixelCanvas,
+      0, 0, this.pixelCanvas.width, this.pixelCanvas.height,
+      0, 0, this.canvas.width, this.canvas.height
     );
   }
 
   getDisplayCanvas(): HTMLCanvasElement {
-    return this.pixelCanvas ?? this.canvas;
+    return this.canvas;
   }
 
-  transformMousePosition(cssX: number, cssY: number): Vector2 {
-    const displayCanvas = this.getDisplayCanvas();
-    const rect = displayCanvas.getBoundingClientRect();
-    const relative: Vector2 = [cssX - rect.left, cssY - rect.top];
+  getRenderTarget(): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
+    if (this.pixelCanvas && this.pixelCtx) {
+      return { canvas: this.pixelCanvas, ctx: this.pixelCtx };
+    }
+    return { canvas: this.canvas, ctx: this.ctx };
+  }
+
+  transformMousePosition(clientX: number, clientY: number): Vector2 {
+    const rect = this.canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
 
     if (this.config.pixelResolution) {
-      // In pixel mode: CSS position (as fraction of CSS size) × game size = game position
-      const gameSize = this.config.pixelResolution;
-      return Vec2.mul(relative, [gameSize[0] / rect.width, gameSize[1] / rect.height]);
-    } else {
-      // In native mode, canvas fills the container completely at position 0,0
-      // Mouse coordinates should be relative to the canvas, accounting for the fact
-      // that the canvas internal pixel size != CSS size
-      const pixelRatio = window.devicePixelRatio || 1;
-      return Vec2.mul(relative, pixelRatio);
+      return [
+        x * (this.config.pixelResolution[0] / rect.width),
+        y * (this.config.pixelResolution[1] / rect.height),
+      ];
     }
+
+    const pixelRatio = window.devicePixelRatio || 1;
+    return [x * pixelRatio, y * pixelRatio];
   }
 }

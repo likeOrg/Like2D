@@ -35,7 +35,7 @@ export interface Like {
   readonly gamepad: Gamepad;
   
   /** Graphics context for rendering operations */
-  readonly gfx: BoundGraphics;
+  gfx: BoundGraphics;
   
   /**
    * Set the canvas display mode.

@@ -1,6 +1,6 @@
 import type { Vector2 } from './vector2';
 
-export type MousePositionTransform = (cssX: number, cssY: number) => Vector2;
+export type MousePositionTransform = (clientX: number, clientY: number) => Vector2;
 
 export class Mouse {
   private x = 0;

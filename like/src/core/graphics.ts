@@ -263,6 +263,11 @@ export function setCanvas(s: GraphicsState, canvas?: Canvas | null): void {
   s.currentCtx = canvas?.ctx ?? s.screenCtx;
 }
 
+export function setScreenContext(s: GraphicsState, ctx: CanvasRenderingContext2D): void {
+  s.screenCtx = ctx;
+  s.currentCtx = ctx;
+}
+
 export function clip(s: GraphicsState, rect?: Rect): void {
   const ctx = s.currentCtx;
   ctx.beginPath();

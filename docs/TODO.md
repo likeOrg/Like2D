@@ -1,52 +1,19 @@
-# Like2D TODO
+# v2.8.0 TODO - Focus & Event Handling
 
-## V2.5.0 - Released
+## Refactor canvas
+ - [x] Make the canvas manager always display the same in-browser canvas, only changing the render target.
+ - [ ] Use algebra to fix and/or simplify mouse coord transform logic, broken by this change.
 
-### Completed Changes
+## Focus Blur (in progress?)
+ - [ ] Add 'focus' and 'blur' events in the engine.
+ - [ ] (refactor) Make sure all event listeners are cleaned up on dispose.
 
-- **Callback adapter redesign** - `createLike()` returns `Like` synchronously, callbacks assigned as properties
-- **Graphics module split** - Static `graphics` for asset loading, bound `GraphicsContext` passed to callbacks
-- Removed stateful APIs (`setBackgroundColor`, `setFont`, etc.)
-- `routeEvents()` exported for custom event handling
+## Mouse API updates (in progress?)
+ - [ ] Replace setVisible and getPointerLock with lockPointer and isPointerLocked
+ - [ ] replace mouse getX and getY with getPosition in API
 
-### Status: ✅ Complete
+## Adding PreventDefault to avoid scrolling the page etc while game is focused. (in progress?)
+ - [ ] Consider binding mouse movement and click events to the canvas element, which can be focused. Else, use preventDefault conditionally with hit testing (use Rect library) in both mouse and keyboard, as a pseudo-capture
+ - [ ] Consider an option to preserve old behavior w/r/t capture, while still calling preventDefault -- on events that could cause scrolling.
+ - [ ] Implement your decision.
 
----
-
-## After V2
-
-### Publishing Preparation
-
-- [ ] Configure GitHub Pages deployment for website
-
-### Website Work
-
-Discuss homepage contents:
-- Introduction
-- Docs
-- Code Sandbox with interactive tutorial?
-
-Logo: spade in circle (Love2D-style)
-
----
-
-## Future Ideas
-
-### Multiplayer System Design
-
-- Separates controller management from action mapping
-- Supports player assignment: local players bind to specific gamepads
-- Handles controller disconnect/reconnect gracefully
-- Provides clean API for networked multiplayer
-- Consider: `PlayerManager` mapping physical controllers to logical player slots?
-
-### Camera System with Mouse Transform
-
-```typescript
-graphics.setCamera(translate, rotate, scale);
-const worldPos = mouse.getWorldPosition(); // Applies inverse transform
-```
-
-Research needed: Study Love2D camera libraries (gamera, STALKER-X, hump.camera) for patterns.
-
-Decision: Only implement if clear "winner" pattern emerges.

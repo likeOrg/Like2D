@@ -8,6 +8,8 @@ export type EventMap = {
   resize: [size: Vector2, pixelSize: Vector2, fullscreen: boolean];
   keypressed: [scancode: string, keycode: string];
   keyreleased: [scancode: string, keycode: string];
+  focus: [];
+  blur: [];
   mousepressed: [x: number, y: number, button: number];
   mousereleased: [x: number, y: number, button: number];
   gamepadpressed: [gamepadIndex: number, buttonIndex: number, buttonName: string];
