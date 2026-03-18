@@ -1,7 +1,5 @@
 node_modules/
 dist/
-packages/*/dist/
-apps/*/dist/
 *.log
 .DS_Store
 .env
