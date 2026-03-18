@@ -42,7 +42,7 @@ export class Engine {
     const audio = new Audio();
     const timer = new Timer();
     const keyboard = new Keyboard();
-    const mouse = new Mouse((cssX, cssY) => this.canvasManager.transformMousePosition(cssX, cssY));
+    const mouse = new Mouse(this.canvas, (cssX, cssY) => this.canvasManager.transformMousePosition(cssX, cssY));
     const gamepad = new Gamepad();
     const input = new Input({ keyboard, mouse, gamepad });
 

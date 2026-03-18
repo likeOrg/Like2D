@@ -8,6 +8,7 @@ export class Mouse {
   private buttons = new Set<number>();
   public onMouseEvent?: (clientX: number, clientY: number, button: number | undefined, type: 'mousemove' | 'mousedown' | 'mouseup') => void;
   private transformFn?: MousePositionTransform;
+  private canvas: HTMLCanvasElement | null = null;
 
   // Event handler references for cleanup
   private mousemoveHandler: (e: globalThis.MouseEvent) => void;
@@ -15,7 +16,8 @@ export class Mouse {
   private mouseupHandler: (e: globalThis.MouseEvent) => void;
   private blurHandler: () => void;
 
-  constructor(transformFn?: MousePositionTransform) {
+  constructor(canvas: HTMLCanvasElement | null, transformFn?: MousePositionTransform) {
+    this.canvas = canvas;
     this.transformFn = transformFn;
 
     // Bind event handlers
@@ -73,14 +75,6 @@ export class Mouse {
     return [this.x, this.y];
   }
 
-  getX(): number {
-    return this.x;
-  }
-
-  getY(): number {
-    return this.y;
-  }
-
   isDown(button: number): boolean {
     return this.buttons.has(button);
   }
@@ -89,19 +83,17 @@ export class Mouse {
     return new Set(this.buttons);
   }
 
-  isVisible(): boolean {
-    return document.pointerLockElement === null;
+  isPointerLocked(): boolean {
+    return document.pointerLockElement !== null;
   }
 
-  setVisible(visible: boolean, canvas?: HTMLCanvasElement): void {
-    if (!visible && canvas) {
-      canvas.requestPointerLock();
-    } else if (visible && canvas && document.pointerLockElement === canvas) {
+  lockPointer(locked: boolean): void {
+    if (!this.canvas) return;
+    
+    if (locked && document.pointerLockElement !== this.canvas) {
+      this.canvas.requestPointerLock();
+    } else if (!locked && document.pointerLockElement === this.canvas) {
       document.exitPointerLock();
     }
-  }
-
-  getRelativeMode(): boolean {
-    return document.pointerLockElement !== null;
   }
 }
