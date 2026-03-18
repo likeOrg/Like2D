@@ -19,5 +19,5 @@
  - [x] Add tabindex="0" to make canvas focusable
  - [x] Add wheel event with preventDefault to stop scrolling
  - [x] Simplify mouse transform logic (offsetX/Y already relative to canvas)
- - [ ] Consider an option to preserve old behavior w/r/t capture, while still calling preventDefault -- on events that could cause scrolling.
+ - [x] Move keyboard events to canvas with preventDefault on scroll keys
 
