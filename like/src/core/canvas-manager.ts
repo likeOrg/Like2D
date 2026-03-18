@@ -89,7 +89,7 @@ export class CanvasManager {
     const scale = Math.min(csize[0] / gameSize[0], csize[1] / gameSize[1]);
 
     const physicalScale = scale * pixelRatio;
-    const intScale = Math.max(1, Math.ceil(physicalScale));
+    const intScale = Math.max(1, Math.round(physicalScale));
 
     this.pixelCanvas = document.createElement('canvas');
     this.pixelCtx = this.pixelCanvas.getContext('2d');
@@ -147,11 +147,18 @@ export class CanvasManager {
     return this.canvas;
   }
 
+  /** Canvas to render to. Pixel canvas in pixel mode, display canvas otherwise. */
   getRenderTarget(): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
     if (this.pixelCanvas && this.pixelCtx) {
       return { canvas: this.pixelCanvas, ctx: this.pixelCtx };
     }
     return { canvas: this.canvas, ctx: this.ctx };
+  }
+
+  /** Render target size in pixels. Pixel resolution in pixel mode, scaled size otherwise. */
+  getCanvasSize(): Vector2 {
+    const target = this.getRenderTarget();
+    return [target.canvas.width, target.canvas.height];
   }
 
   transformMousePosition(offsetX: number, offsetY: number): Vector2 {

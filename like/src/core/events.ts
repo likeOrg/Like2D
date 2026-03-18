@@ -1,6 +1,6 @@
 import type { Vector2 } from './vector2';
 
-// Core event types as they come from the engine (without Like prepended)
+/** Game events. All events flow through handleEvent; these are also available as individual callbacks. */
 export type EventMap = {
   load: [];
   update: [dt: number];
@@ -10,8 +10,12 @@ export type EventMap = {
   keyreleased: [scancode: string, keycode: string];
   focus: [];
   blur: [];
-  mousepressed: [x: number, y: number, button: number];
-  mousereleased: [x: number, y: number, button: number];
+  /** Mouse moved. relative=true means pos is delta [dx, dy] (pointer lock). */
+  mousemoved: [pos: Vector2, relative: boolean];
+  /** Mouse button pressed. pos in canvas pixels. Button 1 = left, 2 = middle, 3 = right. */
+  mousepressed: [pos: Vector2, button: number];
+  /** Mouse button released. */
+  mousereleased: [pos: Vector2, button: number];
   gamepadpressed: [gamepadIndex: number, buttonIndex: number, buttonName: string];
   gamepadreleased: [gamepadIndex: number, buttonIndex: number, buttonName: string];
   actionpressed: [action: string];

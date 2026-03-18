@@ -111,8 +111,9 @@ Assign functions to these properties:
 - `like.resize(size, pixelSize, fullscreen)` - Called when canvas resizes
 - `like.keypressed(scancode, keycode)` - Key pressed
 - `like.keyreleased(scancode, keycode)` - Key released
-- `like.mousepressed(x, y, button)` - Mouse button pressed
-- `like.mousereleased(x, y, button)` - Mouse button released
+- `like.mousemoved(pos, relative)` - Mouse moved
+- `like.mousepressed(pos, button)` - Mouse button pressed
+- `like.mousereleased(pos, button)` - Mouse button released
 - `like.gamepadpressed(index, buttonIndex, buttonName)` - Gamepad button pressed
 - `like.gamepadreleased(index, buttonIndex, buttonName)` - Gamepad button released
 - `like.actionpressed(action)` - Action mapping triggered

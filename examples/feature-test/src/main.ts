@@ -16,7 +16,7 @@ const scalingModes: CanvasMode[] = [
   { pixelResolution: null, fullscreen: false },
 ];
 let currentScalingIndex = 0;
-let scalingModeName = 'Pixel 320x320';
+let scalingModeName = 'Pixel 800x600';
 let isFullscreen = false;
 
 const container = document.getElementById('game-container')!;
@@ -47,7 +47,19 @@ const demoScene: Scene = {
     if (like.input.isDown('move_down')) moveDelta = Vec2.add(moveDelta, [0, 1]);
     
     player.pos = Vec2.add(player.pos, Vec2.mul(moveDelta, player.speed * dt));
-    player.pos = Vec2.clamp(player.pos, [15, 15], Vec2.sub(like.getCanvasSize(), [15, 15]));
+  },
+
+  mousemoved(like: Like, pos: [number, number], relative: boolean) {
+    if (relative && like.mouse.isPointerLocked()) {
+      // Relative movement when pointer is locked - move the player
+      const sensitivity = 0.5;
+      player.pos = Vec2.add(player.pos, Vec2.mul(pos, sensitivity));
+    }
+    
+    // Wrap around edges
+    const [w, h] = like.getCanvasSize();
+    player.pos[0] = (player.pos[0] + w) % w;
+    player.pos[1] = (player.pos[1] + h) % h;
   },
 
   keypressed(like: Like, scancode: string) {

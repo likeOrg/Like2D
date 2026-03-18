@@ -63,7 +63,7 @@ export class Engine {
       gfx,
       setMode: (m) => this.setMode(m),
       getMode: () => this.canvasManager.getMode(),
-      getCanvasSize: () => [this.canvas.width, this.canvas.height],
+      getCanvasSize: () => this.canvasManager.getCanvasSize(),
       setScene: (scene) => {
         this.currentScene = scene;
         scene?.load?.(this.like);
@@ -80,8 +80,16 @@ export class Engine {
       this.dispatch(type === 'keydown' ? 'keypressed' : 'keyreleased', [scancode, keycode]);
     };
 
-    mouse.onMouseEvent = (x, y, button, type) => {
-      this.dispatch(type === 'mousedown' ? 'mousepressed' : 'mousereleased', [x, y, (button ?? 0) + 1]);
+    mouse.onMouseMove = (pos, relative) => {
+      this.dispatch('mousemoved', [pos, relative]);
+    };
+
+    mouse.onMouseDown = (pos, button) => {
+      this.dispatch('mousepressed', [pos, button]);
+    };
+
+    mouse.onMouseUp = (pos, button) => {
+      this.dispatch('mousereleased', [pos, button]);
     };
 
     gamepad.onButtonEvent = (gpIndex, buttonIndex, buttonName, pressed) => {

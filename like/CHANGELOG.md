@@ -9,17 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking Changes
 
-- **Mouse API redesigned**:
-  - `setVisible(visible, canvas?)` → `lockPointer(locked: boolean)` - pass canvas to constructor instead
-  - `isVisible()` → `isPointerLocked()` - inverted logic (returns true when locked)
-  - `getRelativeMode()` removed - use `isPointerLocked()` instead
-  - `getX()`/`getY()` removed - use `getPosition()` which returns `[x, y]`
-  - Mouse events now bound to canvas instead of window
-  - Canvas is now focusable (tabindex="0") and receives focus on click
-  - Wheel events preventDefault to stop page scrolling
-- **Keyboard events now bound to canvas**:
-  - Keys only work when canvas is focused (consistent with mouse)
-  - Scroll keys (arrows, space, page up/down, home/end) preventDefault to stop page scrolling
+- **Mouse event signatures changed**: `mousepressed(x, y, button)` → `mousepressed(pos: Vector2, button: number)`
+- **Keyboard events now bound to canvas**: Keys only work when canvas is focused
+- **Canvas mode refactoring**: Always uses one in-browser canvas, swaps render target internally
+
+### Added
+
+- `mousemoved(pos: Vector2, relative: boolean)` - Mouse movement event
+  - `relative=false`: absolute canvas coordinates `[x, y]`
+  - `relative=true`: relative movement `[dx, dy]` for FPS controls
+- `lockPointer(locked: boolean)` / `isPointerLocked()` - Pointer lock API
+- `showCursor(visible: boolean)` / `isCursorVisible()` - Cursor visibility
+- `focus` / `blur` events - Canvas focus state
+- `getCanvasSize()` now returns render target size (pixel canvas in pixel mode)
+
+### Changed
+
+- Mouse and keyboard events bound to canvas element
+- Wheel events preventDefault to stop page scrolling
+- Scroll keys preventDefault when canvas focused
+- Simplified mouse transform logic using offsetX/Y
 
 ## [2.7.1] - 2026-03-17
 

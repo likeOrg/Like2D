@@ -28,8 +28,9 @@ These callbacks are called automatically by the engine when their corresponding 
 |----------|-----------|-------------|
 | `keypressed` | `(scancode: string, keycode: string) => void` | Called when a keyboard key is pressed. |
 | `keyreleased` | `(scancode: string, keycode: string) => void` | Called when a keyboard key is released. |
-| `mousepressed` | `(x: number, y: number, button: number) => void` | Called when a mouse button is pressed. Coordinates are in canvas pixels. |
-| `mousereleased` | `(x: number, y: number, button: number) => void` | Called when a mouse button is released. |
+| `mousemoved` | `(pos: Vector2, relative: boolean) => void` | Called when mouse moves. `relative=true` means `pos` is delta movement (for FPS controls). |
+| `mousepressed` | `(pos: Vector2, button: number) => void` | Called when a mouse button is pressed. Coordinates are in canvas pixels. |
+| `mousereleased` | `(pos: Vector2, button: number) => void` | Called when a mouse button is released. |
 | `gamepadpressed` | `(gamepadIndex: number, buttonIndex: number, buttonName: string) => void` | Called when a gamepad button is pressed. |
 | `gamepadreleased` | `(gamepadIndex: number, buttonIndex: number, buttonName: string) => void` | Called when a gamepad button is released. |
 | `actionpressed` | `(action: string) => void` | Called when a mapped action is triggered (see Input system). |
@@ -70,8 +71,9 @@ type Like2DEvent =
   | { type: 'resize'; args: [size: Vector2, pixelSize: Vector2, fullscreen: boolean]; timestamp: number }
   | { type: 'keypressed'; args: [scancode: string, keycode: string]; timestamp: number }
   | { type: 'keyreleased'; args: [scancode: string, keycode: string]; timestamp: number }
-  | { type: 'mousepressed'; args: [x: number, y: number, button: number]; timestamp: number }
-  | { type: 'mousereleased'; args: [x: number, y: number, button: number]; timestamp: number }
+  | { type: 'mousemoved'; args: [pos: Vector2, relative: boolean]; timestamp: number }
+  | { type: 'mousepressed'; args: [pos: Vector2, button: number]; timestamp: number }
+  | { type: 'mousereleased'; args: [pos: Vector2, button: number]; timestamp: number }
   | { type: 'gamepadpressed'; args: [gamepadIndex: number, buttonIndex: number, buttonName: string]; timestamp: number }
   | { type: 'gamepadreleased'; args: [gamepadIndex: number, buttonIndex: number, buttonName: string]; timestamp: number }
   | { type: 'actionpressed'; args: [action: string]; timestamp: number }

@@ -42,8 +42,9 @@ interface Scene {
   resize?(like: Like, size: Vector2, pixelSize: Vector2, fullscreen: boolean): void;
   keypressed?(like: Like, scancode: string, keycode: string): void;
   keyreleased?(like: Like, scancode: string, keycode: string): void;
-  mousepressed?(like: Like, x: number, y: number, button: number): void;
-  mousereleased?(like: Like, x: number, y: number, button: number): void;
+  mousemoved?(like: Like, pos: Vector2, relative: boolean): void;
+  mousepressed?(like: Like, pos: Vector2, button: number): void;
+  mousereleased?(like: Like, pos: Vector2, button: number): void;
   gamepadpressed?(like: Like, gamepadIndex: number, buttonIndex: number, buttonName: string): void;
   gamepadreleased?(like: Like, gamepadIndex: number, buttonIndex: number, buttonName: string): void;
   actionpressed?(like: Like, action: string): void;

@@ -1,12 +1,21 @@
 import type { Vector2 } from './vector2';
 
 export type MousePositionTransform = (offsetX: number, offsetY: number) => Vector2;
+export type MouseMoveHandler = (pos: Vector2, relative: boolean) => void;
+export type MouseButtonHandler = (pos: Vector2, button: number) => void;
 
+/**
+ * Mouse input handling. Bound to canvas. Emits relative movement when pointer locked.
+ * Buttons: 1 = left, 2 = middle, 3 = right.
+ */
 export class Mouse {
   private x = 0;
   private y = 0;
   private buttons = new Set<number>();
-  public onMouseEvent?: (x: number, y: number, button: number | undefined, type: 'mousemove' | 'mousedown' | 'mouseup') => void;
+  private cursorVisible = true;
+  public onMouseMove?: MouseMoveHandler;
+  public onMouseDown?: MouseButtonHandler;
+  public onMouseUp?: MouseButtonHandler;
   private transformFn?: MousePositionTransform;
   private canvas: HTMLCanvasElement | null = null;
 
@@ -42,20 +51,29 @@ export class Mouse {
   }
 
   private handleMouseMove(e: globalThis.MouseEvent): void {
-    this.x = e.offsetX;
-    this.y = e.offsetY;
-    this.onMouseEvent?.(e.offsetX, e.offsetY, undefined, 'mousemove');
+    if (this.isPointerLocked()) {
+      // When locked, emit relative movement
+      this.onMouseMove?.([e.movementX, e.movementY], true);
+    } else {
+      // Normal mode: track position and emit absolute coords
+      this.x = e.offsetX;
+      this.y = e.offsetY;
+      const pos = this.getPosition();
+      this.onMouseMove?.(pos, false);
+    }
   }
 
   private handleMouseDown(e: globalThis.MouseEvent): void {
     this.buttons.add(e.button + 1);
-    this.onMouseEvent?.(e.offsetX, e.offsetY, e.button, 'mousedown');
+    const pos: Vector2 = this.transformFn ? this.transformFn(e.offsetX, e.offsetY) : [e.offsetX, e.offsetY];
+    this.onMouseDown?.(pos, e.button + 1);
     this.canvas?.focus();
   }
 
   private handleMouseUp(e: globalThis.MouseEvent): void {
     this.buttons.delete(e.button + 1);
-    this.onMouseEvent?.(e.offsetX, e.offsetY, e.button, 'mouseup');
+    const pos: Vector2 = this.transformFn ? this.transformFn(e.offsetX, e.offsetY) : [e.offsetX, e.offsetY];
+    this.onMouseUp?.(pos, e.button + 1);
   }
 
   private handleWheel(e: WheelEvent): void {
@@ -72,6 +90,7 @@ export class Mouse {
     this.buttons.clear();
   }
 
+  /** Mouse position in canvas pixels. */
   getPosition(): Vector2 {
     if (this.transformFn) {
       return this.transformFn(this.x, this.y);
@@ -79,25 +98,42 @@ export class Mouse {
     return [this.x, this.y];
   }
 
+  /** Check if button is held. Button 1 = left, 2 = middle, 3 = right. */
   isDown(button: number): boolean {
     return this.buttons.has(button);
   }
 
+  /** All currently held buttons. */
   getPressedButtons(): Set<number> {
     return new Set(this.buttons);
   }
 
+  /** True when pointer is locked to canvas. */
   isPointerLocked(): boolean {
     return document.pointerLockElement !== null;
   }
 
+  /** Lock or unlock pointer. When locked, mousemoved emits relative deltas. */
   lockPointer(locked: boolean): void {
     if (!this.canvas) return;
-    
+
     if (locked && document.pointerLockElement !== this.canvas) {
       this.canvas.requestPointerLock();
     } else if (!locked && document.pointerLockElement === this.canvas) {
       document.exitPointerLock();
     }
+  }
+
+  /** Show or hide cursor. Unlike pointer lock, cursor can still leave canvas. */
+  showCursor(visible: boolean): void {
+    this.cursorVisible = visible;
+    if (this.canvas) {
+      this.canvas.style.cursor = visible ? 'auto' : 'none';
+    }
+  }
+
+  /** Current cursor visibility state. */
+  isCursorVisible(): boolean {
+    return this.cursorVisible;
   }
 }

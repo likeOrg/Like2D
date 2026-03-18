@@ -34,7 +34,7 @@ export class StartupScene implements Scene {
     }
   }
 
-  mousepressed(like: Like): void {
+  mousepressed(like: Like, _pos: [number, number], _button: number): void {
     like.setScene(this.next);
   }
 }
