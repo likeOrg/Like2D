@@ -154,19 +154,16 @@ export class CanvasManager {
     return { canvas: this.canvas, ctx: this.ctx };
   }
 
-  transformMousePosition(clientX: number, clientY: number): Vector2 {
-    const rect = this.canvas.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
-
+  transformMousePosition(offsetX: number, offsetY: number): Vector2 {
     if (this.config.pixelResolution) {
+      const rect = this.canvas.getBoundingClientRect();
       return [
-        x * (this.config.pixelResolution[0] / rect.width),
-        y * (this.config.pixelResolution[1] / rect.height),
+        offsetX * (this.config.pixelResolution[0] / rect.width),
+        offsetY * (this.config.pixelResolution[1] / rect.height),
       ];
     }
 
     const pixelRatio = window.devicePixelRatio || 1;
-    return [x * pixelRatio, y * pixelRatio];
+    return [offsetX * pixelRatio, offsetY * pixelRatio];
   }
 }

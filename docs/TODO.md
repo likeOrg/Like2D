@@ -15,7 +15,9 @@
 
 
 ## Adding PreventDefault to avoid scrolling the page etc while game is focused. (in progress?)
- - [ ] Consider binding mouse movement and click events to the canvas element, which can be focused. Else, use preventDefault conditionally with hit testing (use Rect library) in both mouse and keyboard, as a pseudo-capture
+ - [x] Bind mouse movement and click events to the canvas element
+ - [x] Add tabindex="0" to make canvas focusable
+ - [x] Add wheel event with preventDefault to stop scrolling
+ - [x] Simplify mouse transform logic (offsetX/Y already relative to canvas)
  - [ ] Consider an option to preserve old behavior w/r/t capture, while still calling preventDefault -- on events that could cause scrolling.
- - [ ] Implement your decision.
 

@@ -1,12 +1,12 @@
 import type { Vector2 } from './vector2';
 
-export type MousePositionTransform = (clientX: number, clientY: number) => Vector2;
+export type MousePositionTransform = (offsetX: number, offsetY: number) => Vector2;
 
 export class Mouse {
   private x = 0;
   private y = 0;
   private buttons = new Set<number>();
-  public onMouseEvent?: (clientX: number, clientY: number, button: number | undefined, type: 'mousemove' | 'mousedown' | 'mouseup') => void;
+  public onMouseEvent?: (x: number, y: number, button: number | undefined, type: 'mousemove' | 'mousedown' | 'mouseup') => void;
   private transformFn?: MousePositionTransform;
   private canvas: HTMLCanvasElement | null = null;
 
@@ -14,23 +14,27 @@ export class Mouse {
   private mousemoveHandler: (e: globalThis.MouseEvent) => void;
   private mousedownHandler: (e: globalThis.MouseEvent) => void;
   private mouseupHandler: (e: globalThis.MouseEvent) => void;
-  private blurHandler: () => void;
+  private wheelHandler: (e: WheelEvent) => void;
 
   constructor(canvas: HTMLCanvasElement | null, transformFn?: MousePositionTransform) {
     this.canvas = canvas;
     this.transformFn = transformFn;
 
-    // Bind event handlers
+    if (this.canvas) {
+      this.canvas.tabIndex = 0;
+    }
+
     this.mousemoveHandler = this.handleMouseMove.bind(this);
     this.mousedownHandler = this.handleMouseDown.bind(this);
     this.mouseupHandler = this.handleMouseUp.bind(this);
-    this.blurHandler = this.handleBlur.bind(this);
+    this.wheelHandler = this.handleWheel.bind(this);
 
-    // Register event listeners
-    window.addEventListener('mousemove', this.mousemoveHandler);
-    window.addEventListener('mousedown', this.mousedownHandler);
-    window.addEventListener('mouseup', this.mouseupHandler);
-    window.addEventListener('blur', this.blurHandler);
+    if (this.canvas) {
+      this.canvas.addEventListener('mousemove', this.mousemoveHandler);
+      this.canvas.addEventListener('mousedown', this.mousedownHandler);
+      window.addEventListener('mouseup', this.mouseupHandler);
+      this.canvas.addEventListener('wheel', this.wheelHandler, { passive: false });
+    }
   }
 
   setTransform(transformFn: MousePositionTransform | undefined): void {
@@ -38,33 +42,33 @@ export class Mouse {
   }
 
   private handleMouseMove(e: globalThis.MouseEvent): void {
-    // Store raw CSS coordinates - transformation to game coordinates
-    // should be done by the consumer using engine.transformMousePosition()
-    this.x = e.clientX;
-    this.y = e.clientY;
-
-    this.onMouseEvent?.(e.clientX, e.clientY, undefined, 'mousemove');
+    this.x = e.offsetX;
+    this.y = e.offsetY;
+    this.onMouseEvent?.(e.offsetX, e.offsetY, undefined, 'mousemove');
   }
 
   private handleMouseDown(e: globalThis.MouseEvent): void {
     this.buttons.add(e.button + 1);
-    this.onMouseEvent?.(e.clientX, e.clientY, e.button, 'mousedown');
+    this.onMouseEvent?.(e.offsetX, e.offsetY, e.button, 'mousedown');
+    this.canvas?.focus();
   }
 
   private handleMouseUp(e: globalThis.MouseEvent): void {
     this.buttons.delete(e.button + 1);
-    this.onMouseEvent?.(e.clientX, e.clientY, e.button, 'mouseup');
+    this.onMouseEvent?.(e.offsetX, e.offsetY, e.button, 'mouseup');
   }
 
-  private handleBlur(): void {
-    this.buttons.clear();
+  private handleWheel(e: WheelEvent): void {
+    e.preventDefault();
   }
 
   dispose(): void {
-    window.removeEventListener('mousemove', this.mousemoveHandler);
-    window.removeEventListener('mousedown', this.mousedownHandler);
+    if (this.canvas) {
+      this.canvas.removeEventListener('mousemove', this.mousemoveHandler);
+      this.canvas.removeEventListener('mousedown', this.mousedownHandler);
+      this.canvas.removeEventListener('wheel', this.wheelHandler);
+    }
     window.removeEventListener('mouseup', this.mouseupHandler);
-    window.removeEventListener('blur', this.blurHandler);
     this.buttons.clear();
   }
 
