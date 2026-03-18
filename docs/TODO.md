@@ -10,8 +10,8 @@
  - [ ] test pointer lock in feature demo
 
 ## Focus Blur (in progress?)
- - [ ] Add 'focus' and 'blur' events in the engine.
- - [ ] (refactor) Make sure all event listeners are cleaned up on dispose.
+ - [x] Add 'focus' and 'blur' events in the engine.
+ - [x] (refactor) Make sure all event listeners are cleaned up on dispose.
 
 
 ## Adding PreventDefault to avoid scrolling the page etc while game is focused. (in progress?)

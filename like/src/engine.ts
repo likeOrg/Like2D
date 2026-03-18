@@ -21,6 +21,13 @@ export class Engine {
   private currentScene: Scene | null = null;
   private gfxState: ReturnType<typeof newState>;
 
+  // Event handler references for cleanup
+  private windowFocusHandler: (() => void) | null = null;
+  private windowBlurHandler: (() => void) | null = null;
+  private canvasFocusHandler: (() => void) | null = null;
+  private canvasBlurHandler: (() => void) | null = null;
+  private fullscreenChangeHandler: (() => void) | null = null;
+
   readonly like: Like;
 
   constructor(container: HTMLElement) {
@@ -81,29 +88,23 @@ export class Engine {
       this.dispatch(pressed ? 'gamepadpressed' : 'gamepadreleased', [gpIndex, buttonIndex, buttonName]);
     };
 
-    window.addEventListener('focus', () => {
-      this.dispatch('focus', []);
-    });
-
-    window.addEventListener('blur', () => {
-      this.dispatch('blur', []);
-    });
-
-    this.canvas.addEventListener('focus', () => {
-      this.dispatch('focus', []);
-    });
-
-    this.canvas.addEventListener('blur', () => {
-      this.dispatch('blur', []);
-    });
-
-    document.addEventListener('fullscreenchange', () => {
+    this.windowFocusHandler = () => this.dispatch('focus', []);
+    this.windowBlurHandler = () => this.dispatch('blur', []);
+    this.canvasFocusHandler = () => this.dispatch('focus', []);
+    this.canvasBlurHandler = () => this.dispatch('blur', []);
+    this.fullscreenChangeHandler = () => {
       const mode = this.canvasManager.getMode();
       const isFullscreen = !!document.fullscreenElement;
       if (mode.fullscreen !== isFullscreen) {
         this.canvasManager.setMode({ ...mode, fullscreen: isFullscreen });
       }
-    });
+    };
+
+    window.addEventListener('focus', this.windowFocusHandler);
+    window.addEventListener('blur', this.windowBlurHandler);
+    this.canvas.addEventListener('focus', this.canvasFocusHandler);
+    this.canvas.addEventListener('blur', this.canvasBlurHandler);
+    document.addEventListener('fullscreenchange', this.fullscreenChangeHandler);
   }
 
   private dispatch<T extends EventType>(type: T, args: any[]): void {
@@ -167,6 +168,13 @@ export class Engine {
     this.like.mouse.dispose();
     this.like.gamepad.dispose();
     this.canvasManager.dispose();
+    
+    if (this.windowFocusHandler) window.removeEventListener('focus', this.windowFocusHandler);
+    if (this.windowBlurHandler) window.removeEventListener('blur', this.windowBlurHandler);
+    if (this.canvasFocusHandler) this.canvas.removeEventListener('focus', this.canvasFocusHandler);
+    if (this.canvasBlurHandler) this.canvas.removeEventListener('blur', this.canvasBlurHandler);
+    if (this.fullscreenChangeHandler) document.removeEventListener('fullscreenchange', this.fullscreenChangeHandler);
+
     if (this.canvas.parentNode === this.container) {
       this.container.removeChild(this.canvas);
     }
