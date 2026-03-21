@@ -111,6 +111,17 @@ export namespace Vec2 {
     return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
   }
 
+  export function toPolar(v: Vector2): { r: number, angle: number } {
+    return {
+      r: Vec2.length(v),
+      angle: Vec2.angle(v),
+    }
+  }
+
+  export function fromPolar(r: number, angle: number): Vector2 {
+    return [ r * Math.cos(angle), r * Math.sin(angle) ]
+  }
+
   export function angle(v: Vector2): number {
     return Math.atan2(v[1], v[0]);
   }
