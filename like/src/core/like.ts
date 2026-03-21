@@ -20,7 +20,7 @@ import type { Timer } from './timer';
 import type { Input } from './input';
 import type { Keyboard } from './keyboard';
 import type { Mouse } from './mouse';
-import type { Gamepad } from './gamepad';
+import type { LikeGamepad } from './gamepad';
 import type { CanvasInternal } from './canvas';
 import type { BoundGraphics } from './graphics';
 import type { Scene } from '../scene';
@@ -50,7 +50,7 @@ export interface Like {
   readonly mouse: Mouse;
   
   /** Gamepad input handling */
-  readonly gamepad: Gamepad;
+  readonly gamepad: LikeGamepad;
 
   /** Canvas settings, including even Pixel Art mode. */
   readonly canvas: Canvas;

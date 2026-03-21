@@ -23,7 +23,7 @@ import { Input } from './core/input';
 import { Timer } from './core/timer';
 import { Keyboard } from './core/keyboard';
 import { Mouse } from './core/mouse';
-import { Gamepad } from './core/gamepad';
+import { LikeGamepad } from './core/gamepad';
 import { bindGraphics } from './core/graphics';
 import type { Like2DEvent, EventType, EventMap } from './core/events';
 import type { Like } from './core/like';
@@ -74,11 +74,12 @@ export class Engine {
 
     let gfx = bindGraphics(canvas.getContext('2d')!);
 
+    const dispatch = this.dispatch.bind(this);
     const audio = new Audio();
     const timer = new Timer();
     const keyboard = new Keyboard(canvas);
     const mouse = new Mouse(canvas, this.dispatch.bind(this));
-    const gamepad = new Gamepad();
+    const gamepad = new LikeGamepad(dispatch);
     const input = new Input({ keyboard, mouse, gamepad });
 
     this.like = {
@@ -101,9 +102,6 @@ export class Engine {
       this.dispatch(type === 'keydown' ? 'keypressed' : 'keyreleased', [scancode, keycode]);
     };
 
-    gamepad.onButtonEvent = (gpIndex, buttonIndex, buttonName, pressed) => {
-      this.dispatch(pressed ? 'gamepadpressed' : 'gamepadreleased', [gpIndex, buttonIndex, buttonName]);
-    };
 
     window.addEventListener('focus', () => this.dispatch('focus', []));
     window.addEventListener('blur', () => this.dispatch('blur', []));
@@ -141,8 +139,6 @@ export class Engine {
     this.handleEvent = handleEvent;
     this.isRunning = true;
     this.lastTime = performance.now();
-
-    await this.like.gamepad.init();
 
     const loop = () => {
       if (!this.isRunning) return;
@@ -185,7 +181,7 @@ export class Engine {
     this.isRunning = false;
     this.like.keyboard.dispose();
     this.like.mouse.dispose();
-    this.like.gamepad.dispose();
+    this.like.gamepad._dispose();
     this.canvas._dispose();
     this.abort.abort();
 

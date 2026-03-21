@@ -1,249 +1,218 @@
-// Gamepad button mapping layer
-// Bridges SDL database mappings with our internal button naming system
+/**
+ * @module GamepadMapping
+ * 
+ * A database, generated on module load,
+ * which uses SDL's database to coerce our MEAGER
+ * browser APIs into physical gamepad button
+ * mappings.
+ * 
+ * Usage:
+ * ```ts
+ * const gp = new GamepadMapping(gamepad)
+ * const likeButton = gp.applyMapping(buttonNumber);
+ * ```
+ * 
+ * Browser API shortcomings:
+ *  - No standard way of exposing vendor and product
+ *  - Almost nothing is standard
+ *  - Vendor and product alone doesn't suffice for GUID -- Different controllers have the same.
+ *  - D-pads either get mapped to an axis (last pair of axes in Chromium) or buttons (Firefox).
+ *  - Analog axes get mapped differently in Firefox and Chromium.
+ * 
+ * How we overcome them:
+ *  - We parse out vendor and product based on currently known formats.
+ *  - We go with best-match. Expect bugs, because the API is lacking.
+ *  - If an axis isn't shown in the SDL db, we assume it's a dpad.
+ *  - MOST controllers should work.
+ *  - If yours doesn't work, file an issue.
+ *  - A few controllers are vexing our software can't do anything. :(
+ * 
+ */
 
-import { GP } from './gamepad-buttons';
+// @ts-ignore
+import gamecontrollerdb from "../gamecontrollerdb.txt?raw";
 
-// Map SDL button names to our standard button indices
-const SDL_TO_GP: Record<string, number> = {
-  'a': GP.Bottom,
-  'b': GP.Right,
-  'x': GP.Left,
-  'y': GP.Top,
-  'leftshoulder': GP.LB,
-  'rightshoulder': GP.RB,
-  'lefttrigger': GP.LT,
-  'righttrigger': GP.RT,
-  'back': GP.Back,
-  'start': GP.Start,
-  'guide': GP.Guide,
-  'leftstick': GP.LS,
-  'rightstick': GP.RS,
-  'dpup': GP.DUp,
-  'dpdown': GP.DDown,
-  'dpleft': GP.DLeft,
-  'dpright': GP.DRight,
-};
+// Single source of truth for mappings.
+// https://www.w3.org/TR/gamepad/#dfn-standard-gamepad
+const buttonMap = [
+  { sdl: 'a', like: 'ButtonBottom', num: 0 as number },
+  { sdl: 'b', like: 'ButtonRight', num: 1 },
+  { sdl: 'x', like: 'ButtonLeft', num: 2 },
+  { sdl: 'y', like: 'ButtonTop', num: 3 },
 
-// Pre-built mapping that maps controller button index -> GP index
-interface ControllerMapping {
-  name: string;
-  toStandard: Map<number, number>;
-}
+  { sdl: 'leftshoulder', like: 'ButtonL1', num: 4 },
+  { sdl: 'rightshoulder', like: 'ButtonR1', num: 5 },
+  { sdl: 'lefttrigger', like: 'ButtonL2', num: 6 },
+  { sdl: 'righttrigger', like: 'ButtonR2', num: 7 },
 
-// Internal database for storing pre-built controller mappings
-class GamepadDatabase {
-  // vendorProductKey -> mapping
-  private mappings = new Map<number, ControllerMapping>();
-  private loaded = false;
+  { sdl: 'back', like: 'ButtonMenuLeft', num: 8 },
+  { sdl: 'start', like: 'ButtonMenuRight', num: 9 },
+  { sdl: 'guide', like: 'ButtonMenuCenter', num: 16 },
 
-  load(dbContent: string): void {
-    this.mappings.clear();
-    
-    const lines = dbContent.split('\n');
-    
-    for (const line of lines) {
-      const trimmed = line.trim();
-      
-      if (!trimmed || trimmed.startsWith('#')) {
-        continue;
-      }
-      
-      const mapping = this.parseLine(trimmed);
-      if (mapping) {
-        // Extract vendor/product from GUID and store mapping
-        const guid = line.split(',')[0].toLowerCase().trim();
-        const vpKey = this.extractVendorProductKey(guid);
-        if (vpKey !== null && !this.mappings.has(vpKey)) {
-          this.mappings.set(vpKey, mapping);
-        }
-      }
-    }
-    
-    this.loaded = true;
-  }
+  { sdl: 'leftstick', like: 'ButtonLeftStick', num: 10 },
+  { sdl: 'rightstick', like: 'ButtonRightStick', num: 11 },
 
-  private extractVendorProductKey(guid: string): number | null {
-    if (guid.length < 20) return null;
-    const vendorHex = guid.substring(8, 12);
-    const productHex = guid.substring(16, 20);
-    const vendor = parseInt(vendorHex.substring(2, 4) + vendorHex.substring(0, 2), 16);
-    const product = parseInt(productHex.substring(2, 4) + productHex.substring(0, 2), 16);
-    if (isNaN(vendor) || isNaN(product)) return null;
-    return 0x10000 * vendor + product;
-  }
+  { sdl: 'dpup', like: 'DpadUp', num: 12 },
+  { sdl: 'dpdown', like: 'DpadDown', num: 13 },
+  { sdl: 'dpleft', like: 'DpadLeft', num: 14 },
+  { sdl: 'dpright', like: 'DpadRight', num: 15 },
+] as const;
 
-  isLoaded(): boolean {
-    return this.loaded;
-  }
+export const identityMap = new Map(buttonMap.map(({num, like}) => [num, like]));
+export type LikeButton = typeof buttonMap[number]['like'];
 
-  getMappingCount(): number {
-    return this.mappings.size;
-  }
-
-  getMapping(vendor: number, product: number): ControllerMapping | undefined {
-    const key = 0x10000 * vendor + product;
-    return this.mappings.get(key);
-  }
-
-  private parseLine(line: string): ControllerMapping | null {
-    const parts = line.split(',');
-    
-    if (parts.length < 3) {
-      return null;
-    }
-    
-    const name = parts[1].trim();
-    const toStandard = new Map<number, number>();
-    
-    // Parse mapping pairs (key:value)
-    for (let i = 2; i < parts.length; i++) {
-      const part = parts[i].trim();
-      if (!part || part.startsWith('platform:')) continue;
-      
-      const colonIndex = part.indexOf(':');
-      if (colonIndex === -1) continue;
-      
-      const sdlName = part.substring(0, colonIndex).trim();
-      const value = part.substring(colonIndex + 1).trim();
-      
-      if (!sdlName || !value) continue;
-      
-      // Only handle button mappings (b0, b1, etc.)
-      if (value.startsWith('b')) {
-        const controllerIndex = parseInt(value.substring(1), 10);
-        const gpIndex = SDL_TO_GP[sdlName];
-        if (!isNaN(controllerIndex) && gpIndex !== undefined) {
-          toStandard.set(controllerIndex, gpIndex);
-        }
-      }
-    }
-    
-    return { name, toStandard };
-  }
-}
-
-// Singleton instance
-const gamepadDatabase = new GamepadDatabase();
-
-export interface ButtonMapping {
-  toStandard: Map<number, number>;
-  controllerName: string;
-  hasMapping: boolean;
-  vendor: number | null;
-  product: number | null;
-}
-
+/**
+ * The parsed output of a gamepad ID string.
+ */
 export class GamepadMapping {
-  private dbLoaded = false;
+  vendor: number = 0x0000;
+  product: number = 0x0000;
+  name: string = "Unknown";
+  sdlName: string = "Unknown";
+  mapping: MapEntry["mapping"] = identityMap;
 
-  async loadDatabase(): Promise<void> {
-    if (this.dbLoaded) return;
+  constructor(info: Gamepad) {
+    const parsed = GamepadMapping.tryParseId(info.id);
 
-    try {
-      const res = await fetch('./gamecontrollerdb.txt');
-      if (res.ok) {
-        const text = await res.text();
-        // Validate it's actually the DB file, not HTML error page
-        if (text.startsWith('# Game Controller DB') || text.includes('03000000')) {
-          gamepadDatabase.load(text);
-          this.dbLoaded = true;
-        }
+    if (parsed) {
+      const [vendor, product, name] = parsed;
+      this.vendor = parseInt(vendor, 16);
+      this.product = parseInt(product, 16);
+      this.name = name;
+      const mapping = mappingDb.get(getVpNumber(this.vendor, this.product));
+      console.log(getVpNumber(this.vendor, this.product).toString(16));
+      if (mapping) {
+        console.log(`[Gamepad] Found mapping`);
+        this.sdlName = mapping.name;
+        this.mapping = mapping.mapping;
+        console.log(this.infoString());
+      } else {
+        console.log(`[Gamepad] No mapping found
+    id string: '${info.id}'
+    parsed :${JSON.stringify({ vendor, product, name })}`);
       }
-    } catch {}
-
-    if (!this.dbLoaded) {
-      try {
-        // @ts-ignore - Vite handles ?raw imports
-        const module = await import('../gamecontrollerdb.txt?raw');
-        if (typeof module.default === 'string') {
-          gamepadDatabase.load(module.default);
-          this.dbLoaded = true;
-        }
-      } catch {}
+    } else {
+      console.log(`[Gamepad] Failed to parse id: ${info.id}`);
     }
 
-    if (this.dbLoaded) {
-      console.log(`[Gamepad] Loaded ${gamepadDatabase.getMappingCount()} controller mappings`);
+    if (info.mapping == "standard") {
+      this.mapping = identityMap;
+      console.log("[Gamepad] Overridden with standard mapping.");
     }
-  }
-
-  loadDatabaseFromText(content: string): void {
-    gamepadDatabase.load(content);
-    this.dbLoaded = true;
   }
 
   /**
-   * Get button mapping for a specific gamepad
+   * There is no standard way that browsers expose the 16-bit
+   * vendor and product fields.
+   *
+   * If using the currently understood firefox/chromium format,
+   * this will extract what we can.
+   *
+   * @returns [vendor, product, name]
    */
-  getMapping(gamepad: Gamepad): ButtonMapping {
-    const vp = this.extractVendorProduct(gamepad);
-
-    // If browser provides "standard" mapping, use identity mapping
-    if (gamepad.mapping === 'standard') {
-      return {
-        toStandard: IDENTITY_MAP,
-        controllerName: gamepad.id,
-        hasMapping: true,
-        vendor: vp?.vendor ?? null,
-        product: vp?.product ?? null,
-      };
-    }
-
-    // Look up in database
-    if (vp && this.dbLoaded) {
-      const dbMapping = gamepadDatabase.getMapping(vp.vendor, vp.product);
-      if (dbMapping) {
-        return {
-          toStandard: dbMapping.toStandard,
-          controllerName: dbMapping.name,
-          hasMapping: true,
-          vendor: vp.vendor,
-          product: vp.product,
-        };
+  static tryParseId(id: string): [string, string, string] | undefined {
+    // Chrome: `Name (Vendor: XXXX, Product: YYYY)`
+    const infoC = id.match(
+      /^([^(]+)\(Vendor: ([0-9a-f]+) Product: ([0-9a-f]+)/i,
+    );
+    if (infoC) {
+      const [, name, vendor, product] = infoC;
+      return [vendor, product, name.trim()];
+    } else {
+      // Firefox: `VVVV-PPPP-name`
+      const infoF = id.split("-");
+      if (infoF.length == 3) {
+        return infoF as any;
       }
     }
-
-    // No mapping found - use identity
-    return {
-      toStandard: IDENTITY_MAP,
-      controllerName: gamepad.id,
-      hasMapping: false,
-      vendor: vp?.vendor ?? null,
-      product: vp?.product ?? null,
-    };
   }
 
-  private extractVendorProduct(gamepad: Gamepad): { vendor: number; product: number } | null {
-    const id = gamepad.id;
+  applyMapping(gp: Gamepad): Set<LikeButton> {
+    const pressedButtons = new Set<LikeButton>();
 
-    const vendorProductMatch = id.match(/Vendor:\s*([0-9a-fA-F]+)\s+Product:\s*([0-9a-fA-F]+)/i);
-    if (vendorProductMatch) {
-      const vendor = parseInt(vendorProductMatch[1], 16);
-      const product = parseInt(vendorProductMatch[2], 16);
-      if (!isNaN(vendor) && !isNaN(product)) {
-        return { vendor, product };
+    gp.buttons.forEach((btn, i) => {
+      if (btn.pressed) {
+        const maybeName = this.mapping.get(i) ?? identityMap.get(i);
+        if (maybeName) {
+          pressedButtons.add(maybeName);
+        } else {
+          console.log(`[Gamepad] Button not found for index ${i}`);
+        }
       }
-    }
+    })
 
-    const hexMatch = id.match(/^([0-9a-fA-F]{4})[\s-]+([0-9a-fA-F]{4})/);
-    if (hexMatch) {
-      const vendor = parseInt(hexMatch[1], 16);
-      const product = parseInt(hexMatch[2], 16);
-      if (!isNaN(vendor) && !isNaN(product)) {
-        return { vendor, product };
-      }
-    }
+    return pressedButtons;
+  }
 
-    return null;
+  infoString(): string {
+    return `
+[Gamepad] Mapping info for '${this.name}' (sdl: ${this.sdlName})
+  vendor: 0x${this.vendor.toString(16)}
+  product: 0x${this.product.toString(16)}
+  mapping: ${Array.from(this.mapping.entries()).map(([k,v]) => `\n    ${k}:${v}`)}
+    `
   }
 }
 
-// Reusable identity map for standard/unmapped controllers
-const IDENTITY_MAP = new Map<number, number>([
-  [0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7],
-  [8, 8], [9, 9], [10, 10], [11, 11], [12, 12], [13, 13], [14, 14], [15, 15],
-  [16, 16], [17, 17], [18, 18], [19, 19],
-]);
+// A convention used to have numeric keys in our db.
+function getVpNumber(vendor: number, product: number) {
+  return vendor * 0x10000 + product;
+}
 
-// Singleton instance
-export const gamepadMapping = new GamepadMapping();
+const sdlButtonSet = new Set<string>(buttonMap.map(({ sdl }) => sdl));
+const sdlToLikeMap = new Map<string, LikeButton>(
+  buttonMap.map(({ sdl, like }) => [sdl, like]),
+);
+
+type MappingDb = Map<number, MapEntry>;
+type MapEntry = {
+  name: string,
+  mapping: Map<number, LikeButton>,
+}
+
+const mappingDb = generateMappingDb(gamecontrollerdb);
+
+function generateMappingDb(db: string): MappingDb {
+  const dbEntries = db
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((line) => line !== "" && !line.startsWith("#"))
+    .map(parseDbLine);
+
+  console.log(`[Gamepad] Parsed ${dbEntries.length} entries from DB`);
+  const mappingDb = new Map(dbEntries);
+  console.log(`[Gamepad] Final entry count: ${mappingDb.size}`);
+  return mappingDb;
+}
+
+function parseDbLine(line: string): [number, MapEntry] {
+  const [guid, name, ...mappings] = line.split(',');
+  mappings.pop(); // trailing comma
+
+  const vpNum =
+    0x1 * parseInt(guid.substring(16, 18), 16) +
+    0x100 * parseInt(guid.substring(18, 20), 16) +
+    0x10000 * parseInt(guid.substring(8, 10), 16) +
+    0x1000000 * parseInt(guid.substring(10, 12), 16);
+
+  const mapping = new Map(
+    mappings
+      .map((s) => {
+        const [sdl, bname] = s.split(":");
+        const browserIndex = sdlRawButtonToBrowser(bname);
+        return browserIndex !== undefined && sdlButtonSet.has(sdl)
+          && [browserIndex, sdlToLikeMap.get(sdl)]
+      })
+      .filter((v) => !!v) as [number, LikeButton][],
+  );
+
+  return [vpNum, {name, mapping}]
+}
+
+function sdlRawButtonToBrowser(btn: string): number | undefined {
+  return btn.startsWith("b")
+    ? Number(btn.substring(1))
+    : btn.startsWith("h") // format: h0.4 for dpad. Map to browser buttons.
+    ? {1: 12, 2: 13, 4: 14, 8: 15}[Number(btn.substring(3))]
+    : undefined;
+}

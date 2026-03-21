@@ -33,22 +33,25 @@
 
 Web framework inspired by [LÖVE](https://love2d.org/).
 
-## <div style="color:red">LIKE is alpha, and its API may change. Expect flaws.</div>
+## <div style="color:red">During v2.x.x, LIKE's API will change.</div>
 ## What it is
 
 LIKE is a cozy way to make 2d games for browser.
 
 ## What LIKE does
 
-- **↔️ Canvas Scaling:** Two canvas modes for flexibility.
-   - Keep the canvas at 1:1 pixel resolution for maximum sharpness.
-   - For retro-style developers, pixels stay sharp but smooth with automatic prescaling. 👾
+- **↔️ Two Canvas Modes:**
+   - 🖊️ Audio-resize the canvas; sharp at any resolution.
+   - 👾 For retro-style developers, pixels stay crisp but smooth via prescaling.
 - **🔥 Fire-and-forget Assets:** Graphics and audio that pretend to be synchronous.
 - **🎯 Faster, more DWIM graphics:** LIKE turns many repetitive Canvas calls into one, and removes state bleed for properties like `lineCap`.
 - **🔊 Audio Source Tracking:** Global volume, global play/pause.
 - **⭕ Easier Geometry:** `Vector2` and `Rect` are just number tuples (arrays), but a pure-functional library makes them easy to work with and plays nice with `map` and `reduce`. 
-- **🕹️ Physical Joypad:** Our gamepad module auto-maps to physical buttons like "bottom" and "top". Because A isn't always in the same spot.
+- **🚲 Easy Flexible Input:** Keyboard, Mouse, and Gamepad all are given both event-based and tracking-based options. Choose what fits your architecture.
+- **🕹️ Physical Joypad (ALPHA):** Our gamepad module auto-maps to physical buttons like "bottom" and "top". Because A isn't always in the same spot. [^1]
 - **👉 Actions System:** A simple input layer to map inputs to actions, which fire usable events.
+
+[^1]: Physical Gamepad support is limited by Browser APIs. LIKE has worked around this as much as possible, but many gamepads will not work.
 
 ## Installation
 

@@ -17,8 +17,7 @@ export { ImageHandle } from './core/graphics';
 export type { Source, SourceOptions } from './core/audio';
 export type { Scene } from './scene';
 export { StartupScene } from './scenes/startup';
-export { getGPName, GP } from './core/gamepad';
-export type { StickPosition } from './core/gamepad';
+export { type LikeButton } from './core/gamepad';
 
 type Callback<K extends EventType> = (...args: EventMap[K]) => void;
 

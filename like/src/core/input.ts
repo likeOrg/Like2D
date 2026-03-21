@@ -1,24 +1,24 @@
 import type { Keyboard } from './keyboard';
 import type { Mouse } from './mouse';
-import type { Gamepad } from './gamepad';
+import type { LikeGamepad } from './gamepad';
 import { InputStateTracker } from './input-state';
-import { ButtonNames, GP_NAME_MAP } from './gamepad-buttons';
+import { LikeButton } from './gamepad-mapping';
 import { MouseButton } from './events';
 
 export type InputType = InputBinding['type'];
 export type InputBinding =
   | { type: 'keyboard'; code: string }
   | { type: 'mouse'; code: MouseButton }
-  | { type: 'gamepad'; code: ButtonNames };
+  | { type: 'gamepad'; code: LikeButton };
 
 export class Input {
   private actionMap = new Map<string, InputBinding[]>();
   private actionStateTracker = new InputStateTracker<string>();
   private keyboard: Keyboard;
   private mouse: Mouse;
-  private gamepad: Gamepad;
+  private gamepad: LikeGamepad;
 
-  constructor(deps: { keyboard: Keyboard; mouse: Mouse; gamepad: Gamepad }) {
+  constructor(deps: { keyboard: Keyboard; mouse: Mouse; gamepad: LikeGamepad }) {
     this.keyboard = deps.keyboard;
     this.mouse = deps.mouse;
     this.gamepad = deps.gamepad;
@@ -74,7 +74,7 @@ export class Input {
     }
 
     if (normalized.startsWith('Button') || normalized.startsWith('DP')) {
-      return { type: 'gamepad', code: normalized as ButtonNames };
+      return { type: 'gamepad', code: normalized as LikeButton };
     }
 
     return { type: 'keyboard', code: normalized };
@@ -84,18 +84,10 @@ export class Input {
     switch (binding.type) {
       case 'keyboard':
         return this.keyboard.isDown(binding.code);
-      case 'mouse': {
-        if (binding.code !== undefined) {
-          return this.mouse.isDown(binding.code);
-        }
-        return false;
-      }
+      case 'mouse':
+        return this.mouse.isDown(binding.code);
       case 'gamepad': {
-        const buttonIndex = GP_NAME_MAP[binding.code];
-        if (buttonIndex !== undefined) {
-          return this.gamepad.isButtonDownOnAny(buttonIndex);
-        }
-        return false;
+        return this.gamepad.isButtonDown(binding.code);
       }
       default:
         return false;

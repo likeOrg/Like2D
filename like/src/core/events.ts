@@ -20,6 +20,7 @@
  */
 
 import type { Vector2 } from '../math/vector2';
+import { LikeButton } from './gamepad-mapping';
 
 export type MouseButton = 'left' | 'middle' | 'right';
 
@@ -85,10 +86,10 @@ export type EventMap = {
   mousereleased: [pos: Vector2, button: MouseButton];
 
   /** Gamepad button pressed. index is controller number (0-3). */
-  gamepadpressed: [gamepadIndex: number, buttonIndex: number, buttonName: string];
+  gamepadpressed: [gamepadIndex: number, button: LikeButton];
 
   /** Gamepad button released. */
-  gamepadreleased: [gamepadIndex: number, buttonIndex: number, buttonName: string];
+  gamepadreleased: [gamepadIndex: number, button: LikeButton];
 
   /** Mapped action triggered. See {@link Input} for action mapping. */
   actionpressed: [action: string];
