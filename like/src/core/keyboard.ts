@@ -1,6 +1,7 @@
+import { EngineDispatch } from "../engine";
+
 export class Keyboard {
   private pressedScancodes = new Set<string>();
-  public onKeyEvent?: (scancode: string, keycode: string, type: 'keydown' | 'keyup') => void;
   private canvas: HTMLCanvasElement | null = null;
 
   // Event handler references for cleanup
@@ -8,7 +9,7 @@ export class Keyboard {
   private keyupHandler: (e: globalThis.KeyboardEvent) => void;
   private blurHandler: () => void;
 
-  constructor(canvas: HTMLCanvasElement | null) {
+  constructor(canvas: HTMLCanvasElement | null, private dispatch: EngineDispatch) {
     this.canvas = canvas;
 
     this.keydownHandler = this.handleKeyDown.bind(this);
@@ -31,14 +32,14 @@ export class Keyboard {
     if (e.code) {
       this.pressedScancodes.add(e.code);
     }
-    this.onKeyEvent?.(e.code, e.key, 'keydown');
+    this.dispatch('keypressed', [e.code, e.key]);
   }
 
   private handleKeyUp(e: globalThis.KeyboardEvent): void {
     if (e.code) {
       this.pressedScancodes.delete(e.code);
     }
-    this.onKeyEvent?.(e.code, e.key, 'keyup');
+    this.dispatch('keyreleased', [e.code, e.key]);
   }
 
   private handleBlur(): void {

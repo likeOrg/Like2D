@@ -77,8 +77,8 @@ export class Engine {
     const dispatch = this.dispatch.bind(this);
     const audio = new Audio();
     const timer = new Timer();
-    const keyboard = new Keyboard(canvas);
-    const mouse = new Mouse(canvas, this.dispatch.bind(this));
+    const keyboard = new Keyboard(canvas, dispatch);
+    const mouse = new Mouse(canvas, dispatch);
     const gamepad = new LikeGamepad(dispatch);
     const input = new Input({ keyboard, mouse, gamepad });
 
@@ -96,12 +96,6 @@ export class Engine {
         scene?.load?.(this.like);
       },
     };
-
-
-    keyboard.onKeyEvent = (scancode, keycode, type) => {
-      this.dispatch(type === 'keydown' ? 'keypressed' : 'keyreleased', [scancode, keycode]);
-    };
-
 
     window.addEventListener('focus', () => this.dispatch('focus', []));
     window.addEventListener('blur', () => this.dispatch('blur', []));
