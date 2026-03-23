@@ -278,6 +278,9 @@ export function drawImage(
   ctx.restore();
 }
 
+/**
+ * Get an {@link ImageHandle} that pretends to be synchronous.
+ */
 export function newImage(
   _ctx: CanvasRenderingContext2D,
   path: string,

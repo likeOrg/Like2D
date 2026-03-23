@@ -56,7 +56,7 @@ export type LikeInternal = Callbacks & {
    * 
    * Translates into `like.handleEvent = (event) => sceneDispatch(scene, like, event)`.
    * 
-   * @see Scene 
+   * {@link Scene} for detailed usage.
    * @param scene Scene to load, leave out to use callbacks.
    */
   setScene(scene?: Scene): void;

@@ -18,7 +18,9 @@ import type { Like } from './core/like';
  *  - wrap handleEvent (hint: that's what this does)
  * 
  * Also, some no need to pass around a `like` object.
- * Here, `like` instead piggybacks on a closure that follows around your running scene and shows up as an additional first argument to every callback.
+ * Here, `like` instead piggybacks on a closure that follows around
+ * your running scene and shows up as an additional first argument
+ * to every callback.
  * 
  * ## Quick Start
  *
@@ -89,13 +91,13 @@ import type { Like } from './core/like';
  * and more. Don't sleep on it.
  */
 
-type EventHandler<K extends EventType> = (like: Like, ...args: EventMap[K]) => void;
-
 export type Scene = {
   [K in EventType]?: EventHandler<K>;
 } & {
   handleEvent?(like: Like, event: LikeEvent): void;
 };
+
+type EventHandler<K extends EventType> = (like: Like, ...args: EventMap[K]) => void;
 
 /**
  * Used to call a scene's own handlers like `update` or `draw`,

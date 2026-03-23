@@ -4,12 +4,12 @@ import { Vec2, type Vector2 } from "../math/vector2";
 
 export type CanvasModeOptions = { fullscreen: boolean };
 /**
- * ## `'native'` mode
+ * ### `'native'` mode
  * Keeps the canvas pixel resolution
  * the same as the physical pixel resolution of the
  * device. 
  * 
- * ## Pixel art mode `[width, height]`
+ * ### Pixel art mode `[width, height]`
  * The canvas will use prescaling to keep your pixel
  * games looking sharp, but without the uneven pixels
  * caused by the naive approach.
