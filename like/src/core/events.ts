@@ -113,6 +113,6 @@ export type EventType = keyof EventMap;
  * }
  * ```
  */
-export type Like2DEvent = {
+export type LikeEvent = {
   [K in EventType]: { type: K; args: EventMap[K]; timestamp: number }
 }[EventType];

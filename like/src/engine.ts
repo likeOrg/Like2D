@@ -2,12 +2,13 @@
  * @module engine
  * @description Core game engine - lifecycle management and event dispatch.
  *
- * ## Architecture
- *
- * The engine shouldn't exist, but it does.
- * It's our duct tape file.
- * It will get progressively simpler until it doesn't need to exist
- *
+ * You've reached the most evil part of the codebase -- the man
+ * behind the curtain.
+ * 
+ * The secret force gluing everything together.
+ * 
+ * If you want to use modules independently, look here first.
+ * 
  * ## Memory Management
  *
  * Always call `dispose()` when destroying an engine instance:
@@ -25,10 +26,10 @@ import { Keyboard } from './core/keyboard';
 import { Mouse } from './core/mouse';
 import { LikeGamepad } from './core/gamepad';
 import { bindGraphics } from './core/graphics';
-import type { Like2DEvent, EventType, EventMap } from './core/events';
-import type { Like } from './core/like';
-import { sceneDispatch, type Scene } from './scene';
+import type { LikeEvent, EventType, EventMap } from './core/events';
+import type { LikeInternal } from './core/like';
 import { CanvasInternal } from './core/canvas';
+import { Scene, sceneDispatch } from './scene';
 
 export type EngineDispatch = Engine["dispatch"];
 
@@ -45,20 +46,16 @@ export class Engine {
   private canvas: CanvasInternal;
   private isRunning = false;
   private lastTime = 0;
-  private container: HTMLElement;
-  private handleEvent: ((event: Like2DEvent) => void) | null = null;
-  private currentScene?: Scene;
 
-  // Event handler references for cleanup
   private abort = new AbortController();
 
   /**
    * The Like interface providing access to all engine subsystems.
    * This object is passed to all scene callbacks and game code.
    */
-  readonly like: Like;
+  readonly like: LikeInternal;
 
-  constructor(container: HTMLElement) {
+  constructor(private container: HTMLElement) {
     this.canvas = new CanvasInternal(this.dispatch.bind(this));
     const canvas = this.canvas._displayCanvas;
     canvas.addEventListener("like:updateRenderTarget", (event: Event) => {
@@ -66,10 +63,6 @@ export class Engine {
       this.like.gfx = bindGraphics(event.detail.target.getContext('2d')!);
     });
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Failed to get 2D context');
-
-    this.container = container;
     this.container.appendChild(canvas);
 
     let gfx = bindGraphics(canvas.getContext('2d')!);
@@ -91,10 +84,16 @@ export class Engine {
       gamepad,
       gfx,
       canvas: this.canvas,
-      setScene: (scene) => {
-        this.currentScene = scene;
-        scene?.load?.(this.like);
-      },
+      start: this.start.bind(this),
+      dispose: this.dispose.bind(this),
+      setScene: (scene?: Scene) =>
+        (this.like.handleEvent = scene
+          ? (event) => sceneDispatch(scene, this.like, event)
+          : undefined),
+      callOwnHandlers: (event: LikeEvent) => {
+        if (event.type in this.like)
+          (this.like as any)[event.type](...event.args)
+      }
     };
 
     window.addEventListener('focus', () => this.dispatch('focus', []));
@@ -104,33 +103,25 @@ export class Engine {
   }
 
   private dispatch<K extends EventType>(type: K, args: EventMap[K]): void {
-    if (!this.handleEvent) return;
-    
-    const event = { type, args, timestamp: this.like.timer.getTime() } as Like2DEvent;
-    
-    if (this.currentScene) {
-      sceneDispatch(this.currentScene, this.like, event);
+    const event = { type, args, timestamp: this.like.timer.getTime() } as LikeEvent;
+    if (this.like.handleEvent) {
+      this.like.handleEvent(event);
     } else {
-      this.handleEvent(event);
+      this.like.callOwnHandlers(event);
     }
   }
 
   /**
    * Start the game loop.
    *
-   * @param handleEvent - Callback to receive events. Used internally by createLike.
-   * @returns Promise that resolves when the engine is initialized
-   *
    * @remarks
    * This method:
-   * 1. Initializes the gamepad mapping database
-   * 2. Dispatches the initial `load` event
-   * 3. Starts the requestAnimationFrame loop
+   * 1. Dispatches the initial `load` event
+   * 2. Starts the requestAnimationFrame loop
    *
    * The engine runs until dispose() is called.
    */
-  async start(handleEvent: (event: Like2DEvent) => void): Promise<void> {
-    this.handleEvent = handleEvent;
+  async start(): Promise<void> {
     this.isRunning = true;
     this.lastTime = performance.now();
 

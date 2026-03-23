@@ -1,12 +1,11 @@
 /**
  * @module scene
  * @description A helpful callback / state management layer, plus utility scenes.
+ * 
  */
 
-import type { Like2DEvent, EventMap, EventType } from './core/events';
+import type { LikeEvent, EventMap, EventType } from './core/events';
 import type { Like } from './core/like';
-
-type EventHandler<K extends EventType> = (like: Like, ...args: EventMap[K]) => void;
 
 /**
  * An interface for creating scenes.
@@ -44,7 +43,7 @@ type EventHandler<K extends EventType> = (like: Like, ...args: EventMap[K]) => v
  * like.setScene(new MagicalGrowingRectangle());
  * ```
  * 
- * To get back to global callbacks, just use `like.setScene()`.
+ * To get back to global callbacks, just use `like.handleEvent = undefined`
  *
  * ## Scene Lifecycle
  * 
@@ -74,7 +73,7 @@ type EventHandler<K extends EventType> = (like: Like, ...args: EventMap[K]) => v
  * 
  *     // Then, call my own callbacks.
  *     // By calling it here, the UI draws on top.
- *     sceneDispatch(this, like, event);
+ *     callSceneHandlers(this, like, event);
  *   }
  *   ...
  * }
@@ -89,17 +88,35 @@ type EventHandler<K extends EventType> = (like: Like, ...args: EventMap[K]) => v
  * Composing scenes lets you filter events, layer game elements,
  * and more. Don't sleep on it.
  */
+
+type EventHandler<K extends EventType> = (like: Like, ...args: EventMap[K]) => void;
+
 export type Scene = {
   [K in EventType]?: EventHandler<K>;
 } & {
-  /** Special callback that calls the callbacks. Or doesn't? {@link scene} for usage. */
-  handleEvent?(like: Like, event: Like2DEvent): void;
+  handleEvent?(like: Like, event: LikeEvent): void;
 };
 
-export function sceneDispatch(scene: Scene, like: Like, event: Like2DEvent) {
-  if (scene.handleEvent) {
-    scene.handleEvent(like, event);
-  } else if (event.type in scene) {
+/**
+ * Used to call a scene's own handlers like `update` or `draw`,
+ * typically at the end of handleEvent
+ * after modifying the event stream or composing sub-scenes.
+ */
+export const callSceneHandlers = (scene: Scene, like: Like, event: LikeEvent) => {
+  if (event.type in scene) {
     (scene as any)[event.type](like, ...event.args);
   }
+}
+
+/**
+ * Used to call sub scenes while respecting potential `handleEvent` within them.
+ * The main scene is similar to a sub-scene of the root (like) object in this
+ * regard.
+ */
+export const sceneDispatch = (scene: Scene, like: Like, event: LikeEvent) => {
+    if (scene.handleEvent) {
+      scene.handleEvent(like, event);
+    } else {
+      callSceneHandlers(scene, like, event);
+    }
 }

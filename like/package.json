@@ -11,13 +11,17 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./math": {
-      "import": "./dist/math/index.js",
-      "types": "./dist/math/index.d.ts"
+    "./scene": {
+      "import": "./dist/scene.js",
+      "types": "./dist/scene.d.ts"
     },
     "./math/*": {
-      "import": "./dist/math/*",
-      "types": "./dist/math/*"
+      "import": "./dist/math/*.js",
+      "types": "./dist/math/*.d.ts"
+    },
+    "./prefab-scenes": {
+      "import": "./dist/prefab-scenes/index.js",
+      "types": "./dist/prefab-scenes/index.d.ts"
     },
     "./internal/*": {
       "import": "./dist/core/*.js",

@@ -5,7 +5,7 @@
 ### Breaking Changes
 
  - **Rect and type Rectangle now separate.**
-
+ 
  - **Named Mouse Buttons** 1, 2, 3 are now `'left' | 'middle' | 'right'`.
 
  - **No More Physical Mapping** Here lies Sam's attempt at making physical gamepad mappings in the
@@ -29,13 +29,22 @@
     - All API methods intended to be private have vanished. Import from `like/core/[name]` and cast `[Name]` to `[NameInternal]` to retrieve.
     - `Rect`, `Rectangle`, `Vector2`, and `Vec2` now import from `like/math`.
 
+ - **LikeWithCallbacks is now just Like**
+ - **Like is now LikeInternal**
+ - **Like2DEvent is now just LikeEvent**
+
 ### Added
  - `like.canvas` module.
  - `like.canvas.getFullscreen(): bool`
  - `like.canvas.setFullscreen(bool)`
+ - `like.callOwnHandlers(LikeEvent)`: This has been split out and exposed for the sake of
+   ease in writing custom LIKE systems.
+ - `callSceneHandlers(LikeEvent)`: Similar, but for a scene to call its own events.
+ - `sceneDispatch(Scene, like, LikeEvent)`: Used for passing events into sub-scenes (including root scene).
 
 ### Updated
  - Documented public-facing API with TSDoc
+ - `like.handleEvents` and `scene.handleEvents` now work as expected -- they override the preexisting event handling.
 
 ### Fixed
  - canvas resize events now _actually fire_

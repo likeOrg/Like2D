@@ -1,5 +1,7 @@
-import { createLike, StartupScene, type Scene, type ImageHandle, type Source, type Like, type CanvasSize } from "like";
+import { createLike, type ImageHandle, type Source, type Like, type CanvasSize, LikeEvent } from "like";
+import { StartScreen } from "like/prefab-scenes";
 import { Vec2 } from "like/math/vector2";
+import { callSceneHandlers, Scene } from "like/scene";
 
 let pepperImage: ImageHandle | null = null;
 let audioSource: Source | null = null;
@@ -139,5 +141,5 @@ document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
   like.canvas.setFullscreen(true);
 });
 
-like.setScene(new StartupScene(demoScene));
+like.setScene(new StartScreen(demoScene));
 await like.start();
