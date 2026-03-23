@@ -11,8 +11,8 @@ Hardcoding keys (`if (key === 'Space')`) creates problems:
 
 ```typescript
 // Map abstract actions to physical inputs
-like.input.map('jump', ['Space', 'ArrowUp', 'KeyW', 'ButtonBottom']);
-like.input.map('fire', ['MouseLeft', 'KeyZ', 'RT']);
+like.input.setAction('jump', ['Space', 'ArrowUp', 'KeyW', 'ButtonBottom']);
+like.input.setAction('fire', ['MouseLeft', 'KeyZ', 'RT']);
 
 // Query by action
 if (like.input.isDown('jump')) { /* ... */ }

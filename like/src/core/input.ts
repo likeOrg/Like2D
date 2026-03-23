@@ -24,14 +24,15 @@ export class InputInternal {
     this.gamepad = deps.gamepad;
   }
 
-  map(action: string, inputs: string[]): void {
-    const bindings: InputBinding[] = inputs.map(input => this.parseInput(input));
-    this.actionMap.set(action, bindings);
-  }
-
-  unmap(action: string): void {
-    this.actionMap.delete(action);
-    this.actionStateTracker.clear();
+  setAction(action: string, inputs: string[] = []): void {
+    if (inputs.length) {
+      const bindings: InputBinding[] = inputs.map(input => this.parseInput(input));
+      this.actionMap.set(action, bindings);
+    } else {
+      this.actionMap.delete(action);
+      this.actionStateTracker.currState.delete(action);
+      this.actionStateTracker.prevState.delete(action);
+    }
   }
 
   isDown(action: string): boolean {

@@ -35,6 +35,7 @@
  - `Like` is now `LikeInternal`
  - `Like2DEvent` is now just `LikeEvent`
  - Renamed `Source` to `AudioSource`
+ - Renamed `input.map` and `input.unmap` to `input.setAction(string, string[]?)` -- which clears the action if nothing provided.
 
 ### Added
  - `like.canvas` module.

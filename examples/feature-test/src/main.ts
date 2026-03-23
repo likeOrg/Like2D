@@ -28,15 +28,15 @@ const demoScene: Scene = {
     pepperImage = like.gfx.newImage('pepper.png');
     audioSource = like.audio.newSource('./test.ogg');
     
-    like.input.map('jump', ['Space', 'ArrowUp', 'KeyW', 'ButtonBottom']);
-    like.input.map('fire', ['MouseLeft', 'RT']);
-    like.input.map('move_left', ['ArrowLeft', 'KeyA', 'DPLeft']);
-    like.input.map('move_right', ['ArrowRight', 'KeyD', 'DPRight']);
-    like.input.map('move_up', ['ArrowUp', 'KeyW', 'DPUp']);
-    like.input.map('move_down', ['ArrowDown', 'KeyS', 'DPDown']);
-    like.input.map('audio_play_pause', ['KeyP']);
-    like.input.map('sleep_timer', ['KeyL']);
-    like.input.map('toggle_pointer_lock', ['KeyC']);
+    like.input.setAction('jump', ['Space', 'ArrowUp', 'KeyW', 'ButtonBottom']);
+    like.input.setAction('fire', ['MouseLeft', 'RT']);
+    like.input.setAction('move_left', ['ArrowLeft', 'KeyA', 'DPLeft']);
+    like.input.setAction('move_right', ['ArrowRight', 'KeyD', 'DPRight']);
+    like.input.setAction('move_up', ['ArrowUp', 'KeyW', 'DPUp']);
+    like.input.setAction('move_down', ['ArrowDown', 'KeyS', 'DPDown']);
+    like.input.setAction('audio_play_pause', ['KeyP']);
+    like.input.setAction('sleep_timer', ['KeyL']);
+    like.input.setAction('toggle_pointer_lock', ['KeyC']);
   },
 
   update(like: Like, dt: number) {

@@ -1,5 +1,5 @@
 export class InputStateTracker<T> {
-  private prevState = new Set<T>();
+  public prevState = new Set<T>();
   public currState = new Set<T>();
 
   update(pressedKeys: Set<T>): { justPressed: T[]; justReleased: T[] } {

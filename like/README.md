@@ -31,7 +31,7 @@
  </g>
 </svg>
 
-Web framework inspired by [LÖVE](https://love2d.org/).
+Lightweight Web framework inspired by [LÖVE](https://love2d.org/).
 
 ## <div style="color:red">During v2.x.x, LIKE's API will change.</div>
 ## What it is
@@ -40,15 +40,17 @@ LIKE is a cozy way to make 2d games for browser.
 
 ## What LIKE does
 
+- **🔥 Fire-and-forget Assets:** Graphics and audio that pretend to be synchronous.
+- **🎯 DWIM graphics:** Turns repetitive draw calls into one while removing state bleed for properties like `lineCap`.
 - **↔️ Two Canvas Modes:**
    - 🖊️ Audio-resize the canvas; sharp at any resolution.
    - 👾 For retro-style developers, pixels stay crisp but smooth via prescaling.
-- **🔥 Fire-and-forget Assets:** Graphics and audio that pretend to be synchronous.
-- **🎯 Faster, more DWIM graphics:** LIKE turns many repetitive Canvas calls into one, and removes state bleed for properties like `lineCap`.
-- **🔊 Audio Source Tracking:** Global volume, global play/pause.
 - **⭕ Easier Geometry:** `Vector2` and `Rect` are just number tuples (arrays), but a pure-functional library makes them easy to work with and plays nice with `map` and `reduce`. 
-- **🚲 Easy Flexible Input:** Keyboard, Mouse, and Gamepad all are given both event-based and tracking-based options. Choose what fits your architecture.
-- **👉 Actions System:** A simple input layer to map inputs to actions, which fire usable events.
+- **🚲 Easy Input:** Keyboard, Mouse, and Gamepad all are given both event-based and tracking-based options. Choose what fits your architecture.
+- **👟 Consistent APIs:** Colors 0-1, not 0-255. Seconds, not milliseconds.
+- **👉 Actions System:** An input layer maps inputs to actions, which fire usable events.
+- **🌎 Global control:** Choose how to handle LIKE events, and manage resources with centralized trackers. LIKE is a great foundation for your own engine.
+- **🐦 Light and Elegant:** Zero dependencies and less than 5000 lines of code -- focused entirely on what matters.
 
 ## Installation
 
@@ -77,7 +79,7 @@ const like = createLike(document.body);
 
 like.load = () => {
   like.setMode([800, 600]);
-  like.input.map('jump', ['Space', 'ButtonBottom']);
+  like.input.setAction('jump', ['Space', 'ButtonBottom']);
 };
 
 like.update = (dt) => {
@@ -101,7 +103,7 @@ LIKE's API is not the same as LOVE, but similar in spirit. Notable differences:
  - Draw your graphics in one call, that's all. No setup or state bleed.
  - You manage your own instance of like in a big friendly object. This allows us to have multiple games on one page.
  - We use Vector2 and Rect tuples (like `[x, y]`) instead of loose coordinates.
- - Theres an actions system -- `input.map` / `actionpressed` and `actionreleased` callbacks.
+ - Theres an actions system -- `input.setAction` / `actionpressed` and `actionreleased` callbacks.
  - Some things are missing either due to browser limitations or smaller scope.
 
 ## Feedback welcome
