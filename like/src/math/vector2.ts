@@ -1,4 +1,4 @@
-import { mod as mmod } from ".";
+import { mod as mmod } from "./index.js";
 
 /** A pair of numbers `[x, y]`
  * representing for example:
