@@ -4,7 +4,7 @@
  * 
  */
 
-import type { LikeEvent, EventMap, EventType } from './core/events';
+import type { LikeEvent, EventMap } from './core/events';
 import type { Like } from './core/like';
 
 /**
@@ -92,12 +92,10 @@ import type { Like } from './core/like';
  */
 
 export type Scene = {
-  [K in EventType]?: EventHandler<K>;
+  [K in keyof EventMap]?: (like: Like, ...args: EventMap[K]) => void;
 } & {
   handleEvent?(like: Like, event: LikeEvent): void;
 };
-
-type EventHandler<K extends EventType> = (like: Like, ...args: EventMap[K]) => void;
 
 /**
  * Used to call a scene's own handlers like `update` or `draw`,
