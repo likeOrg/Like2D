@@ -86,10 +86,14 @@ export class Engine {
       canvas: this.canvas,
       start: this.start.bind(this),
       dispose: this.dispose.bind(this),
-      setScene: (scene?: Scene) =>
-        (this.like.handleEvent = scene
-          ? (event) => sceneDispatch(scene, this.like, event)
-          : undefined),
+      setScene: (scene?: Scene) => {
+        if (scene) {
+          this.like.handleEvent = (event) => sceneDispatch(scene, this.like, event);
+          this.dispatch("load", []);
+        } else {
+          this.like.handleEvent = undefined;
+        }
+      },
       callOwnHandlers: (event: LikeEvent) => {
         if (event.type in this.like)
           (this.like as any)[event.type](...event.args)

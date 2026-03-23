@@ -54,7 +54,8 @@ export type LikeInternal = Callbacks & {
    * A simple way to set the current scene, which acts like a pluggable
    * set of callbacks. 
    * 
-   * Translates into `like.handleEvent = (event) => sceneDispatch(scene, like, event)`.
+   * Translates into `like.handleEvent = (event) => sceneDispatch(scene, like, event)`
+   * followed by dispatching a `load` event.
    * 
    * {@link Scene} for detailed usage.
    * @param scene Scene to load, leave out to use callbacks.
