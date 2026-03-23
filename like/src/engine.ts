@@ -96,10 +96,10 @@ export class Engine {
       }
     };
 
-    window.addEventListener('focus', () => this.dispatch('focus', []));
-    window.addEventListener('blur', () => this.dispatch('blur', []));
-    canvas.addEventListener('focus', () => this.dispatch('focus', []));
-    canvas.addEventListener('focus', () => this.dispatch('focus', []));
+    window.addEventListener('focus', () => this.dispatch('focus', ['tab']));
+    window.addEventListener('blur', () => this.dispatch('blur', ['tab']));
+    canvas.addEventListener('focus', () => this.dispatch('focus', ['canvas']));
+    canvas.addEventListener('focus', () => this.dispatch('focus', ['canvas']));
   }
 
   private dispatch<K extends EventType>(type: K, args: EventMap[K]): void {

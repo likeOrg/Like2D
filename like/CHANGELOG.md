@@ -44,6 +44,7 @@
    ease in writing custom LIKE systems.
  - `callSceneHandlers(LikeEvent)`: Similar, but for a scene to call its own events.
  - `sceneDispatch(Scene, like, LikeEvent)`: Used for passing events into sub-scenes (including root scene).
+ - Focus/blur now take one argument `'tab' | 'canvas'` for source.
 
 ### Updated
  - Documented public-facing API with TSDoc

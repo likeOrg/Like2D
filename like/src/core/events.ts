@@ -70,11 +70,11 @@ export type EventMap = {
   /** Physical key released. */
   keyreleased: [scancode: string, keycode: string];
 
-  /** Window or tab gained focus. Game should resume audio/updates. */
-  focus: [];
+  /** Canvas or tab gained focus. Game may resume audio/updates. */
+  focus: [source: 'canvas' | 'tab'];
 
-  /** Window or tab lost focus. Game should pause audio/updates. */
-  blur: [];
+  /** Canvas or tab lost focus. Game may pause audio/updates. */
+  blur: [source: 'canvas' | 'tab'];
 
   /** Mouse moved. pos is absolute, delta is relative.. */
   mousemoved: [pos: Vector2, delta: Vector2];
