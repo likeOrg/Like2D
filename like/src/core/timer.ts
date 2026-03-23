@@ -5,7 +5,6 @@ export class TimerInternal {
   private fps = 0;
   private fpsAccumulator = 0;
   private sleepUntil: number | null = null;
-  private sceneStartTime = 0;
 
   _update(dt: number): void {
     this.currentDelta = dt;
@@ -20,10 +19,6 @@ export class TimerInternal {
     }
   }
 
-  resetSceneTime(): void {
-    this.sceneStartTime = this.totalTime;
-  }
-
   getDelta(): number {
     return this.currentDelta;
   }
@@ -34,10 +29,6 @@ export class TimerInternal {
 
   getTime(): number {
     return this.totalTime;
-  }
-
-  getSceneTime(): number {
-    return this.totalTime - this.sceneStartTime;
   }
 
   isSleeping(): boolean {

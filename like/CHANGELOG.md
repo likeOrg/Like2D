@@ -29,10 +29,12 @@
     - All API methods intended to be private have vanished. Import from `like/core/[name]` and cast `[Name]` to `[NameInternal]` to retrieve.
     - `Rect`, `Rectangle`, `Vector2`, and `Vec2` now import from `like/math/rect` and `like/math/vector2` etc.
 
- - **LikeWithCallbacks is now just Like**
- - **Like is now LikeInternal**
- - **Like2DEvent is now just LikeEvent**
- - **Renamed Source to AudioSource**
+ - **Removed Timer `setSceneTime`** because it doesn't play nice with composed scenes.
+
+ - `LikeWithCallbacks` is now just `Like`
+ - `Like` is now `LikeInternal`
+ - `Like2DEvent` is now just `LikeEvent`
+ - Renamed `Source` to `AudioSource`
 
 ### Added
  - `like.canvas` module.
