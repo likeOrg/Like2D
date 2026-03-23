@@ -12,7 +12,7 @@
  browser. At first reading sdlgamecontrollerdb was promising, but the browser wasn't giving enough info for
  an SDL GUID -- it was ambiguous. Then, disaster strikes: Firefox and Chromium don't
  agree on where to map his DPad or analog sticks. **tl;dr
- gamepad physical mapping support has been ended. Use actions bindings.**
+ gamepad physical mapping support has been ended. Use actions bindings.**. A prefab scene for binding controller inputs is in the works.
    - `like.gamepadpressed(gamepad: number, name: string)` event is now `like.gamepadpressed(gamepad: number, buttonNum: number, name: string)` as it was before. 
 
  - **Updates to mouse moved callback**
@@ -26,8 +26,8 @@
  - **Resize event** signature is now just  `resize(size: Vector2)`.
 
  - **Module exports**:
-    - All API methods intended to be private have vanished. Import from `like/core/[name]` and cast `[Name]` to `[NameInternal]` to retrieve.
     - `Rect`, `Rectangle`, `Vector2`, and `Vec2` now import from `like/math/rect` and `like/math/vector2` etc.
+    - `like/scene` builtins are now in `like/prefab-scenes`
 
  - **Removed Timer `setSceneTime`** because it doesn't play nice with composed scenes.
 
@@ -45,16 +45,16 @@
    ease in writing custom LIKE systems.
  - `callSceneHandlers(LikeEvent)`: Similar, but for a scene to call its own events.
  - `sceneDispatch(Scene, like, LikeEvent)`: Used for passing events into sub-scenes (including root scene).
- - Focus/blur now take one argument `'tab' | 'canvas'` for source.
+ - `like.focus` and `like.blur` now have one argument `'tab' | 'canvas'` for source.
  - `like.audio.getAllSources`
 
 ### Updated
  - Documented public-facing API with TSDoc
- - `like.handleEvents` and `scene.handleEvents` now work as expected -- they override the preexisting event handling.
 
 ### Fixed
  - canvas resize events now _actually fire_
- - countless internal inconsistencies: duplicated efforts, unclear names, repetitive and long code. To be clear, I had AI generate this codebase for me initially, and I have been reviewing / rewriting the code to match my human standards. Sometimes with the help of AI, sorry not sorry.
+ - `like.handleEvents` and `scene.handleEvents` now work as expected -- they override the preexisting event handling.
+ - All API methods intended to be private have vanished from the user-facing API. Import from `like/internal/[name]` and cast `[Name]` to `[NameInternal]` to retrieve.
 
 ## [2.8.0] - 2025-03-18
 
