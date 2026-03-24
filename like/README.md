@@ -31,7 +31,7 @@
  </g>
 </svg>
 
-Lightweight Web framework inspired by [LÖVE](https://love2d.org/).
+Lightweight web game framework inspired by [LÖVE](https://love2d.org/).
 
 ## <div style="color:red">During v2.x.x, LIKE's API will change.</div>
 ## What it is
