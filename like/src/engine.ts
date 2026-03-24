@@ -73,7 +73,7 @@ export class Engine {
     const keyboard = new KeyboardInternal(canvas, dispatch);
     const mouse = new MouseInternal(canvas, dispatch);
     const gamepad = new GamepadInternal(dispatch);
-    const input = new InputInternal({ keyboard, mouse, gamepad });
+    const input = new InputInternal({ keyboard, mouse, gamepad }, dispatch);
 
     this.like = {
       audio,
@@ -138,9 +138,7 @@ export class Engine {
 
       if (!this.like.timer.isSleeping()) {
         this.like.timer._update(dt);
-        const { pressed, released } = this.like.input._update();
-        pressed.forEach(action => this.dispatch('actionpressed', [action]));
-        released.forEach(action => this.dispatch('actionreleased', [action]));
+        this.like.input._update();
         this.dispatch('update', [dt]);
       }
 

@@ -124,12 +124,12 @@ const demoScene: Scene = {
     gfx.circle('fill', 'springgreen', player.pos, 15);
     gfx.circle('line', 'lime', player.pos, 15);
 
-    // Display gamepad axes
-    const axes = gamepad.getGamepad(0)?.axes;
-    if (axes && axes.length > 0) {
+    // Display gamepad sticks
+    const sticks = gamepad.getSticks(0);
+    if (sticks.length > 0) {
       gfx.print('orange', 'Gamepad Axes:', [20, 260], { font: '16px sans-serif' });
-      axes.forEach((axis, i) => {
-        gfx.print('white', `  Axis ${i}: ${axis.toFixed(3)}`, [20, 280 + i * 18], { font: '14px sans-serif' });
+      sticks.forEach((pos, i) => {
+        gfx.print('white', `  Stick ${i}: ${pos}`, [20, 280 + i * 18], { font: '14px sans-serif' });
       });
     } else {
       gfx.print('gray', 'No gamepad connected', [20, 260], { font: '14px sans-serif' });

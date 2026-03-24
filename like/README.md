@@ -46,7 +46,7 @@ LIKE is a cozy way to make 2d games for browser.
    - 🖊️ Audio-resize the canvas; sharp at any resolution.
    - 👾 For retro-style developers, pixels stay crisp but smooth via prescaling.
 - **⭕ Easier Geometry:** `Vector2` and `Rect` are just number tuples (arrays), but a pure-functional library makes them easy to work with and plays nice with `map` and `reduce`. 
-- **🚲 Easy Input:** Keyboard, Mouse, and Gamepad all are given both event-based and tracking-based options. Choose what fits your architecture.
+- **🚲 Easy Input:** Keyboard, Mouse, and Gamepad all are given both event-based and tracking-based options. Choose what fits your architecture. Gamepads are easy to remap, and LIKE can load and save them automatically.
 - **👟 Consistent APIs:** Colors 0-1, not 0-255. Seconds, not milliseconds.
 - **👉 Actions System:** An input layer maps inputs to actions, which fire usable events.
 - **🌎 Global control:** Choose how to handle LIKE events, and manage resources with centralized trackers. LIKE is a great foundation for your own engine.

@@ -8,19 +8,19 @@ export type { LikeButton };
 export type GamepadTarget = number | "any";
 
 type Mapping = {
-  buttons: Map<number, number>,
+  buttons: number[],
   sticks: StickMapping[],
 }
 type StickMapping = [StickAxisMapping, StickAxisMapping];
 type StickAxisMapping = {index: number, invert: boolean};
 
-const defaultMapping = (): Mapping => ({
-  buttons: new Map(),
-  sticks: [
-    [{index: 0, invert: false}, {index: 1, invert: false}],
-    [{index: 2, invert: false}, {index: 3, invert: false}],
-  ]
-})
+const defaultMapping = (stickCount: number): Mapping => ({
+  buttons: [],
+  sticks: Array(stickCount / 2).fill(0).map((_, i) => [
+    { index: i * 2, invert: false },
+    { index: i * 2 + 1, invert: false },
+  ]),
+});
 
 /** LIKE Gamepad Wrapper
  * 
@@ -71,7 +71,7 @@ export class GamepadInternal {
     const gps = new GamepadState(ev.gamepad.index);
     this.gamepads.set(ev.gamepad.index, gps);
 
-    const mapping = this.getSavedMapping(ev.gamepad.index);
+    const mapping = this.loadMapping(ev.gamepad.index);
     if (this.autoLoadMapping && mapping) {
         gps.mapping = mapping;
         console.log(
@@ -92,6 +92,19 @@ export class GamepadInternal {
 
   _update(): void {
     this.gamepads.forEach((gp) => gp.update(this.dispatch));
+  }
+
+  /**
+   * 
+   * @param target Which controller?
+   * @returns all of the sticks. Convention is 0 = left, 1 = right.
+   */
+  getSticks(target: number): Vector2[] {
+    const gp = this.gamepads.get(target);
+    if (gp) {
+      return gp.sticks;
+    }
+    return [];
   }
 
   /** Check if a gamepad button is down. */
@@ -123,23 +136,6 @@ export class GamepadInternal {
     }
   }
 
-  /** Get a raw DOM gamepad object. */
-  getGamepad(target: number): Gamepad | null {
-    return navigator.getGamepads()?.[target] ?? null;
-  }
-
-  /**
-   * Enable automatically loading mappings.
-   *
-   * When a gamepad with a known (to this system) ID is plugged in,
-   * this will load the previously saved mapping.
-   *
-   * @param autosave (default true)
-   */
-  setAutoloadMapping(enable: boolean) {
-    this.autoLoadMapping = enable;
-  }
-
   /**
    * Get a controller mapping.
    * Note that modifying this mapping in place will modify the target controller.
@@ -147,19 +143,6 @@ export class GamepadInternal {
    */
   getMapping(index: number): Mapping | undefined {
     return this.gamepads.get(index)?.mapping;
-  }
-
-  /**
-   * Get saved mapping from db, if it exists.
-   */
-  getSavedMapping(index: number): Mapping | undefined {
-    const gp = navigator.getGamepads()?.[index];
-    if (gp) {
-      const item = localStorage.getItem(getLocalstoragePath(gp));
-      if (item) {
-        return JSON.parse(item);
-      }
-    }
   }
 
   /**
@@ -178,6 +161,19 @@ export class GamepadInternal {
   }
 
   /**
+   * Get saved mapping from db, if it exists.
+   */
+  loadMapping(index: number): Mapping | undefined {
+    const gp = navigator.getGamepads()?.[index];
+    if (gp) {
+      const item = localStorage.getItem(getLocalstoragePath(gp));
+      if (item) {
+        return JSON.parse(item);
+      }
+    }
+  }
+
+  /**
    * Save a mapping to persistant storage
    */
   saveMapping(index: number, mapping: Mapping) {
@@ -185,6 +181,18 @@ export class GamepadInternal {
     if (gp) {
       localStorage.setItem(getLocalstoragePath(gp), JSON.stringify(mapping));
     }
+  }
+
+  /**
+   * Enable automatically loading mappings.
+   *
+   * When a gamepad with a known (to this system) ID is plugged in,
+   * this will load the previously saved mapping.
+   *
+   * @param autosave (default true)
+   */
+  enableAutoLoadMapping(enable: boolean) {
+    this.autoLoadMapping = enable;
   }
 
   _dispose(): void {
@@ -213,19 +221,23 @@ function getLocalstoragePath(gamepad: Gamepad): string {
  * its state.
  */
 class GamepadState {
-  public mapping: Mapping = defaultMapping();
+  public mapping: Mapping;
   public pressed: boolean[] = [];
   public sticks: Vector2[] = [];
   public justPressed: boolean[] = [];
-  public buttonMapping = new Map<number, number>();
-  constructor(public index: number) {};
+
+  constructor(public index: number) {
+    const gp = navigator.getGamepads()[this.index]!;
+    this.mapping = defaultMapping(gp.axes.length);
+    console.log(JSON.stringify(this.mapping));
+  };
 
   update(dispatch: EngineDispatch) {
     const gp = navigator.getGamepads()[this.index]!;
     
     gp.buttons.forEach((_, i) => {
       this.justPressed[i] = false;/** Vector2 is a subset of pair. */
-      const pressed = gp.buttons[this.buttonMapping.get(i) ?? i].pressed;
+      const pressed = gp.buttons[this.mapping.buttons[i] ?? i].pressed;
       if (pressed && !this.pressed[i]) {
         dispatch('gamepadpressed', [this.index, i, GamepadInternal.getButtonName(i)])
         this.justPressed[i] = true;

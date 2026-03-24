@@ -5,11 +5,19 @@
 ### Breaking Changes
  - `like.mouse.showCursor(boolean)` integrated with `like.mouse.setMode`. Rationale: setVisible is irrelevant in capture mode.
    Note that setting `visible` to `false` in `setMode` will be remembered when capture state is exited.
+ - Removed `like.gamepad.getGamepad` -- Redundant with DOM
+ - Removed `like.input.clear` -- Why does this exist?
 
 ### Added
  - `like.mouse.setMode`, which replaces `showCursor` and allows setting mouse sensitivity in capture mode, as well as visibility and scroll blocking in non-captured mode.
  - `like.mouse.setCapturedPos`, allows emulated mouse to be teleported while in capture mode.
  - `Vec.map` and `Vec.map2` curried functions to make operations 
+ - `like.gamepad.isPressed` and `like.gamepad.isJustPressed` now accept `'any'` as the first argument, to check all gamepads.
+ - Gamepad mapping / remapping system
+  - `like.gamepad.setMapping`, `like.gamepad.getMapping`: Set / get active button mappings.
+  - `like.gamepad.loadMapping`, `like.gamepad.saveMapping`: Put persistent mappings in localstorage.
+  - `like.gamepad.enableAutoLoadMapping`: Always load saved mappings on gamepad connection.
+  - `like.gamepad.getSticks`
 
 ### Fixed
  - **Capture Bug** If another element set cursor capture, LIKE would report capture TRUE.
