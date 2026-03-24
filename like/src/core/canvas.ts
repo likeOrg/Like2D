@@ -69,7 +69,6 @@ export class CanvasInternal {
                 detail: {
                     pos,
                     delta,
-                    renderSize: this.getSize(),
                 }
             }));
         }, { signal: this.abort.signal })
@@ -111,15 +110,17 @@ export class CanvasInternal {
             this._renderCanvas = document.createElement('canvas');
             const changed = CanvasInternal.setCanvasElemSize(this._renderCanvas, size);
             if (changed) {
-                this.dispatch('resize', [size]);
+                this.dispatchResize(size);
             }
         }
         if (prevRenderCanvas != this._renderCanvas) {
-            this._displayCanvas.dispatchEvent(new CustomEvent('like:updateRenderTarget', {
+            this._displayCanvas.dispatchEvent(
+              new CustomEvent("like:updateRenderTarget", {
                 detail: {
-                    target: this._renderCanvas,
-                }
-            }));
+                  target: this._renderCanvas,
+                },
+              }),
+            );
         }
 
         if ('fullscreen' in flags) {
@@ -130,6 +131,17 @@ export class CanvasInternal {
     /** Get the apparent (in-game) canvas size. */
     getSize(): Vector2 {
         return [this._renderCanvas.width, this._renderCanvas.height];
+    }
+
+    dispatchResize(size: Vector2) {
+        this._displayCanvas.dispatchEvent(
+          new CustomEvent("like:resizeCanvas", {
+            detail: {
+              size,
+            },
+          }),
+        );
+        this.dispatch("resize", [size]);
     }
 
     /** Sometimes you want a screen rect! */
@@ -173,7 +185,7 @@ export class CanvasInternal {
                * tons of canvas bitmap reallocations. So wait 1/4 second..
                */
               CanvasInternal.setCanvasElemSize(this._displayCanvas, realSize);
-              this.dispatch('resize', [realSize]);
+              this.dispatchResize(realSize);
               this.resizeTimeoutId = setTimeout(() => { this.resizeTimeoutId = 0; }, 250);
             }
         } else if (this._renderCanvas != this._displayCanvas) {

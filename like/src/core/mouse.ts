@@ -6,6 +6,12 @@ const mouseButtons = ["left", "middle", "right"] as const;
 const numToButton = (i: number): MouseButton => mouseButtons[i];
 type MouseMoveEvent = HTMLElementEventMap["like:mousemoved"];
 
+type MouseMode =
+  | { lock: false, visible: boolean, scrollBlock: boolean }
+  | { lock: true, speed: number };
+
+type MouseSetMode = Partial<MouseMode> & { lock: boolean };
+
 /**
  * Mouse input handling. Bound to canvas. Emits relative movement when pointer locked.
  * Buttons: 1 = left, 2 = middle, 3 = right.
@@ -14,23 +20,58 @@ export class MouseInternal {
   private pos: Vector2 = [0, 0];
   private lastPos: Vector2 = [0, 0];
   private buttons = new Set<MouseButton>();
-  private cursorVisible = true;
   private abort = new AbortController();
+  /** The canvas reference is the DOM / display canvas, this keeps
+   * track of the internal (apparent) canvas size.
+   */
+  private canvasSize: Vector2 = [800, 600];
+
+  // We keep track of a locked mode and an unlocked mode, so that when capture changes
+  // we can use the settings from last time.
+  private lockedMode: MouseMode & {lock: true} = { lock: true, speed: 1 };
+  private unlockedMode: MouseMode & {lock: false} = { lock: false, visible: true, scrollBlock: true };
+  private enableLock = false;
 
   constructor(private canvas: HTMLCanvasElement, private dispatch: EngineDispatch) {
-    this.canvas.addEventListener('like:mousemoved', this.handleMouseMove.bind(this) as any, { signal: this.abort.signal });
-    this.canvas.addEventListener('mousedown', this.handleMouseDown.bind(this), { signal: this.abort.signal });
-    window.addEventListener('mouseup', this.handleMouseUp.bind(this), { signal: this.abort.signal });
-    this.canvas.addEventListener('wheel', this.handleWheel.bind(this), { passive: false, signal: this.abort.signal });
-    this.canvas.addEventListener('mouseleave', () => this.buttons.clear(), { signal: this.abort.signal });
+    this.canvas.addEventListener(
+      "like:mousemoved",
+      this.handleMouseMove.bind(this) as any,
+      { signal: this.abort.signal },
+    );
+    this.canvas.addEventListener("mousedown", this.handleMouseDown.bind(this), {
+      signal: this.abort.signal,
+    });
+    window.addEventListener("mouseup", this.handleMouseUp.bind(this), {
+      signal: this.abort.signal,
+    });
+    this.canvas.addEventListener("wheel", this.handleWheel.bind(this), {
+      passive: false,
+      signal: this.abort.signal,
+    });
+    this.canvas.addEventListener("mouseleave", () => this.buttons.clear(), {
+      signal: this.abort.signal,
+    });
+    this.canvas.addEventListener(
+      "pointerlockchanged",
+      () => {
+        if (!this.isPointerLocked())
+        this.enableLock = false;
+      },
+    );
+    this.canvas.addEventListener(
+      "like:resizeCanvas",
+      (e: HTMLElementEventMap["like:resizeCanvas"]) => {
+        this.canvasSize = e.detail.size;
+      }
+    )
   }
 
   private handleMouseMove(e: MouseMoveEvent): void {
-    if (this.isPointerLocked()) {
+    if (this.isPointerLocked() && this.enableLock) {
       /** In pointer-lock mode, simulate a real cursor bounded by the canvas. */
-      this.pos = Vec2.clamp(Vec2.add(this.pos, e.detail.delta),
-        [0, 0],
-        e.detail.renderSize);
+      this.setCapturedPos(
+        Vec2.add(this.pos, Vec2.mul(e.detail.delta, this.lockedMode.speed)),
+      );
       this.dispatch('mousemoved', [this.pos, e.detail.delta]);
     } else {
       /** In non-pointer locked mode, calculate deltas ourselves. */
@@ -54,11 +95,9 @@ export class MouseInternal {
   }
 
   private handleWheel(e: WheelEvent): void {
-    e.preventDefault();
-  }
-
-  _dispose(): void {
-    this.abort.abort();
+    if (this.unlockedMode.scrollBlock) {
+      e.preventDefault();
+    }
   }
 
   /** Mouse position, transformed to canvas pixels. */
@@ -76,47 +115,113 @@ export class MouseInternal {
     return new Set(this.buttons);
   }
 
-  /** True when pointer is locked to canvas.
-   * {@link lockPointer}
-   */
-  isPointerLocked(): boolean {
-    return document.pointerLockElement !== null;
-  }
-
   /**
-   * Whether to lock (capture) the pointer.
+   * Set the current cursor mode.
    * 
+   * ### Normal mode
+   * Consider setting `scrollBlock` to false (default is true) if you want
+   * your element to blend into the webpage for freer scrolling.
+   * 
+   * ```ts
+   * {
+   *   lock: false,
+   *   visible: true, // disable to hide cursor.
+   *   scrollBlock: true, // disable scroll while hovering canvas. Default: true
+   * }
+   * ```
+   * 
+   * ### Captured mode
    * In locked mode, the cursor cannot escape the canvas.
    * It also becomes invisible.
+   * However, it can move infinitely, sensitivity can be controlled,
+   * and the emulated cursor (in `pos` of {@link mousemoved}) can be freely repositioned.
    * 
-   * Note that event {@link mousemoved} passes both
-   * `pos` and `delta`.
+   * ```ts
+   * {
+   *   lock: true,
+   *   speed: 1.0, // mouse sensitivity
+   * }
+   * ```
+   * Avoid binding the `ESC` key in captured mode. This will exit the capture and
+   * reset mode to default.
+   * 
+   * ### Note on `pos` vs `delta`
+   * Event {@link mousemoved} passes both `pos` and `delta` args.
    * 
    * Though the emulated cursor in locked mode
    * (locked mode doesn't natively track absolute position)
    * may be stuck on canvas edges, the `delta` field always
-   * represents mouse movement.
+   * represents mouse movement, even against edges.
   */
-  lockPointer(locked: boolean): void {
-    if (!this.canvas) return;
+  setMode(mode: MouseSetMode) {
+    this.lockPointer(mode.lock);
+    if (mode.lock) {
+      this.lockedMode = {
+        ...this.lockedMode,
+        ...mode,
+      };
+    } else {
+      this.unlockedMode = {
+        ...this.unlockedMode,
+        ...mode
+      };
+      this.canvas.style.cursor = this.unlockedMode.visible ? 'auto' : 'none';
+    }
+  }
 
-    if (locked && document.pointerLockElement !== this.canvas) {
+  getMode(): MouseMode {
+    return this.enableLock ? this.lockedMode : this.unlockedMode;
+  }
+
+  /**
+   * Only applicable in capture mode -- sets the position
+   * of the emulated mouse.
+   */
+  setCapturedPos(pos: Vector2) {
+    if (this.isPointerLocked()) {
+      this.pos = Vec2.clamp(pos, [0, 0], this.canvasSize);
+    } else {
+      console.log("[Mouse] Attempt to set cursor position while not captured.");
+    }
+  }
+
+  /**
+   * Enable/disable pointer lock (capture).
+   * 
+   * For more fine-grained control, use {@link setMode} which
+   * also documents behaviors more thoroughly.
+   */
+  lockPointer(lock: boolean) {
+    this.enableLock = lock;
+    const wasLocked = this.isPointerLocked();
+    if (lock && !wasLocked) {
       this.canvas.requestPointerLock();
-    } else if (!locked && document.pointerLockElement === this.canvas) {
+    } else if (!lock && wasLocked) {
       document.exitPointerLock();
     }
   }
 
-  /** Show or hide cursor. Unlike pointer lock, cursor can still leave canvas. */
-  showCursor(visible: boolean): void {
-    this.cursorVisible = visible;
-    if (this.canvas) {
-      this.canvas.style.cursor = visible ? 'auto' : 'none';
-    }
+  /**
+   * True when pointer is locked to canvas.
+   */
+  isPointerLocked(): boolean {
+    return document.pointerLockElement == this.canvas;
   }
 
-  /** Current cursor visibility state. */
+  /**
+   * @returns whether the pointer is visible.
+   */
   isCursorVisible(): boolean {
-    return this.cursorVisible;
+    return this.enableLock || !this.unlockedMode.visible;
   }
+
+  /** I beleve you wanted to use `like.mouse.setMode({lock: true})`
+   * or `like.mouse.lockPointer().
+   */
+  setRelativeMode?: never;
+
+  _dispose(): void {
+    this.abort.abort();
+  }
+
 }

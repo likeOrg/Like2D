@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.10.0] - Unreleased
+
+### Breaking Changes
+ - `like.mouse.showCursor(boolean)` integrated with `like.mouse.setMode`. Rationale: setVisible is irrelevant in capture mode.
+   Note that setting `visible` to `false` in `setMode` will be remembered when capture state is exited.
+
+### Added
+ - `like.mouse.setMode`, which replaces `showCursor` and allows setting mouse sensitivity in capture mode, as well as visibility and scroll blocking in non-captured mode.
+ - `like.mouse.setCapturedPos`, allows emulated mouse to be teleported while in capture mode.
+
+### Fixed
+ - **Capture Bug** If another element set cursor capture, LIKE would report capture TRUE.
+
 ## [2.9.0] - 2026-03-23
 
 ### Breaking Changes

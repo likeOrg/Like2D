@@ -26,8 +26,9 @@ export type MouseButton = 'left' | 'middle' | 'right';
 
 declare global {
   interface HTMLElementEventMap {
-    ['like:mousemoved']: CustomEvent<{pos: Vector2, delta: Vector2, renderSize: Vector2}>;
+    ['like:mousemoved']: CustomEvent<{pos: Vector2, delta: Vector2}>;
     ['like:updateRenderTarget']: CustomEvent<{target: HTMLCanvasElement}>;
+    ['like:resizeCanvas']: CustomEvent<{size: Vector2}>;
   }
 }
 
