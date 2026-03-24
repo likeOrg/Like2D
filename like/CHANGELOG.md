@@ -9,6 +9,7 @@
 ### Added
  - `like.mouse.setMode`, which replaces `showCursor` and allows setting mouse sensitivity in capture mode, as well as visibility and scroll blocking in non-captured mode.
  - `like.mouse.setCapturedPos`, allows emulated mouse to be teleported while in capture mode.
+ - `Vec.map` and `Vec.map2` curried functions to make operations 
 
 ### Fixed
  - **Capture Bug** If another element set cursor capture, LIKE would report capture TRUE.
