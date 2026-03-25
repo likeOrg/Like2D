@@ -35,7 +35,6 @@ export type LikeInternal = Callbacks & {
 
   canvas: CanvasInternal,
 
-
   /** Graphics context for rendering operations */
   gfx: BoundGraphics;
 
@@ -104,7 +103,10 @@ type Gamepad = Public<GamepadInternal>;
  * Don't forget to call `await start()` when you're ready,
  * and `dispose()` if you're done with it.
  */
-export type Like = LikeInternal & {
+export type Like = Omit<
+  LikeInternal,
+  "canvas" | "keyboard" | "mouse" | "audio" | "timer" | "input" | "gamepad"
+> & {
   /** Canvas settings, including even Pixel Art mode. */
   readonly canvas: Canvas;
 
@@ -131,4 +133,4 @@ export type Like = LikeInternal & {
 
   /** I think you meant to type like.canvas instead.  */
   window?: never;
-}
+};
