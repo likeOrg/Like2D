@@ -27,7 +27,7 @@
  * - Angles in radians, 0 is right, positive is clockwise
  */
 
-import type { Vector2 } from "../math/vector2";
+import { Vec2, type Vector2 } from "../math/vector2";
 import type { Rectangle } from "../math/rect";
 
 type DrawMode = "fill" | "line";
@@ -55,9 +55,13 @@ export type DrawProps = ShapeProps & {
 
 export type PrintProps = {
   font?: string;
-  limit?: number;
-  align?: CanvasTextAlign;
-};
+} & (
+  | {
+      width: number;
+      align: CanvasTextAlign;
+    }
+  | {}
+);
 
 export class ImageHandle {
   readonly path: string;
@@ -171,7 +175,7 @@ export const pure = {
    * @param color Fill or stroke color.
    * @param position Center position.
    * @param radii Radius (number) or [rx, ry] for ellipse.
-   * @param props Optional angle, arc, or stroke properties.
+   * @param props Optional arc, center, and stroke properties. Center is true by default.
    */
   circle(
     ctx: CanvasRenderingContext2D,
@@ -180,23 +184,24 @@ export const pure = {
     position: Vector2,
     radii: number | Vector2,
     props?: ShapeProps & {
-      angle?: number;
       arc?: [number, number];
-      center: boolean;
+      center?: boolean;
     },
   ): void {
-    const [x, y] = position;
+    const center = (props && 'center' in props) ? props.center : true;
     const c = applyColor(color);
-    const [rx, ry] = typeof radii === "number" ? [radii, radii] : radii;
+    const size: Vector2 = typeof radii === "number" ? [radii, radii] : radii;
     const [startAngle, endAngle] = props?.arc ?? [0, Math.PI * 2];
-    const rotation = props?.angle ?? 0;
+    if (!center) {
+      position = Vec2.add(position, size);
+    }
 
     ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(rx, ry);
-    ctx.rotate(rotation);
+    ctx.translate(...position);
+    ctx.scale(...size);
     ctx.beginPath();
     ctx.arc(0, 0, 1, startAngle, endAngle);
+    if (mode == 'fill') ctx.lineTo(0, 0);
     ctx.closePath();
     ctx.restore();
 
@@ -235,11 +240,15 @@ export const pure = {
 
   /**
    * Draws text at position.
+   * 
+   * Keep in mind: if you set `align` without `width` in your props,
+   * nothing will happen -- you'll get left-aligned text.
+   * 
    * @param ctx Canvas context.
    * @param color Fill color.
    * @param text Text string.
    * @param position Top-left position.
-   * @param props Optional font, text limit, or alignment.
+   * @param props {@link PrintProps} Optional font, text limit, or alignment.
    */
   print(
     ctx: CanvasRenderingContext2D,
@@ -249,20 +258,21 @@ export const pure = {
     props?: PrintProps,
   ): void {
     const [x, y] = position;
-    const { font = "16px sans-serif", limit, align = "left" } = props ?? {};
+    const { font = "16px sans-serif" } = props ?? {};
     ctx.fillStyle = parseColor(color);
     ctx.font = font;
 
-    if (limit !== undefined) {
-      const lines = wrapText(ctx, text, limit);
+    if (props && 'width' in props) {
+      const { width, align } = props;
+      const lines = wrapText(ctx, text, width);
       const lineHeight = getFontHeight(ctx);
       lines.forEach((line, i) => {
         const lineWidth = ctx.measureText(line).width;
         const drawX =
           align === "center"
-            ? x + (limit - lineWidth) / 2
+            ? x + (width - lineWidth) / 2
             : align === "right"
-              ? x + limit - lineWidth
+              ? x + width - lineWidth
               : x;
         ctx.fillText(line, drawX, y + i * lineHeight);
       });
