@@ -89,7 +89,7 @@ export class Engine {
       setScene: (scene?: Scene) => {
         if (scene) {
           this.like.handleEvent = (event) => sceneDispatch(scene, this.like, event);
-          this.dispatch("load", []);
+          if (this.isRunning) this.dispatch("load", []);
         } else {
           this.like.handleEvent = undefined;
         }
@@ -142,6 +142,7 @@ export class Engine {
         this.dispatch('update', [dt]);
       }
 
+      this.canvas._renderCanvas.getContext('2d')!.resetTransform();
       this.dispatch('draw', []);
       this.canvas._present();
       requestAnimationFrame(loop);
