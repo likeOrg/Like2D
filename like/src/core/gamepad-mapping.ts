@@ -56,7 +56,7 @@ const buttonMap = [
 export const allButtons = new Set<string>(buttonMap.map(({like}) => like));
 export const fullButtonName = new Map(buttonMap.map(({like, name}) => [like, name]));
 
-export type LikeButton = (typeof buttonMap)[number]["like"] | `Unknown${number}`;
+export type LikeButton = (typeof buttonMap)[number]["like"] | `Button${number}` | `Axis${number}+` | `Axis${number}-`;
 
 export type GamepadMappingEntry = {
   buttons: ButtonMapping;

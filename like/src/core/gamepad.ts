@@ -134,20 +134,24 @@ export class GamepadInternal {
     return fullButtonName.get(name as any) ?? name;
   }
 
-  _checkButton(target: GamepadTarget, button: LikeButton, mode: 'justPressed' | 'pressed'): boolean | undefined {
+  _checkButton(
+    target: GamepadTarget,
+    button: LikeButton | number,
+    mode: "isJustPressed" | "isDown",
+  ): boolean | undefined {
     if (target == "any") {
-      return this.gamepads.values().some((gp) => gp[mode].has(button));
+      return this.gamepads.values().some((gp) => gp[mode](button));
     } else {
-      return this.gamepads.get(target)?.[mode].has(button);
+      return this.gamepads.get(target)?.[mode](button);
     }
   }
 
   /** Check if a gamepad button is down. */
   isDown(
     target: GamepadTarget,
-    button: LikeButton,
+    button: LikeButton | number,
   ): boolean | undefined {
-    return this._checkButton(target, button, 'pressed');
+    return this._checkButton(target, button, "isDown");
   }
 
   /**
@@ -156,9 +160,9 @@ export class GamepadInternal {
    */
   isJustPressed(
     target: GamepadTarget,
-    button: LikeButton,
+    button: LikeButton | number,
   ): boolean | undefined {
-    return this._checkButton(target, button, 'justPressed');
+    return this._checkButton(target, button, "isJustPressed");
   }
 
   /**
@@ -242,29 +246,54 @@ function getLocalstoragePath(gamepad: Gamepad): string {
  */
 class GamepadState {
   public mapping: GamepadMapping;
-  public pressed = new Set<LikeButton>();
-  public justPressed = new Set<LikeButton>();
+  public downNums = new Set<number>();
+  public down = new Set<LikeButton>();
+  public lastDownNums = new Set<number>();
+  public lastDown = new Set<LikeButton>();
 
   constructor(public index: number) {
     const gp = navigator.getGamepads()[this.index]!;
     this.mapping = defaultMapping(gp.axes.length);
   }
 
+  isDown(button: number | LikeButton): boolean {
+    return typeof(button) == "number" ? this.downNums.has(button) : this.down.has(button);
+  }
+
+  isJustPressed(button: number | LikeButton): boolean {
+    return typeof(button) == "number" ?
+      (this.downNums.has(button) && !this.lastDownNums.has(button)) :
+      (this.down.has(button) && !this.lastDown.has(button));
+  }
+
+  map(button: number): LikeButton {
+    if (button > maxButtons) {
+      // this is an axis
+      return `$Axis${Math.floor(button - 64) / 2}${button % 2 ? '-' : '+'}` as LikeButton;
+    } else {
+      return this.mapping.buttons.get(button) ?? `Button${button}`;
+    }
+  }
+
   update(dispatch: EngineDispatch) {
     const gp = navigator.getGamepads()[this.index]!;
 
-    const nextPressed = new Set<LikeButton>();
-    this.justPressed.clear();
+    // Swap down and last down, then clear 'down'
+    // Rotates the button log backwards w/o allocation.
+    [this.down, this.lastDown] = [this.lastDown, this.down];
+    this.down.clear();
+    [this.downNums, this.lastDownNums] = [this.lastDownNums, this.downNums];
+    this.downNums.clear();
+
     gp.buttons.forEach((btn, i) => {
-      const name = this.mapping.buttons.get(i) ?? `Unknown${i}`;
+      const name = this.map(i);
       if (btn.pressed) {
-        nextPressed.add(name);
+        this.down.add(name);
+        this.downNums.add(i);
       }
-      if (btn.pressed && !this.pressed.has(name)) {
+      if (btn.pressed && !this.lastDownNums.has(i)) {
         dispatch("gamepadpressed", [this.index, name, i]);
-        this.pressed.add(name);
-        this.justPressed.add(name);
-      } else if (!btn.pressed && this.pressed.has(name)) {
+      } else if (!btn.pressed && this.downNums.has(i)) {
         dispatch("gamepadreleased", [this.index, name, i]);
       }
     });
@@ -278,7 +307,7 @@ class GamepadState {
   }
 
   clear() {
-    this.justPressed.clear();
-    this.pressed.clear();
+    this.lastDown.clear();
+    this.down.clear();
   }
 }

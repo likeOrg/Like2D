@@ -10,9 +10,8 @@
  - `like.mouse.setMode`, replaces `showCursor` and allows setting mouse sensitivity in capture mode, as well as visibility and scroll blocking in non-captured mode.
  - Removed `buttonMenuCenter` mapping -- Relatively uncommon, no games will rely on this.
  - Removed `gfx.circle` angle property -- prefer transforms, we can rotate any shape...
- - Renamed `gamepad.isButtonDown` to `gamepad.isDown`, and it no longer lets you check unmapped (numeric) pressed. use `gamepadpressed`
- - `like.gamepad.isDown` no longer checks for unmapped (numeric) presses. Use `gamepadpressed`.
- - Renamed `gamepad.isButtonJustPressed` to `gamepad:isJustPressed`
+ - Renamed `gamepad.isButtonDown` to `gamepad.isDown`
+ - Renamed `gamepad.isButtonJustPressed` to `gamepad.isJustPressed`
  - Shortened the name of gamepad buttons. "BBottom" instead of "ButtonBottom", "Left" instead of "DPadLeft", "L1" instead of "ButtonL1", etc.
  - Gamepads now have a remapping feature, with auto-save / auto-load to localStorage enabled by default.
  - `like.gfx.print` option `limit` renamed to `width`.
@@ -22,6 +21,7 @@
   - `like.mouse.setCapturedPos`, allows emulated mouse to be teleported while in capture mode.
   - `Vec.map` and `Vec.map2` helpers.
   - `like.gamepad.isPressed` and `like.gamepad.isJustPressed` now accept `'any'` as the first argument, to check all gamepads.
+  - `like.gamepad.isJustPressed` now accepts a numeric argument for raw buttons.
   - Gamepad mapping / remapping system
     - Brought back SDL auto mapping as a best-guess solution, plus:
     - `like.gamepad.setMapping`, `like.gamepad.getMapping`: Set / get active button mappings.
