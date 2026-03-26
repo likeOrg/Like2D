@@ -22,6 +22,7 @@
   - `Vec.map` and `Vec.map2` helpers.
   - `like.gamepad.isPressed` and `like.gamepad.isJustPressed` now accept `'any'` as the first argument, to check all gamepads.
   - Gamepad mapping / remapping system
+    - Brought back SDL auto mapping as a best-guess solution, plus:
     - `like.gamepad.setMapping`, `like.gamepad.getMapping`: Set / get active button mappings.
     - `like.gamepad.loadMapping`, `like.gamepad.saveMapping`: Put persistent mappings in localstorage.
     - `like.gamepad.enableAutoLoadMapping`: Always load saved mappings on gamepad connection.

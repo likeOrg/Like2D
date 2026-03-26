@@ -111,7 +111,7 @@ export type MapMode = {
 
 export class MapGamepad implements Scene {
   private currentlyUnmapped: LikeButton[] = [];
-  private mapping: GamepadMapping = defaultMapping(2);
+  private mapping!: GamepadMapping;
   private held?: LikeButton;
   private alreadyMapped = new Set<Number>();
 
@@ -119,9 +119,10 @@ export class MapGamepad implements Scene {
     private mapMode: MapMode,
     private targetPad: number,
     private next?: Scene,
-  ) {}
+  ) { }
 
   load(like: Like): void {
+    this.mapping = like.gamepad.getMapping(this.targetPad) ?? defaultMapping(2);
     for (const btn of mapOrder.reverse()) {
       if (this.mapMode.buttons.has(btn)) {
         this.currentlyUnmapped.push(btn);
@@ -142,7 +143,7 @@ export class MapGamepad implements Scene {
     like.gfx.scale(20);
     like.gfx.translate([0, 1]);
     like.gfx.print(
-        "white", "GAMEPAD MAPPING", [0.2, 0.2], centerText
+        "white", "Unmapped gamepad detected.", [0.2, 0.2], centerText
     );
     for (const prop of this.mapMode.buttons.keys()) {
       const color =
@@ -158,8 +159,8 @@ export class MapGamepad implements Scene {
     like.gfx.print(
       "white",
       active
-        ? `Press input for ${active}!`
-        : "Good, press any button to start.",
+        ? `Press ${like.gamepad.fullButtonName(active)}!`
+        : "Press any button to resume.",
       [2, 10],
       { font: "1px serif" },
     );

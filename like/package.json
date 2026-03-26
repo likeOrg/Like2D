@@ -35,7 +35,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp src/gamecontrollerdb.txt dist/",
     "typecheck": "tsc --noEmit",
     "lint": "echo 'No linting configured'",
     "clean": "rm -rf dist",

@@ -1,10 +1,12 @@
-import { defaultMapping, GamepadMapping, LikeButton, mapStick, standardButtonMapping } from './gamepad-mapping';
+import { defaultMapping, fullButtonName, GamepadMappingEntry, getMappingFromGamepad, LikeButton, mapStick, standardButtonMapping } from './gamepad-mapping';
 import { EngineDispatch } from '../engine';
 import { Vector2 } from '../math/vector2';
 
+type GamepadMapping = GamepadMappingEntry;
+
 export {
   type LikeButton,
-  type GamepadMapping,
+  type GamepadMappingEntry as GamepadMapping,
   type StickMapping,
   type StickAxisMapping,
   defaultMapping,
@@ -17,15 +19,21 @@ export type GamepadTarget = number | "any";
  * 
  *  - Allows events/callbacks to be sent from joy buttons.
  *  - Can track if any gamepad has a button pressed / just pressed.
- *  - Remaps raw input numbers to readable strings using.
+ *  - Remaps raw input numbers to readable strings -- by default using SDL database.
  * 
- * If you're planning on supporting gamepads, be sure to include a
+ * If you're planning on supporting gamepads, please include a
  * way to generate {@link GamepadMapping} and set it with {@link Gamepad.setMapping}.
  * 
  * If you don't want to make your own, take a look at `prefab-scenes/mapGamepad`.
  * 
+ * ## Getting events
+ * ```ts
+ * like.gamepadpressed = (idx: number, button: LikeButton) => {
+ *   console.log(`Button ${button} pressed on controller ${idx}`);
+ * }
+ * ```
+ * 
  * ## Using the built-in mapping scene
- * Usage:
  * ```ts
  * import { buttonSetSNES, MapGamepad } from "like/prefab-scenes";
  * 
@@ -37,24 +45,17 @@ export type GamepadTarget = number | "any";
  *   }
  * }
  * ```
- * 
  * Available button sets:
  *  - `buttonSetNES`: A, B, Start, Select, DPad
  *  - `buttonSetSNES`: NES plus X, Y, L1, R1
  *  - `buttonSetPS1`: SNES plus L2, R2
  *  - `buttonSetAll`: PS1 plus Lstick, RStick (stick click buttons)
  * 
- * ## Getting events
- * ```ts
- * like.gamepadpressed = (idx: number, button: LikeButton) => {
- *   console.log(`Button ${button} pressed on controller ${idx}`);
- * }
- * ```
  */
 export class GamepadInternal {
   private gamepads = new Map<number, GamepadState>();
   private abort = new AbortController();
-  private autoLoadMapping = true;
+  private autoLoadMapping = false;
 
   constructor(private dispatch: EngineDispatch) {
     // Register event listeners
@@ -96,9 +97,15 @@ export class GamepadInternal {
       console.log(`[Gamepad] Connected standard gamepad ${ev.gamepad.id}.`);
       gps.mapping.buttons = standardButtonMapping();
     } else {
-      console.log(
-        `[Gamepad] Connected non-standard gamepad ${ev.gamepad.id}.Consider remapping it.`,
-      );
+      const sdlMapping = getMappingFromGamepad(ev.gamepad);
+      if (sdlMapping.size > 0) {
+        gps.mapping.buttons = sdlMapping;
+        console.log(`[Gamepad] Connected, applied SDL database mapping for ${ev.gamepad.id}.`);
+      } else {
+        console.log(
+          `[Gamepad] Connected non-standard gamepad ${ev.gamepad.id}. Consider remapping it.`,
+        );
+      }
     }
 
     console.log(
@@ -121,6 +128,10 @@ export class GamepadInternal {
       return gp.getSticks();
     }
     return [];
+  }
+
+  fullButtonName(name: LikeButton): string {
+    return fullButtonName.get(name as any) ?? name;
   }
 
   _checkButton(target: GamepadTarget, button: LikeButton, mode: 'justPressed' | 'pressed'): boolean | undefined {
