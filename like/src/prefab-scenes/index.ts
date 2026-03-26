@@ -5,3 +5,4 @@
  */
 
 export { StartScreen } from "./startScreen";
+export { MapGamepad, buttonSetAll as buttonMapAll, buttonSetNES as buttonMapNES, buttoSetPS1 as buttonMapPS1, buttonSetSNES as buttonMapSNES } from "./mapGamepad";
