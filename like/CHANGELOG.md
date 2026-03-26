@@ -7,24 +7,25 @@
    Note that setting `visible` to `false` in `setMode` will be remembered when capture state is exited.
  - Removed `like.gamepad.getGamepad` -- Redundant with DOM
  - Removed `like.input.clear` -- Why does this exist?
+ - `like.mouse.setMode`, replaces `showCursor` and allows setting mouse sensitivity in capture mode, as well as visibility and scroll blocking in non-captured mode.
  - Removed `buttonMenuCenter` mapping -- Relatively uncommon, no games will rely on this.
  - Removed `gfx.circle` angle property -- prefer transforms, we can rotate any shape...
  - Renamed `gamepad.isButtonDown` to `gamepad.isDown`, and it no longer lets you check unmapped (numeric) pressed. use `gamepadpressed`
- - `like.gamepad.isDown` no longer lets you check for unmapped (numeric) presses. Use `gamepadpressed`.
+ - `like.gamepad.isDown` no longer checks for unmapped (numeric) presses. Use `gamepadpressed`.
  - Renamed `gamepad.isButtonJustPressed` to `gamepad:isJustPressed`
- - Gamepads now have mapping, auto-save / auto-load enabled by default.
+ - Shortened the name of gamepad buttons. "BBottom" instead of "ButtonBottom", "Left" instead of "DPadLeft", "L1" instead of "ButtonL1", etc.
+ - Gamepads now have a remapping feature, with auto-save / auto-load to localStorage enabled by default.
  - `like.gfx.print` option `limit` renamed to `width`.
 
 ### Added
-  - `like.mouse.setMode`, which replaces `showCursor` and allows setting mouse sensitivity in capture mode, as well as visibility and scroll blocking in non-captured mode.
   - `like.mouse.setCapturedPos`, allows emulated mouse to be teleported while in capture mode.
-  - `Vec.map` and `Vec.map2` curried functions to make operations 
+  - `Vec.map` and `Vec.map2` helpers.
   - `like.gamepad.isPressed` and `like.gamepad.isJustPressed` now accept `'any'` as the first argument, to check all gamepads.
   - Gamepad mapping / remapping system
-  - `like.gamepad.setMapping`, `like.gamepad.getMapping`: Set / get active button mappings.
-  - `like.gamepad.loadMapping`, `like.gamepad.saveMapping`: Put persistent mappings in localstorage.
-  - `like.gamepad.enableAutoLoadMapping`: Always load saved mappings on gamepad connection.
-  - `like.gamepad.getSticks`: Get an array of mapped sticks.
+    - `like.gamepad.setMapping`, `like.gamepad.getMapping`: Set / get active button mappings.
+    - `like.gamepad.loadMapping`, `like.gamepad.saveMapping`: Put persistent mappings in localstorage.
+    - `like.gamepad.enableAutoLoadMapping`: Always load saved mappings on gamepad connection.
+    - `like.gamepad.getSticks`: Get an array of mapped sticks.
 
 ### Fixed
  - **Capture Bug** If another element set cursor capture, LIKE would report capture TRUE.

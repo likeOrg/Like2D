@@ -1,5 +1,5 @@
 import { createLike, type ImageHandle, type AudioSource, type Like, type CanvasSize } from "like";
-import { StartScreen } from "like/prefab-scenes";
+import { buttonMapAll, buttonMapNES, MapGamepad, StartScreen } from "like/prefab-scenes";
 import { Vec2 } from "like/math/vector2";
 import { Scene } from "like/scene";
 
@@ -28,12 +28,12 @@ const demoScene: Scene = {
     pepperImage = like.gfx.newImage('pepper.png');
     audioSource = like.audio.newSource('./test.ogg');
     
-    like.input.setAction('jump', ['Space', 'ArrowUp', 'KeyW', 'ButtonBottom']);
+    like.input.setAction('jump', ['Space', 'ArrowUp', 'KeyW', 'BBottom']);
     like.input.setAction('fire', ['MouseLeft', 'RT']);
-    like.input.setAction('move_left', ['ArrowLeft', 'KeyA', 'DPLeft']);
-    like.input.setAction('move_right', ['ArrowRight', 'KeyD', 'DPRight']);
-    like.input.setAction('move_up', ['ArrowUp', 'KeyW', 'DPUp']);
-    like.input.setAction('move_down', ['ArrowDown', 'KeyS', 'DPDown']);
+    like.input.setAction('move_left', ['ArrowLeft', 'KeyA', 'Left']);
+    like.input.setAction('move_right', ['ArrowRight', 'KeyD', 'Right']);
+    like.input.setAction('move_up', ['ArrowUp', 'KeyW', 'Up']);
+    like.input.setAction('move_down', ['ArrowDown', 'KeyS', 'Down']);
     like.input.setAction('audio_play_pause', ['KeyP']);
     like.input.setAction('sleep_timer', ['KeyL']);
     like.input.setAction('toggle_pointer_lock', ['KeyC']);
@@ -61,7 +61,6 @@ const demoScene: Scene = {
   keypressed(like: Like, scancode: string) {
     if (scancode === 'KeyZ') {
       scaleIndex = (scaleIndex + 1) % scales.length;
-      console.log();
       const mode = scales[scaleIndex];
       like.canvas.setMode(mode);
     }
@@ -82,6 +81,8 @@ const demoScene: Scene = {
       like.mouse.lockPointer(!locked);
     }
   },
+
+  gamepadpressed: (_ignore, ...args) => console.log(args),
 
   draw(like: Like) {
     const { timer, mouse, gamepad, gfx } = like;
@@ -141,5 +142,5 @@ document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
   like.canvas.setFullscreen(true);
 });
 
-like.setScene(new StartScreen(demoScene));
+like.setScene(new MapGamepad({buttons: buttonMapNES, stickCount: 2}, 0, demoScene));
 await like.start();

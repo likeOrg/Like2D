@@ -10,27 +10,30 @@ import type { Vector2 } from "../math/vector2";
  * Which are exceedingly common.
  */
 const buttonMap = [
-  { like: "ButtonBottom", num: 0 as number },
-  { like: "ButtonRight", num: 1 },
-  { like: "ButtonLeft", num: 2 },
-  { like: "ButtonTop", num: 3 },
+  { like: "BBottom", num: 0 as number, name: "Bottom Face Button" },
+  { like: "BRight", num: 1, name: "Right Face Button" },
+  { like: "BLeft", num: 2, name: "Left Face Button" },
+  { like: "BTop", num: 3, name: "Top Face Button" },
 
-  { like: "ButtonL1", num: 4 },
-  { like: "ButtonR1", num: 5 },
-  { like: "ButtonL2", num: 6 },
-  { like: "ButtonR2", num: 7 },
+  { like: "L1", num: 4, name: "Left shoulder (front)" },
+  { like: "R1", num: 5, name: "Right shoulder (front)" },
+  { like: "L2", num: 6, name: "Left shoulder (rear)" },
+  { like: "R2", num: 7, name: "Right shoulder (rear)" },
 
-  { like: "ButtonMenuLeft", num: 8 },
-  { like: "ButtonMenuRight", num: 9 },
+  { like: "MenuLeft", num: 8, name: "Left Menu Button" },
+  { like: "MenuRight", num: 9, name: "Right Menu Button" },
 
-  { like: "ButtonLeftStick", num: 10 },
-  { like: "ButtonRightStick", num: 11 },
+  { like: "LeftStick", num: 10, name: "Left Stick Button" },
+  { like: "RightStick", num: 11, name: "Right Stick Button" },
 
-  { like: "DPadUp", num: 12 },
-  { like: "DPadDown", num: 13 },
-  { like: "DPadLeft", num: 14 },
-  { like: "DPadRight", num: 15 },
+  { like: "Up", num: 12, name: "D-Pad Up" },
+  { like: "Down", num: 13, name: "D-Pad Down" },
+  { like: "Left", num: 14, name: "D-Pad Left" },
+  { like: "Right", num: 15, name: "D-Pad right" },
 ] as const;
+
+export const allButtons = new Set<string>(buttonMap.map(({like}) => like));
+export const fullButtonName = new Map(buttonMap.map(({like, name}) => [like, name]));
 
 export type LikeButton = (typeof buttonMap)[number]["like"] | `Unknown${number}`;
 

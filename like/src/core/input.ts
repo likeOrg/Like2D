@@ -1,7 +1,7 @@
 import type { KeyboardInternal } from './keyboard';
 import type { MouseInternal } from './mouse';
 import { GamepadTarget, GamepadInternal } from './gamepad';
-import { LikeButton } from './gamepad-mapping';
+import { allButtons, LikeButton } from './gamepad-mapping';
 import { MouseButton } from './events';
 import { EngineDispatch } from '../engine';
 
@@ -84,7 +84,7 @@ export class InputInternal {
       return { type: "mouse", button: buttonCode as MouseButton };
     }
 
-    if (normalized.startsWith("Button") || normalized.startsWith("DP")) {
+    if (allButtons.has(input)) {
       return {
         type: "gamepad",
         gamepad: "any",
