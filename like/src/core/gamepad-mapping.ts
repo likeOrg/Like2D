@@ -190,9 +190,11 @@ export class SdlGamepadMapping {
       /^([^(]+)\(Vendor: ([0-9a-f]+) Product: ([0-9a-f]+)/i,
     );
     if (infoC) {
+      // chrome pattern: Name(Vendor: VEND Product: PROD)
       const [, name, vendor, product] = infoC;
       return [vendor, product, name.trim()];
     } else {
+      // firefox pattern: VEND-PROD-Name
       const infoF = id.split("-");
       if (infoF.length == 3) {
         return infoF as [string, string, string];

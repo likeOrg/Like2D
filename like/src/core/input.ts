@@ -84,7 +84,7 @@ export class InputInternal {
       return { type: "mouse", button: buttonCode as MouseButton };
     }
 
-    if (allButtons.has(input)) {
+    if (allButtons.has(input) || normalized.startsWith("Button") || normalized.startsWith("Axis")) {
       return {
         type: "gamepad",
         gamepad: "any",

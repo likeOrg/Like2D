@@ -89,10 +89,10 @@ export class GamepadInternal {
 
     const mapping = this.loadMapping(ev.gamepad.index);
     if (this.autoLoadMapping && mapping) {
-        gps.mapping = mapping;
-        console.log(
-          `[Gamepad] Connected, auto-loaded mapping for ${ev.gamepad.id}`,
-        );
+      gps.mapping = mapping;
+      console.log(
+        `[Gamepad] Connected, auto-loaded mapping for ${ev.gamepad.id}`,
+      );
     } else if (ev.gamepad.mapping == "standard") {
       console.log(`[Gamepad] Connected standard gamepad ${ev.gamepad.id}.`);
       gps.mapping.buttons = standardButtonMapping();
@@ -100,7 +100,9 @@ export class GamepadInternal {
       const sdlMapping = getMappingFromGamepad(ev.gamepad);
       if (sdlMapping.size > 0) {
         gps.mapping.buttons = sdlMapping;
-        console.log(`[Gamepad] Connected, applied SDL database mapping for ${ev.gamepad.id}.`);
+        console.log(
+          `[Gamepad] Connected, applied SDL database mapping for ${ev.gamepad.id}.`,
+        );
       } else {
         console.log(
           `[Gamepad] Connected non-standard gamepad ${ev.gamepad.id}. Consider remapping it.`,
@@ -118,7 +120,7 @@ export class GamepadInternal {
   }
 
   /**
-   * 
+   *
    * @param target Which controller?
    * @returns all of the sticks. Convention is 0 = left, 1 = right.
    */
@@ -196,7 +198,7 @@ export class GamepadInternal {
     const gp = navigator.getGamepads()?.[index];
     if (gp) {
       const path = getLocalstoragePath(gp);
-      console.log(`[Gamepad] Loaded mapping ${path} from localStorage.`)
+      console.log(`[Gamepad] Loaded mapping ${path} from localStorage.`);
       const item = localStorage.getItem(path);
       if (item) {
         const raw = JSON.parse(item);
@@ -213,7 +215,7 @@ export class GamepadInternal {
     const gp = navigator.getGamepads()?.[index];
     if (gp) {
       const path = getLocalstoragePath(gp);
-      console.log(`[Gamepad] Saved mapping ${path} to localStorage.`)
+      console.log(`[Gamepad] Saved mapping ${path} to localStorage.`);
       localStorage.setItem(path, JSON.stringify(mapping));
     }
   }
@@ -233,12 +235,13 @@ export class GamepadInternal {
   _dispose(): void {
     this.abort.abort();
   }
-
 }
 
 function getLocalstoragePath(gamepad: Gamepad): string {
   return `${gamepad.axes.length}A${gamepad.buttons.length}B${gamepad.id}`;
 }
+
+const maxButtons = 64;
 
 /** Internal class: Using it externally could result
  * in a gamepad being disconnected and still trying to maintain
@@ -267,12 +270,12 @@ class GamepadState {
   }
 
   map(button: number): LikeButton {
-    if (button > maxButtons) {
-      // this is an axis
-      return `$Axis${Math.floor(button - 64) / 2}${button % 2 ? '-' : '+'}` as LikeButton;
-    } else {
-      return this.mapping.buttons.get(button) ?? `Button${button}`;
-    }
+      return (
+        this.mapping.buttons.get(button) ??
+        (button < maxButtons
+          ? `Button${button}`
+          : `Axis${Math.floor((button - maxButtons) / 2)}${button % 2 ? "-" : "+"}`)
+      );
   }
 
   update(dispatch: EngineDispatch) {
@@ -280,25 +283,40 @@ class GamepadState {
 
     // Swap down and last down, then clear 'down'
     // Rotates the button log backwards w/o allocation.
-    [this.down, this.lastDown] = [this.lastDown, this.down];
-    this.down.clear();
     [this.downNums, this.lastDownNums] = [this.lastDownNums, this.downNums];
     this.downNums.clear();
 
     gp.buttons.forEach((btn, i) => {
-      const name = this.map(i);
       if (btn.pressed) {
-        this.down.add(name);
         this.downNums.add(i);
-      }
-      if (btn.pressed && !this.lastDownNums.has(i)) {
-        dispatch("gamepadpressed", [this.index, name, i]);
-      } else if (!btn.pressed && this.downNums.has(i)) {
-        dispatch("gamepadreleased", [this.index, name, i]);
       }
     });
 
-    this.pressed = nextPressed;
+    gp.axes.forEach((axis, i) => {
+      const pos: -1 | 0 | 1 = Math.round(axis) as any;
+      if (pos == 0) return;
+      const index = 64 + i * 2 + (pos == -1 ? 1 : 0);
+      this.downNums.add(index);
+    });
+
+    // Now update mapped events and dispatch.
+    [this.down, this.lastDown] = [this.lastDown, this.down];
+    this.down.clear();
+
+    this.downNums.forEach((i) => {
+      const name = this.map(i);
+      this.down.add(name);
+      if (!this.lastDownNums.has(i)) {
+        dispatch("gamepadpressed", [this.index, name, i]);
+      }
+    });
+
+    this.lastDownNums.forEach((i) => {
+      if (!this.downNums.has(i)) {
+        const name = this.map(i);
+        dispatch("gamepadreleased", [this.index, name, i]);
+      }
+    });
   }
 
   getSticks(): Vector2[] {

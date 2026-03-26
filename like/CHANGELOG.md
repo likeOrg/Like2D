@@ -13,7 +13,7 @@
  - Renamed `gamepad.isButtonDown` to `gamepad.isDown`
  - Renamed `gamepad.isButtonJustPressed` to `gamepad.isJustPressed`
  - Shortened the name of gamepad buttons. "BBottom" instead of "ButtonBottom", "Left" instead of "DPadLeft", "L1" instead of "ButtonL1", etc.
- - Gamepads now have a remapping feature, with auto-save / auto-load to localStorage enabled by default.
+ - Gamepads now have a remapping feature, with auto-save / auto-load to localStorage enabled by default. No more 1:1 relationship between button names and numbers.
  - `like.gfx.print` option `limit` renamed to `width`.
  - `like.gfx.print` made alignment work differently than LOVE, more like browser canvas.
 
@@ -23,6 +23,7 @@
   - `like.gamepad.isPressed` and `like.gamepad.isJustPressed` now accept `'any'` as the first argument, to check all gamepads.
   - `like.gamepad.isJustPressed` now accepts a numeric argument for raw buttons.
   - Gamepad mapping / remapping system
+    - Gamepad now digitizes all axes and triggers automatically.
     - Brought back SDL auto mapping as a best-guess solution, plus:
     - `like.gamepad.setMapping`, `like.gamepad.getMapping`: Set / get active button mappings.
     - `like.gamepad.loadMapping`, `like.gamepad.saveMapping`: Put persistent mappings in localstorage.

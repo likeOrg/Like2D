@@ -144,7 +144,7 @@ export class MapGamepad implements Scene {
     like.gfx.translate([0, 1]);
     like.gfx.print(
       "white",
-      "Unmapped gamepad detected. Please map it or else it will be bad. Do you want it bad?",
+      "Choose your buttons.",
       [8, 0.2],
       centerText,
     );
@@ -183,6 +183,7 @@ export class MapGamepad implements Scene {
       this.held = active;
     } else if (!active) {
       like.gamepad.setMapping(this.targetPad, this.mapping);
+      console.log(this.mapping.buttons.entries());
       setTimeout(() => like.setScene(this.next), 100);
     }
   }
