@@ -3,6 +3,14 @@
 ## [2.10.0] - Unreleased
 
 ### Breaking Changes
+ - Imports have been restructured for sanity, thus breaking all of your stuff. Sorry not sorry.
+    - `like`
+    - `like/input`
+    - `like/audio`
+    - `like/graphics`
+    - `like/math`
+    - `like/timer`
+    - `like/prefab-scenes`
  - `like.mouse.showCursor(boolean)` integrated with `like.mouse.setMode`. Rationale: setVisible is irrelevant in capture mode.
    Note that setting `visible` to `false` in `setMode` will be remembered when capture state is exited.
  - Removed `like.gamepad.getGamepad` -- Redundant with DOM

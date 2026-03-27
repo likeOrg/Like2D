@@ -14,3 +14,6 @@
 
 /** True modulus, conspicuously missing from JS */
 export const mod = (a: number, b: number) => ((a % b) + b) % b;
+
+export { type Vector2, Vec2 } from "./vector2";
+export { type Rectangle, Rect } from "./rect";

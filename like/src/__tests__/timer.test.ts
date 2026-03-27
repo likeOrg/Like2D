@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { TimerInternal } from '../core/timer';
+import { Timer } from '../timer';
 
 describe('Timer', () => {
-  let timer: TimerInternal;
+  let timer: Timer;
 
   beforeEach(() => {
-    timer = new TimerInternal();
+    timer = new Timer();
     vi.stubGlobal('performance', {
       now: vi.fn(() => 0),
     });
@@ -16,11 +16,11 @@ describe('Timer', () => {
   });
 
   it('tracks delta time and total time', () => {
-    timer._update(0.1);
+    timer.update(0.1);
     expect(timer.getDelta()).toBe(0.1);
     expect(timer.getTime()).toBe(0.1);
 
-    timer._update(0.2);
+    timer.update(0.2);
     expect(timer.getDelta()).toBe(0.2);
     expect(timer.getTime()).toBeCloseTo(0.3);
   });
@@ -28,7 +28,7 @@ describe('Timer', () => {
   it('calculates FPS', () => {
     // 60 frames in 1 second
     for (let i = 0; i < 60; i++) {
-      timer._update(1 / 60);
+      timer.update(1 / 60);
     }
     expect(timer.getFPS()).toBe(60);
   });

@@ -18,7 +18,7 @@
  *  - We go with best-match and always fall back on manual mapping.
  */
 
-import type { Vector2 } from "../math/vector2";
+import type { Vector2 } from "../math";
 
 /**
  * ref: https://www.w3.org/TR/gamepad/#dfn-standard-gamepad

@@ -1,26 +1,10 @@
 /**
  * @module events
  * @description All events that flow through the engine.
- *
- * ## Overview
- *
- * LIKE uses events at its core.
- * These pass through the engine and down to your
- * callbacks or scene.
- * 
- * This module is the single source of truth for what
- * events are possible.
- * 
- * Use it as a reference.
- *
- * @see {@link EventMap} lists every event.
- * @see {@link Scene} for implementing callbacks in a class
- * @see {@link Like} for global callback assignment
- * @see {@link Input} for action mapping
  */
 
-import type { Vector2 } from '../math/vector2';
-import { LikeButton } from './gamepad-mapping';
+import type { Vector2 } from './math/vector2';
+import type { LikeButton } from './input';
 
 export type MouseButton = 'left' | 'middle' | 'right';
 
@@ -34,23 +18,6 @@ declare global {
 
 /**
  * The master type will all events on it.
- * 
- * Each frame:
- * 1. `update(dt)` - Game logic with delta time in seconds
- * 2. `draw` - Render the frame
- *
- * Input events fire immediately when they occur:
- * - `keypressed`/`keyreleased` - Keyboard input
- * - `mousemoved`/`mousepressed`/`mousereleased` - Mouse input
- * - `gamepadpressed`/`gamepadreleased` - Controller input
- * - `actionpressed`/`actionreleased` - Mapped actions (see {@link Input})
- *
- * Window events:
- * - `focus`/`blur` - Tab/window focus changes
- * - `resize` - Canvas size changes
- *
- * Lifecycle:
- * - `load` - Called once when the game starts
  */
 export type EventMap = {
   /** Game initialization. Called once before the first frame. */
@@ -109,18 +76,20 @@ export type EventMap = {
 
 export type EventType = keyof EventMap;
 
+export type LikeMouseEvent = 'mousemoved' | 'mousepressed' | 'mousereleased';
+export type LikeKeyboardEvent = 'keypressed' | 'keyreleased';
+export type LikeGamepadEvent = 'gamepadpressed' | 'gamepadreleased' | 'gamepadconnected' | 'gamepaddisconnected';
+
+/**
+ * Generic dispatcher - each module defines its own event subset
+ */
+export type Dispatcher<T extends EventType> = <K extends T>(
+  type: K,
+  args: EventMap[K]
+) => void;
+
 /**
  * Discriminated union of all event objects.
- * Use this with `handleEvent` to receive all events generically.
- *
- * @example
- * ```typescript
- * handleEvent(like: Like, event: Like2DEvent) {
- *   if (event.type === 'update') {
- *     const dt = event.args[0];
- *   }
- * }
- * ```
  */
 export type LikeEvent = {
   [K in EventType]: { type: K; args: EventMap[K]; timestamp: number }

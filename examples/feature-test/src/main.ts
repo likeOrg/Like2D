@@ -1,6 +1,9 @@
-import { createLike, type ImageHandle, type AudioSource, type Like, type CanvasSize } from "like";
+import { createLike, Like, } from "like";
+import { ImageHandle } from "like/graphics";
+import { AudioSource } from "like/audio";
+import { CanvasSize } from "like/graphics";
 import { MapGamepad, } from "like/prefab-scenes";
-import { Vec2 } from "like/math/vector2";
+import { Vec2 } from "like/math";
 import { Scene } from "like/scene";
 import { buttonSetPS1 } from "like/prefab-scenes";
 

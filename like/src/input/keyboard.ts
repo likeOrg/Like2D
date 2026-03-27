@@ -1,17 +1,16 @@
-import { EngineDispatch } from "../engine";
+import type { Dispatcher } from "../events";
 
-export class KeyboardInternal {
+export class Keyboard {
   private pressedScancodes = new Set<string>();
   private canvas: HTMLCanvasElement | null = null;
-  private abort = new AbortController();
 
-  constructor(canvas: HTMLCanvasElement | null, private dispatch: EngineDispatch) {
+  constructor(canvas: HTMLCanvasElement | null, private dispatch: Dispatcher<'keypressed' | 'keyreleased'>, abort: AbortSignal) {
     this.canvas = canvas;
 
     if (this.canvas) {
-      this.canvas.addEventListener('keydown', this.handleKeyDown.bind(this), { signal: this.abort.signal });
-      this.canvas.addEventListener('keyup', this.handleKeyUp.bind(this), { signal: this.abort.signal });
-      this.canvas.addEventListener('blur', this.handleBlur.bind(this), { signal: this.abort.signal });
+      this.canvas.addEventListener('keydown', this.handleKeyDown.bind(this), { signal: abort });
+      this.canvas.addEventListener('keyup', this.handleKeyUp.bind(this), { signal: abort });
+      this.canvas.addEventListener('blur', this.handleBlur.bind(this), { signal: abort });
     }
   }
 
@@ -35,11 +34,6 @@ export class KeyboardInternal {
   }
 
   private handleBlur(): void {
-    this.pressedScancodes.clear();
-  }
-
-  _dispose(): void {
-    this.abort.abort();
     this.pressedScancodes.clear();
   }
 

@@ -1,36 +1,7 @@
-/**
- * @module graphics
- * @description a reduced-state, Love2D-like wrapper around browser canvas
- * 
- * # Graphics Module
- * 
- * A wrapper around browser Canvas.
- * In standard usage `like.gfx` gives a {@link BoundGraphics} object with a canvas already on it.
- * So, you can for example call `like.gfx.rectangle('fill', 'green', [10, 10, 30, 30])`
- * 
- * ## State Isolation
- * Each drawing operation resets relevant canvas state before executing:
- * - Stroke properties (`lineWidth`, `lineCap`, `lineJoin`, `miterLimit`) are always set to defaults first
- * - No state leakage between drawing calls
- * 
- * ## Predicable Parameter Ordering
- * - No clunky argument overrides that could affect positionality.
- * - **Required arguments** come first as positional parameters
- * - **Optional arguments** are grouped in a trailing `props` object
- * - **Mode** `'fill' | 'line'` is the first arg if relevent. 
- * - **Color** then {@link Color}, if relevant -- there is no `setColor`.
- * 
- * ## Note: Coordinate System is unchanged from native Canvas.
- * - Origin (0, 0) at top-left
- * - X increases right
- * - Y increases down
- * - Angles in radians, 0 is right, positive is clockwise
- */
-
 import { Vec2, type Vector2 } from "../math/vector2";
 import type { Rectangle } from "../math/rect";
 
-type DrawMode = "fill" | "line";
+export type DrawMode = "fill" | "line";
 
 /**
  * - RGBA array with values 0-1: `[r, g, b, a]`
@@ -119,33 +90,41 @@ function setStrokeProps(
   ctx.miterLimit = props?.miterLimit ?? 10;
 }
 
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+): string[] {
+  const words = text.split(" ");
+  const [first, ...rest] = words;
+  const lines: string[] = [];
+  let current = first ?? "";
+  rest.forEach((word) => {
+    if (ctx.measureText(current + " " + word).width < maxWidth) {
+      current += " " + word;
+    } else {
+      lines.push(current);
+      current = word;
+    }
+  });
+  lines.push(current);
+  return lines;
+}
+
+function getFontHeight(ctx: CanvasRenderingContext2D): number {
+  const match = ctx.font.match(/(\d+)px/);
+  return match ? parseInt(match[1]) : 16;
+}
+
 /**
  * A ready-made pure module for drawing to non-LIKE canvases.
- * 
- * Acts as the core of the graphics system.
- * 
- * import { pure as gfx } from "like/internal/graphics"
- * gfx.clear(my2dContext, "red");
  */
-export const pure = {
-  /**
-   * Clears the canvas with a solid color.
-   * @param ctx Canvas context.
-   * @param color Fill color.
-   */
+export const draw = {
   clear(ctx: CanvasRenderingContext2D, color: Color = [0, 0, 0, 1]): void {
     ctx.fillStyle = parseColor(color);
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   },
 
-  /**
-   * Draws a rectangle.
-   * @param ctx Canvas context.
-   * @param mode Fill or line.
-   * @param color Fill or stroke color.
-   * @param rect Rectangle [x, y, w, h].
-   * @param props Optional stroke properties.
-   */
   rectangle(
     ctx: CanvasRenderingContext2D,
     mode: DrawMode,
@@ -164,15 +143,6 @@ export const pure = {
     }
   },
 
-  /**
-   * Draws a circle or ellipse.
-   * @param ctx Canvas context.
-   * @param mode Fill or line.
-   * @param color Fill or stroke color.
-   * @param position Center position.
-   * @param radii Radius (number) or [rx, ry] for ellipse.
-   * @param props Optional arc, center, and stroke properties. Center is true by default.
-   */
   circle(
     ctx: CanvasRenderingContext2D,
     mode: DrawMode,
@@ -211,13 +181,6 @@ export const pure = {
     }
   },
 
-  /**
-   * Draws connected line segments.
-   * @param ctx Canvas context.
-   * @param color Stroke color.
-   * @param points Array of [x, y] positions.
-   * @param props Optional stroke properties.
-   */
   line(
     ctx: CanvasRenderingContext2D,
     color: Color,
@@ -234,18 +197,6 @@ export const pure = {
     ctx.stroke();
   },
 
-  /**
-   * Draws text at position.
-   * 
-   * Keep in mind: if you set `align` without `width` in your props,
-   * nothing will happen -- you'll get left-aligned text.
-   * 
-   * @param ctx Canvas context.
-   * @param color Fill color.
-   * @param text Text string.
-   * @param position Top-left position.
-   * @param props {@link PrintProps} Optional font, text limit, or alignment.
-   */
   print(
     ctx: CanvasRenderingContext2D,
     color: Color,
@@ -272,17 +223,6 @@ export const pure = {
     }
   },
 
-  /**
-   * Draws an image.
-   * 
-   * @remarks named "draw" because it draws anything _drawable_
-   * in the long run.
-   * 
-   * @param ctx Canvas context.
-   * @param handle Image handle from newImage.
-   * @param position Draw position.
-   * @param props Optional rotation, scale, origin, or quad.
-   */
   draw(
     ctx: CanvasRenderingContext2D,
     handle: ImageHandle,
@@ -311,22 +251,10 @@ export const pure = {
     ctx.restore();
   },
 
-  /**
-   * Loads an image from a path.
-   * Unlike built-in loading, this pretends to be synchronous.
-   * @param ctx Canvas context.
-   * @param path Image file path.
-   * @returns ImageHandle for use with draw.
-   */
   newImage(_ctx: CanvasRenderingContext2D, path: string): ImageHandle {
     return new ImageHandle(path);
   },
 
-  /**
-   * Sets the clipping region.
-   * @param ctx Canvas context.
-   * @param rect Clipping rectangle, or full canvas if omitted.
-   */
   clip(ctx: CanvasRenderingContext2D, rect?: Rectangle): void {
     ctx.beginPath();
     if (rect) {
@@ -338,14 +266,6 @@ export const pure = {
     ctx.clip();
   },
 
-  /**
-   * Draws a polygon.
-   * @param ctx Canvas context.
-   * @param mode Fill or line.
-   * @param color Fill or stroke color.
-   * @param points Array of [x, y] vertices.
-   * @param props Optional stroke properties.
-   */
   polygon(
     ctx: CanvasRenderingContext2D,
     mode: DrawMode,
@@ -370,109 +290,30 @@ export const pure = {
     }
   },
 
-  /**
-   * Draws individual pixels.
-   * @param ctx Canvas context.
-   * @param color Fill color.
-   * @param pts Array of [x, y] positions.
-   */
   points(ctx: CanvasRenderingContext2D, color: Color, pts: Vector2[]): void {
     ctx.fillStyle = applyColor(color);
     pts.forEach(([x, y]) => ctx.fillRect(x, y, 1, 1));
   },
 
-  /**
-   * Saves canvas state.
-   * @param ctx Canvas context.
-   */
   push(ctx: CanvasRenderingContext2D): void {
     ctx.save();
   },
 
-  /**
-   * Restores canvas state.
-   * @param ctx Canvas context.
-   */
   pop(ctx: CanvasRenderingContext2D): void {
     ctx.restore();
   },
 
-  /**
-   * Applies a translation.
-   * @param ctx Canvas context.
-   * @param offset [x, y] offset.
-   */
   translate(ctx: CanvasRenderingContext2D, offset: Vector2): void {
     const [x, y] = offset;
     ctx.translate(x, y);
   },
 
-  /**
-   * Applies a rotation.
-   * @param ctx Canvas context.
-   * @param angle Rotation in radians.
-   */
   rotate(ctx: CanvasRenderingContext2D, angle: number): void {
     ctx.rotate(angle);
   },
 
-  /**
-   * Applies a scale.
-   * @param ctx Canvas context.
-   * @param factor Scale factor (number or [x, y]).
-   */
   scale(ctx: CanvasRenderingContext2D, factor: number | Vector2): void {
     const [sx, sy] = typeof factor === "number" ? [factor, factor] : factor;
     ctx.scale(sx, sy);
   },
 };
-
-function wrapText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-): string[] {
-  const words = text.split(" ");
-  const [first, ...rest] = words;
-  const lines: string[] = [];
-  let current = first ?? "";
-  rest.forEach((word) => {
-    if (ctx.measureText(current + " " + word).width < maxWidth) {
-      current += " " + word;
-    } else {
-      lines.push(current);
-      current = word;
-    }
-  });
-  lines.push(current);
-  return lines;
-}
-
-function getFontHeight(ctx: CanvasRenderingContext2D): number {
-  const match = ctx.font.match(/(\d+)px/);
-  return match ? parseInt(match[1]) : 16;
-}
-
-type Bind<F> = F extends (
-  ctx: CanvasRenderingContext2D,
-  ...args: infer A
-) => infer R
-  ? (...args: A) => R
-  : never;
-
-/**
- * A graphics object with a canvas already attatched to it.
- * Calling its methods will draw to the render canvas.
- * See {@link graphics} for more info.
- */
-export type BoundGraphics = {
-  [K in keyof typeof pure]: Bind<(typeof pure)[K]>;
-};
-
-export function bindGraphics(ctx: CanvasRenderingContext2D): BoundGraphics {
-  const bound = {} as BoundGraphics;
-  for (const [name, fn] of Object.entries(pure)) {
-    (bound as any)[name] = (...args: any[]) => (fn as any)(ctx, ...args);
-  }
-  return bound;
-}

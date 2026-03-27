@@ -1,6 +1,6 @@
 
 import { type Scene } from '../scene';
-import type { ImageHandle } from '../internal/graphics';
+import type { ImageHandle } from '../graphics/index';
 import { Vec2 } from '../math/vector2';
 import { Like } from '..';
 

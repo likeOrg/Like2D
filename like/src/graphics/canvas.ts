@@ -1,40 +1,42 @@
-import { EngineDispatch } from "../engine";
+import { type Dispatcher } from "../events";
 import { Rect, Rectangle } from "../math/rect";
 import { Vec2, type Vector2 } from "../math/vector2";
 
 export type CanvasModeOptions = { fullscreen: boolean };
 export type CanvasSize = Vector2 | 'native';
 
-export class CanvasInternal {
-    /** The ultimately visible canvas in the browser */
-    public _displayCanvas: HTMLCanvasElement;
+export class Canvas {
     /** The canvas that we're drawing to with `like.gfx` functions.
-     * If it's the same as _displayCanvas, we're in native mode.
+     * If it's the same as displayCanvas, we're in native mode.
      * Otherwise, we're in pixelart mode, consisting of nearest -> linear scaling.
     */
-    public _renderCanvas: HTMLCanvasElement;
+    private renderCanvas: HTMLCanvasElement;
 
-    private resizeTimeoutId: number = 0;
-    private abort = new AbortController();
+    private resizeTimeoutId: any = 0;
 
-    constructor(public dispatch: EngineDispatch) {
-        this._displayCanvas = document.createElement('canvas');
-        this._displayCanvas.tabIndex = 0;
-        this._displayCanvas.style.width = '100%';
-        this._displayCanvas.style.height = '100%';
-        this._renderCanvas = this._displayCanvas;
+    constructor(
+        /** The ultimately visible canvas in the browser */
+        private displayCanvas: HTMLCanvasElement,
+        private dispatch: Dispatcher<'resize'>,
+        private abort: AbortSignal,
+    ) {
+        displayCanvas = document.createElement('canvas');
+        displayCanvas.tabIndex = 0;
+        displayCanvas.style.width = '100%';
+        displayCanvas.style.height = '100%';
+        this.renderCanvas = this.displayCanvas;
         this.setMode('native');
 
         /** Only the canvas can really transform the mouse to the game size.
          * This hack sends an event for the mouse module to listen to.
          */
-        this._displayCanvas.addEventListener('mousemove', (ev: MouseEvent) => {
+        this.displayCanvas.addEventListener('mousemove', (ev: MouseEvent) => {
             let pos;
             let delta;
             const rawPos: Vector2 = [ev.offsetX, ev.offsetY];
             const rawDelta: Vector2 = [ev.movementX, ev.movementY];
 
-            if (this._renderCanvas == this._displayCanvas) {
+            if (this.renderCanvas == this.displayCanvas) {
                 /* Native mode. */
                 pos = Vec2.mul(rawPos, window.devicePixelRatio ?? 1);
                 delta = Vec2.mul(rawDelta, window.devicePixelRatio ?? 1);
@@ -43,8 +45,8 @@ export class CanvasInternal {
                 * which preserves aspect ratio.
                 */
                 const csize: Vector2 = [
-                    this._displayCanvas.clientWidth,
-                    this._displayCanvas.clientHeight
+                    this.displayCanvas.clientWidth,
+                    this.displayCanvas.clientHeight
                 ];
                 /* Scale of both dimensions */
                 const scale: number = calcAspectFriendlyScale(this.getSize(), csize)
@@ -65,13 +67,13 @@ export class CanvasInternal {
                 }
             }
 
-            this._displayCanvas.dispatchEvent(new CustomEvent('like:mousemoved', {
+            this.displayCanvas.dispatchEvent(new CustomEvent('like:mousemoved', {
                 detail: {
                     pos,
                     delta,
                 }
             }));
-        }, { signal: this.abort.signal })
+        }, { signal: this.abort })
     }
 
     /** Get a unified canvas info object. */
@@ -101,23 +103,23 @@ export class CanvasInternal {
      */
     setMode(size: CanvasSize, flags: Partial<CanvasModeOptions> = {}) {
         // set up sizing / render target
-        const prevRenderCanvas = this._renderCanvas;
+        const prevRenderCanvas = this.renderCanvas;
         if (size == 'native') {
-            this._displayCanvas.style.objectFit = 'fill';
-            this._renderCanvas = this._displayCanvas;
+            this.displayCanvas.style.objectFit = 'fill';
+            this.renderCanvas = this.displayCanvas;
         } else {
-            this._displayCanvas.style.objectFit = 'contain';
-            this._renderCanvas = document.createElement('canvas');
-            const changed = CanvasInternal.setCanvasElemSize(this._renderCanvas, size);
+            this.displayCanvas.style.objectFit = 'contain';
+            this.renderCanvas = document.createElement('canvas');
+            const changed = Canvas.setCanvasElemSize(this.renderCanvas, size);
             if (changed) {
                 this.dispatchResize(size);
             }
         }
-        if (prevRenderCanvas != this._renderCanvas) {
-            this._displayCanvas.dispatchEvent(
+        if (prevRenderCanvas != this.renderCanvas) {
+            this.displayCanvas.dispatchEvent(
               new CustomEvent("like:updateRenderTarget", {
                 detail: {
-                  target: this._renderCanvas,
+                  target: this.renderCanvas,
                 },
               }),
             );
@@ -130,11 +132,11 @@ export class CanvasInternal {
 
     /** Get the apparent (in-game) canvas size. */
     getSize(): Vector2 {
-        return [this._renderCanvas.width, this._renderCanvas.height];
+        return [this.renderCanvas.width, this.renderCanvas.height];
     }
 
-    dispatchResize(size: Vector2) {
-        this._displayCanvas.dispatchEvent(
+    private dispatchResize(size: Vector2) {
+        this.displayCanvas.dispatchEvent(
           new CustomEvent("like:resizeCanvas", {
             detail: {
               size,
@@ -149,67 +151,78 @@ export class CanvasInternal {
         return [0, 0, ...this.getSize()];
     }
 
-    /** Get the actual (physical) canvas size on screen. */
-    _getDisplayPixelSize(): Vector2 {
+    /** Get the actual (physical) canvas size on screen. You probably meant to type `getSize()` */
+    getDisplayPixelSize(): Vector2 {
         return Vec2.round(Vec2.mul(
-            [this._displayCanvas.clientWidth, this._displayCanvas.clientHeight],
+            [this.displayCanvas.clientWidth, this.displayCanvas.clientHeight],
             window.devicePixelRatio ?? 1,
         ));
     }
 
     /** Are we fullscreen? */
     getFullscreen(): boolean {
-        return this._displayCanvas === document.fullscreenElement;
+        return this.displayCanvas === document.fullscreenElement;
     }
 
     /** Set fullscreen. */
     setFullscreen(fullscreen: boolean) {
         if (fullscreen) {
-            this._displayCanvas.requestFullscreen();
-            this._displayCanvas.focus();
+            this.displayCanvas.requestFullscreen();
+            this.displayCanvas.focus();
         } else {
-            document.exitFullscreen();
+            if (this.getFullscreen()) {
+                document.exitFullscreen();
+            }
         }
     }
 
-    /** Called every frame by the engine after drawing */
-    _present() {
-        if (this._renderCanvas == this._displayCanvas) {
-            const realSize = this._getDisplayPixelSize();
-            if ((realSize[0] != this._displayCanvas.width ||
-              realSize[1] != this._displayCanvas.height) &&
+    /** 
+     * @private Called internally by the engine before
+     * rendering a frame.
+     */
+    prePresent() {
+        if (this.renderCanvas == this.displayCanvas) {
+            const realSize = this.getDisplayPixelSize();
+            if ((realSize[0] != this.displayCanvas.width ||
+              realSize[1] != this.displayCanvas.height) &&
               !this.resizeTimeoutId)
             {
               /** In native scaling mode, zooming and resizing the window cause us
                * to set canvas width and height every frame, which could cause
                * tons of canvas bitmap reallocations. So wait 1/4 second..
                */
-              CanvasInternal.setCanvasElemSize(this._displayCanvas, realSize);
+              Canvas.setCanvasElemSize(this.displayCanvas, realSize);
               this.dispatchResize(realSize);
               this.resizeTimeoutId = setTimeout(() => { this.resizeTimeoutId = 0; }, 250);
             }
-        } else if (this._renderCanvas != this._displayCanvas) {
+        }
+        this.renderCanvas.getContext('2d')!.resetTransform();
+    }
+
+    /** @private Called every frame by the engine after drawing */
+    present() {
+        if (this.renderCanvas != this.displayCanvas) {
             /* We're in pixelart mode,
              * so set output canvas size to an ideal integer scale.
              * No debounce: changes to integer ratio are infrequent.
              */
-            CanvasInternal.setCanvasElemSize(
-                this._displayCanvas,
+            Canvas.setCanvasElemSize(
+                this.displayCanvas,
                 Vec2.mul(
                     this.getSize(),
                     Math.round(calcAspectFriendlyScale(
-                        this.getSize(), this._getDisplayPixelSize())
+                        this.getSize(), this.getDisplayPixelSize())
                     )
                 )
             );
 
             // Copy the internal canvas to the visible one.
-            const ctx = this._displayCanvas.getContext('2d')!;
+            const ctx = this.displayCanvas.getContext('2d')!;
             ctx.imageSmoothingEnabled = false;
             ctx.drawImage(
-                this._renderCanvas,
-                0, 0, this._renderCanvas.width, this._renderCanvas.height,
-                0, 0, this._displayCanvas.width, this._displayCanvas.height,
+                this.renderCanvas,
+                0, 0, this.renderCanvas.width, this.renderCanvas.height,
+                0, 0, this.displayCanvas.width, this.displayCanvas.height,
             );
         }
     }
@@ -224,10 +237,6 @@ export class CanvasInternal {
     }
     static getCanvasElemSize(canvas: HTMLCanvasElement): Vector2 {
         return [canvas.width, canvas.height];
-    }
-
-    _dispose(): void {
-        this.abort.abort();
     }
 }
 

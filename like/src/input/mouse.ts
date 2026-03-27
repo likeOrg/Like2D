@@ -1,6 +1,5 @@
-import { EngineDispatch } from '../engine';
 import { Vec2, type Vector2 } from '../math/vector2';
-import { type MouseButton } from './events';
+import { type MouseButton, type Dispatcher, type LikeMouseEvent } from '../events';
 
 const mouseButtons = ["left", "middle", "right"] as const;
 const numToButton = (i: number): MouseButton => mouseButtons[i];
@@ -10,16 +9,15 @@ type MouseMode =
   | { lock: false, visible: boolean, scrollBlock: boolean }
   | { lock: true, speed: number };
 
-type MouseSetMode = Partial<MouseMode> & { lock: boolean };
+export type MouseSetMode = Partial<MouseMode> & { lock: boolean };
 
 /**
  * Mouse input handling. Bound to canvas. Emits relative movement when pointer locked.
  */
-export class MouseInternal {
+export class Mouse {
   private pos: Vector2 = [0, 0];
   private lastPos: Vector2 = [0, 0];
   private buttons = new Set<MouseButton>();
-  private abort = new AbortController();
   /** The canvas reference is the DOM / display canvas, this keeps
    * track of the internal (apparent) canvas size.
    */
@@ -31,24 +29,24 @@ export class MouseInternal {
   private unlockedMode: MouseMode & {lock: false} = { lock: false, visible: true, scrollBlock: true };
   private enableLock = false;
 
-  constructor(private canvas: HTMLCanvasElement, private dispatch: EngineDispatch) {
+  constructor(private canvas: HTMLCanvasElement, private dispatch: Dispatcher<LikeMouseEvent>, abort: AbortSignal) {
     this.canvas.addEventListener(
       "like:mousemoved",
       this.handleMouseMove.bind(this) as any,
-      { signal: this.abort.signal },
+      { signal: abort },
     );
     this.canvas.addEventListener("mousedown", this.handleMouseDown.bind(this), {
-      signal: this.abort.signal,
+      signal: abort,
     });
     window.addEventListener("mouseup", this.handleMouseUp.bind(this), {
-      signal: this.abort.signal,
+      signal: abort,
     });
     this.canvas.addEventListener("wheel", this.handleWheel.bind(this), {
       passive: false,
-      signal: this.abort.signal,
+      signal: abort,
     });
     this.canvas.addEventListener("mouseleave", () => this.buttons.clear(), {
-      signal: this.abort.signal,
+      signal: abort,
     });
     this.canvas.addEventListener(
       "pointerlockchanged",
@@ -56,13 +54,15 @@ export class MouseInternal {
         if (!this.isPointerLocked())
         this.enableLock = false;
       },
+      { signal: abort }
     );
     this.canvas.addEventListener(
       "like:resizeCanvas",
       (e: HTMLElementEventMap["like:resizeCanvas"]) => {
         this.canvasSize = e.detail.size;
-      }
-    )
+      },
+      { signal: abort }
+    );
   }
 
   private handleMouseMove(e: MouseMoveEvent): void {
@@ -151,7 +151,7 @@ export class MouseInternal {
    * (locked mode doesn't natively track absolute position)
    * may be stuck on canvas edges, the `delta` field always
    * represents mouse movement, even against edges.
-  */
+   */
   setMode(mode: MouseSetMode) {
     this.lockPointer(mode.lock);
     if (mode.lock) {
@@ -218,9 +218,4 @@ export class MouseInternal {
    * or `like.mouse.lockPointer().
    */
   setRelativeMode?: never;
-
-  _dispose(): void {
-    this.abort.abort();
-  }
-
 }

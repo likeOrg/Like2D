@@ -4,8 +4,8 @@
  * 
  */
 
-import type { LikeEvent, EventMap } from './internal/events';
-import type { Like } from './internal/like';
+import type { LikeEvent, EventMap } from './events';
+import type { Like } from './like';
 
 /**
  * An interface for creating scenes.

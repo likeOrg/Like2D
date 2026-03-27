@@ -1,14 +1,6 @@
 import { defaultMapping, fullButtonName, GamepadMapping, getSdlMapping, LikeButton, mapStick } from './gamepad-mapping';
-import { EngineDispatch } from '../engine';
+import { type Dispatcher, type LikeGamepadEvent } from '../events';
 import { Vector2 } from '../math/vector2';
-
-export {
-  type LikeButton,
-  type GamepadMapping,
-  type StickMapping,
-  type StickAxisMapping,
-  defaultMapping,
-} from "./gamepad-mapping";
 
 /** A selector for a gamepad. */
 export type GamepadTarget = number | "any";
@@ -23,55 +15,28 @@ export type GamepadTarget = number | "any";
  * way to generate {@link GamepadMapping} and set it with {@link Gamepad.setMapping}.
  * 
  * If you don't want to make your own, take a look at `prefab-scenes/mapGamepad`.
- * 
- * ## Getting events
- * ```ts
- * like.gamepadpressed = (idx: number, button: LikeButton) => {
- *   console.log(`Button ${button} pressed on controller ${idx}`);
- * }
- * ```
- * 
- * ## Using the built-in mapping scene
- * ```ts
- * import { buttonSetSNES, MapGamepad } from "like/prefab-scenes";
- * 
- * like.gamepadconnected = (index: number, mapped: boolean) => {
- *   if (!mapped) {
- *     const myTargetMapping = { buttons: buttonSetSNES, sticks: 2 };
- *     const mappingScene = new MapGamepad(myTargetMapping, index);
- *     like.scene.setScene(mappingScene);
- *   }
- * }
- * ```
- * Available button sets:
- *  - `buttonSetNES`: A, B, Start, Select, DPad
- *  - `buttonSetSNES`: NES plus X, Y, L1, R1
- *  - `buttonSetPS1`: SNES plus L2, R2
- *  - `buttonSetAll`: PS1 plus Lstick, RStick (stick click buttons)
- * 
  */
-export class GamepadInternal {
+export class Gamepad {
   private gamepads: Record<number, GamepadState> = {};
-  private abort = new AbortController();
   private autoLoadMapping = true;
 
-  constructor(private dispatch: EngineDispatch) {
+  constructor(private dispatch: Dispatcher<LikeGamepadEvent>, abort: AbortSignal) {
     // Register event listeners
     window.addEventListener(
       "gamepadconnected",
-      this._onGamepadConnected.bind(this),
+      this.onGamepadConnected.bind(this),
       {
-        signal: this.abort.signal,
+        signal: abort,
       },
     );
     window.addEventListener(
       "gamepaddisconnected",
-      (ev: GamepadEvent) => {
+      (ev: globalThis.GamepadEvent) => {
         console.log(`[Gamepad] Disconnected ${ev.gamepad.id}`);
         delete this.gamepads[ev.gamepad.index];
         this.dispatch("gamepaddisconnected", [ev.gamepad.index]);
       },
-      { signal: this.abort.signal },
+      { signal: abort },
     );
     window.addEventListener(
       "blur",
@@ -80,11 +45,11 @@ export class GamepadInternal {
           gps.clear();
         }
       },
-      { signal: this.abort.signal },
+      { signal: abort },
     );
   }
 
-  _onGamepadConnected(ev: GamepadEvent) {
+  private onGamepadConnected(ev: globalThis.GamepadEvent) {
     const gps = new GamepadState(ev.gamepad.index);
     this.gamepads[ev.gamepad.index] = gps;
     console.log(
@@ -101,7 +66,7 @@ export class GamepadInternal {
     } else {
       const sdlMapping = getSdlMapping(ev.gamepad);
       if (sdlMapping) {
-        gps.mapping.buttons = sdlMapping;
+        gps.mapping.buttons = sdlMapping.mapping;
         console.log(
           `[Gamepad] Connected, applied SDL database mapping.`,
         );
@@ -115,7 +80,11 @@ export class GamepadInternal {
     this.dispatch("gamepadconnected", [ev.gamepad.index]);
   }
 
-  _update(): void {
+  /**
+   * @private
+   * Called by the engine every frame.
+   */
+  update(): void {
     Object.values(this.gamepads).forEach((gp) => gp.update(this.dispatch));
   }
 
@@ -136,7 +105,7 @@ export class GamepadInternal {
     return fullButtonName.get(name as any) ?? name;
   }
 
-  _checkButton(
+  private checkButton(
     target: GamepadTarget,
     button: LikeButton | number,
     mode: "justPressed" | "isDown",
@@ -153,7 +122,7 @@ export class GamepadInternal {
     target: GamepadTarget,
     button: LikeButton | number,
   ): boolean | undefined {
-    return this._checkButton(target, button, "isDown");
+    return this.checkButton(target, button, "isDown");
   }
 
   /**
@@ -164,7 +133,7 @@ export class GamepadInternal {
     target: GamepadTarget,
     button: LikeButton | number,
   ): boolean | undefined {
-    return this._checkButton(target, button, "justPressed");
+    return this.checkButton(target, button, "justPressed");
   }
 
   /**
@@ -224,18 +193,14 @@ export class GamepadInternal {
    * When a gamepad with a known (to this system) ID is plugged in,
    * this will load the previously saved mapping.
    *
-   * @param autosave (default true)
+   * @param enable
    */
   enableAutoLoadMapping(enable: boolean) {
     this.autoLoadMapping = enable;
   }
-
-  _dispose(): void {
-    this.abort.abort();
-  }
 }
 
-function getLocalstoragePath(gamepad: Gamepad): string {
+function getLocalstoragePath(gamepad: globalThis.Gamepad): string {
   return `${gamepad.axes.length}A${gamepad.buttons.length}B${gamepad.id}`;
 }
 
@@ -276,8 +241,9 @@ class GamepadState {
       );
   }
 
-  update(dispatch: EngineDispatch) {
+  update(dispatch: Dispatcher<LikeGamepadEvent>) {
     const gp = navigator.getGamepads()[this.index]!;
+    if (!gp) return;
 
     [this.downNums, this.lastDownNums] = [this.lastDownNums, this.downNums];
     for (const k in this.downNums) {

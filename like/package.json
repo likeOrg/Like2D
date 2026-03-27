@@ -15,17 +15,45 @@
       "import": "./dist/scene.js",
       "types": "./dist/scene.d.ts"
     },
-    "./math/*": {
-      "import": "./dist/math/*.js",
-      "types": "./dist/math/*.d.ts"
+    "./math": {
+      "import": "./dist/math/index.js",
+      "types": "./dist/math/index.d.ts"
     },
     "./prefab-scenes": {
       "import": "./dist/prefab-scenes/index.js",
       "types": "./dist/prefab-scenes/index.d.ts"
     },
-    "./internal/*": {
-      "import": "./dist/core/*.js",
-      "types": "./dist/core/*.d.ts"
+    "./gamepad": {
+      "import": "./dist/gamepad/index.js",
+      "types": "./dist/gamepad/index.d.ts"
+    },
+    "./graphics": {
+      "import": "./dist/graphics/index.js",
+      "types": "./dist/graphics/index.d.ts"
+    },
+    "./audio": {
+      "import": "./dist/audio/index.js",
+      "types": "./dist/audio/index.d.ts"
+    },
+    "./input": {
+      "import": "./dist/input/index.js",
+      "types": "./dist/input/index.d.ts"
+    },
+    "./timer": {
+      "import": "./dist/timer/index.js",
+      "types": "./dist/timer/index.d.ts"
+    },
+    "./events": {
+      "import": "./dist/events.js",
+      "types": "./dist/events.d.ts"
+    },
+    "./like": {
+      "import": "./dist/like.js",
+      "types": "./dist/like.d.ts"
+    },
+    "./engine": {
+      "import": "./dist/engine.js",
+      "types": "./dist/engine.d.ts"
     }
   },
   "files": [

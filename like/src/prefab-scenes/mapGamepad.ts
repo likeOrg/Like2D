@@ -1,5 +1,6 @@
-import { Color, Like, LikeButton, PrintProps } from "..";
-import { defaultMapping, GamepadMapping } from "../internal/gamepad";
+import type { Like } from "..";
+import type { Color, PrintProps } from "../graphics";
+import { type LikeButton, defaultMapping, GamepadMapping } from "../input";
 import { Vector2 } from "../math/vector2";
 import { Scene } from "../scene";
 
