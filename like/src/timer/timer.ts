@@ -1,4 +1,6 @@
-export class TimerInternal {
+import { EngineProps } from "../engine";
+
+export class Timer {
   private currentDelta = 0;
   private totalTime = 0;
   private frameCount = 0;
@@ -6,7 +8,12 @@ export class TimerInternal {
   private fpsAccumulator = 0;
   private sleepUntil: number | null = null;
 
-  _update(dt: number): void {
+  constructor(props: EngineProps<never>) {
+    props.canvas.addEventListener("like:update", this.update.bind(this), { signal: props.abort })
+  }
+
+  private update(ev: HTMLElementEventMap["like:update"]): void {
+    const {dt} = ev.detail;
     this.currentDelta = dt;
     this.totalTime += dt;
     this.frameCount++;
@@ -19,18 +26,29 @@ export class TimerInternal {
     }
   }
 
+  /** Get `dt` (from the update loop) anywhere.
+   * AKA the time since the last frame.
+   */
   getDelta(): number {
     return this.currentDelta;
   }
 
+  /** Get an estimated FPS based on one-second average. */
   getFPS(): number {
     return this.fps;
   }
 
+  /** Get the ingame time. */
   getTime(): number {
     return this.totalTime;
   }
 
+  /**
+   * Whether or not the game is (supposed to be) frozen.
+   * The only callback while sleeping is `draw`, and
+   * calling this outside of `draw` will always return
+   * false -- except if you have a custom runtime.
+   */
   isSleeping(): boolean {
     if (this.sleepUntil === null) return false;
     const currentTime = performance.now();
@@ -41,6 +59,10 @@ export class TimerInternal {
     return false;
   }
 
+  /**
+   * Freeze the whole game for a time. Audio will keep playing,
+   * but update functions won't be called and events won't fire.
+   */
   sleep(duration: number): void {
     this.sleepUntil = performance.now() + (duration * 1000);
   }

@@ -1,5 +1,55 @@
 # Changelog
 
+## [2.10.0] - Unreleased
+
+### Breaking Changes
+ - Imports have been restructured for sanity, thus breaking all of your stuff. Sorry not sorry, this is how it was always supposed to be. Our modules:
+    - `like`
+    - `like/input`
+    - `like/audio`
+    - `like/graphics`
+    - `like/math`
+    - `like/timer`
+    - `like/prefab-scenes`
+ - `like.mouse.showCursor(boolean)` integrated with `like.mouse.setMode`. Rationale: setVisible is irrelevant in capture mode.
+   Note that setting `visible` to `false` in `setMode` will be remembered when capture state is exited.
+ - Removed `like.gamepad.getGamepad` -- Redundant with DOM
+ - Removed `like.input.clear` -- Why does this exist?
+ - `like.mouse.setMode`, replaces `showCursor` and allows setting mouse sensitivity in capture mode, as well as visibility and scroll blocking in non-captured mode.
+ - Removed `buttonMenuCenter` mapping -- Relatively uncommon, no games will rely on this.
+ - Removed `gfx.circle` angle property -- prefer transforms, we can rotate any shape...
+ - Renamed `gamepad.isButtonDown` to `gamepad.isDown`
+ - Renamed `gamepad.isButtonJustPressed` to `gamepad.justPressed`
+ - Shortened the name of gamepad buttons. "BBottom" instead of "ButtonBottom", "Left" instead of "DPadLeft", "L1" instead of "ButtonL1", etc.
+ - Gamepads now have a remapping feature, with auto-save / auto-load to localStorage enabled by default. No more 1:1 relationship between button names and numbers.
+ - `like.gfx.print` option `limit` renamed to `width`.
+ - `like.gfx.print` made alignment work differently than LOVE, more like browser canvas.
+
+### Added
+  - `like.mouse.setCapturedPos`, allows emulated mouse to be teleported while in capture mode.
+  - `Vec.map` and `Vec.map2` helpers.
+  - `like.gamepad.isDown` and `like.gamepad.isDown` now accept `'any'` as the first argument, to check all gamepads.
+  - `like.gamepad.justPressed` now accepts a numeric argument for raw buttons.
+  - Gamepad mapping / remapping system
+    - Gamepad now digitizes all axes and triggers automatically.
+    - Brought back SDL auto mapping as a best-guess solution, plus:
+    - `like.gamepad.setMapping`, `like.gamepad.getMapping`: Set / get active button mappings.
+    - `like.gamepad.loadMapping`, `like.gamepad.saveMapping`: Put persistent mappings in localstorage.
+    - `like.gamepad.enableAutoLoadMapping`: Always load saved mappings on gamepad connection.
+    - `like.gamepad.getSticks`: Get an array of mapped sticks.
+    - `like.gamepadconnected` and `like.gamepaddisconnected` events.
+  - Documented input module better.
+  - `like.input.setAction` now takes string or InputBinding arguments.
+  - Added `like.input.appendToAction`
+  - Added `like.input.getActionMapping`
+  - `like.canvas.getDisplayPixelSize` -- 
+
+### Fixed
+ - **Capture Bug** If another element set cursor capture, LIKE would report capture TRUE.
+ - Make `gfx.circle` center property actually work.
+ - Make `gfx.circle` filled arc actually fill like a pie slice kinda
+ - **Double Load** Scene-based games were loading twice. `like.setScene` was dispatching `load` before `like` had actually started running.
+
 ## [2.9.0] - 2026-03-23
 
 ### Breaking Changes

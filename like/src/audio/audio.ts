@@ -5,9 +5,9 @@
  * 
  * ## Track and give global control to all audio objects
  * Start, stop, or set global volume for every currently playing sound.
- *
  */
 
+/** Pass this into like.audio.newSource as config. */
 export type AudioSourceOptions = {
   volume?: number;
 }
@@ -27,13 +27,14 @@ export class AudioSource {
   readonly path: string;
   /** Underlying HTMLAudioElement. Modify directly for looping, pitch, etc. Use methods for playback control. Avoid setting volume directly. */
   readonly audio: HTMLAudioElement;
+  /** Avoid setting these directly. */
   readonly options: Required<AudioSourceOptions>;
   /** Resolves when the audio is loaded and ready to play. */
   readonly ready: Promise<void>;
   private loadState: LoadState = { loaded: false, pendingPlay: false, pendingSeek: 0 };
-  private audioRef: AudioInternal;
+  private audioRef: Audio;
 
-  constructor(path: string, audioRef: AudioInternal, options: AudioSourceOptions = {}) {
+  constructor(path: string, audioRef: Audio, options: AudioSourceOptions = {}) {
     this.path = path;
     this.audioRef = audioRef;
     this.audio = document.createElement('audio');
@@ -156,7 +157,15 @@ export class AudioSource {
   }
 }
 
-export class AudioInternal {
+/**
+ * The audio subsystem.
+ * 
+ * Manages a handful of AudioSource objects, for things like global volume,
+ * global play/pause, etc..
+ * 
+ * To make a new source, use `like.audio.newSource`.
+ */
+export class Audio {
   private sources: WeakRef<AudioSource>[] = [];
   private globalVolume = 1;
 

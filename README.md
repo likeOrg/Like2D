@@ -7,7 +7,6 @@
 Want to make a 2D browser game? Well like, do it!
 
 LIKE is in the same family as LÖVE or Raylib, but only for web.
-2D gamedev has never been simpler!
 
 ## Simple bindings
 
@@ -45,4 +44,4 @@ npm run dev
 ## Why the Spade?
 
 Here I am, digging in the dirt of browser APIs.
-Pulling out rocks and weeds and such, all so you can plant your flowers.
+Pulling out rocks and weeds and such, to make room for flowers.

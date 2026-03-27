@@ -1,7 +1,11 @@
-import { createLike, type ImageHandle, type AudioSource, type Like, type CanvasSize } from "like";
-import { StartScreen } from "like/prefab-scenes";
-import { Vec2 } from "like/math/vector2";
+import { createLike, Like, } from "like";
+import { ImageHandle } from "like/graphics";
+import { AudioSource } from "like/audio";
+import { CanvasSize } from "like/graphics";
+import { MapGamepad, } from "like/prefab-scenes";
+import { Vec2 } from "like/math";
 import { Scene } from "like/scene";
+import { buttonSetPS1 } from "like/prefab-scenes";
 
 let pepperImage: ImageHandle | null = null;
 let audioSource: AudioSource | null = null;
@@ -28,12 +32,12 @@ const demoScene: Scene = {
     pepperImage = like.gfx.newImage('pepper.png');
     audioSource = like.audio.newSource('./test.ogg');
     
-    like.input.setAction('jump', ['Space', 'ArrowUp', 'KeyW', 'ButtonBottom']);
+    like.input.setAction('jump', ['Space', 'ArrowUp', 'KeyW', 'BBottom']);
     like.input.setAction('fire', ['MouseLeft', 'RT']);
-    like.input.setAction('move_left', ['ArrowLeft', 'KeyA', 'DPLeft']);
-    like.input.setAction('move_right', ['ArrowRight', 'KeyD', 'DPRight']);
-    like.input.setAction('move_up', ['ArrowUp', 'KeyW', 'DPUp']);
-    like.input.setAction('move_down', ['ArrowDown', 'KeyS', 'DPDown']);
+    like.input.setAction('move_left', ['ArrowLeft', 'KeyA', 'Left']);
+    like.input.setAction('move_right', ['ArrowRight', 'KeyD', 'Right']);
+    like.input.setAction('move_up', ['ArrowUp', 'KeyW', 'Up']);
+    like.input.setAction('move_down', ['ArrowDown', 'KeyS', 'Down']);
     like.input.setAction('audio_play_pause', ['KeyP']);
     like.input.setAction('sleep_timer', ['KeyL']);
     like.input.setAction('toggle_pointer_lock', ['KeyC']);
@@ -61,7 +65,6 @@ const demoScene: Scene = {
   keypressed(like: Like, scancode: string) {
     if (scancode === 'KeyZ') {
       scaleIndex = (scaleIndex + 1) % scales.length;
-      console.log();
       const mode = scales[scaleIndex];
       like.canvas.setMode(mode);
     }
@@ -82,6 +85,8 @@ const demoScene: Scene = {
       like.mouse.lockPointer(!locked);
     }
   },
+
+  gamepadpressed: (_ignore, ...args) => console.log(args),
 
   draw(like: Like) {
     const { timer, mouse, gamepad, gfx } = like;
@@ -124,12 +129,12 @@ const demoScene: Scene = {
     gfx.circle('fill', 'springgreen', player.pos, 15);
     gfx.circle('line', 'lime', player.pos, 15);
 
-    // Display gamepad axes
-    const axes = gamepad.getGamepad(0)?.axes;
-    if (axes && axes.length > 0) {
+    // Display gamepad sticks
+    const sticks = gamepad.getSticks(0);
+    if (sticks.length > 0) {
       gfx.print('orange', 'Gamepad Axes:', [20, 260], { font: '16px sans-serif' });
-      axes.forEach((axis, i) => {
-        gfx.print('white', `  Axis ${i}: ${axis.toFixed(3)}`, [20, 280 + i * 18], { font: '14px sans-serif' });
+      sticks.forEach((pos, i) => {
+        gfx.print('white', `  Stick ${i}: ${pos}`, [20, 280 + i * 18], { font: '14px sans-serif' });
       });
     } else {
       gfx.print('gray', 'No gamepad connected', [20, 260], { font: '14px sans-serif' });
@@ -141,5 +146,5 @@ document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
   like.canvas.setFullscreen(true);
 });
 
-like.setScene(new StartScreen(demoScene));
+like.setScene(new MapGamepad({buttons: buttonSetPS1, stickCount: 2}, 0, demoScene));
 await like.start();

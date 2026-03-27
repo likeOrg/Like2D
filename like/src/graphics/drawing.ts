@@ -27,10 +27,10 @@
  * - Angles in radians, 0 is right, positive is clockwise
  */
 
-import type { Vector2 } from "../math/vector2";
+import { Vec2, type Vector2 } from "../math/vector2";
 import type { Rectangle } from "../math/rect";
 
-type DrawMode = "fill" | "line";
+export type DrawMode = "fill" | "line";
 
 /**
  * - RGBA array with values 0-1: `[r, g, b, a]`
@@ -55,8 +55,8 @@ export type DrawProps = ShapeProps & {
 
 export type PrintProps = {
   font?: string;
-  limit?: number;
-  align?: CanvasTextAlign;
+  width?: number,
+  align?: CanvasTextAlign,
 };
 
 export class ImageHandle {
@@ -119,15 +119,45 @@ function setStrokeProps(
   ctx.miterLimit = props?.miterLimit ?? 10;
 }
 
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+): string[] {
+  const words = text.split(" ");
+  const [first, ...rest] = words;
+  const lines: string[] = [];
+  let current = first ?? "";
+  rest.forEach((word) => {
+    if (ctx.measureText(current + " " + word).width < maxWidth) {
+      current += " " + word;
+    } else {
+      lines.push(current);
+      current = word;
+    }
+  });
+  lines.push(current);
+  return lines;
+}
+
+function getFontHeight(ctx: CanvasRenderingContext2D): number {
+  const match = ctx.font.match(/(\d+)px/);
+  return match ? parseInt(match[1]) : 16;
+}
+
 /**
- * A ready-made pure module for drawing to non-LIKE canvases.
+ * All of these methods exist on `like.gfx`, but with `ctx`
+ * bound to the first arg.
  * 
- * Acts as the core of the graphics system.
+ * Acts as the core of the graphics system, but can be used separately.
  * 
- * import { pure as gfx } from "like/internal/graphics"
- * gfx.clear(my2dContext, "red");
+ * ```ts
+ * import { draw } from "like/graphics"
+ * draw.clear(my2dContext, "red");
+ * ```
+ * 
  */
-export const pure = {
+export const draw = {
   /**
    * Clears the canvas with a solid color.
    * @param ctx Canvas context.
@@ -171,7 +201,7 @@ export const pure = {
    * @param color Fill or stroke color.
    * @param position Center position.
    * @param radii Radius (number) or [rx, ry] for ellipse.
-   * @param props Optional angle, arc, or stroke properties.
+   * @param props Optional arc, center, and stroke properties. Center is true by default.
    */
   circle(
     ctx: CanvasRenderingContext2D,
@@ -180,23 +210,24 @@ export const pure = {
     position: Vector2,
     radii: number | Vector2,
     props?: ShapeProps & {
-      angle?: number;
       arc?: [number, number];
-      center: boolean;
+      center?: boolean;
     },
   ): void {
-    const [x, y] = position;
+    const center = (props && 'center' in props) ? props.center : true;
     const c = applyColor(color);
-    const [rx, ry] = typeof radii === "number" ? [radii, radii] : radii;
+    const size: Vector2 = typeof radii === "number" ? [radii, radii] : radii;
     const [startAngle, endAngle] = props?.arc ?? [0, Math.PI * 2];
-    const rotation = props?.angle ?? 0;
+    if (!center) {
+      position = Vec2.add(position, size);
+    }
 
     ctx.save();
-    ctx.translate(x, y);
-    ctx.scale(rx, ry);
-    ctx.rotate(rotation);
+    ctx.translate(...position);
+    ctx.scale(...size);
     ctx.beginPath();
     ctx.arc(0, 0, 1, startAngle, endAngle);
+    if (mode == 'fill') ctx.lineTo(0, 0);
     ctx.closePath();
     ctx.restore();
 
@@ -234,12 +265,20 @@ export const pure = {
   },
 
   /**
-   * Draws text at position.
+   * Draws text at a position.
+   * 
+   * Keep in mind: if you set `align` without `width` in your props,
+   * nothing will happen -- you'll get left-aligned text.
+   * 
+   * Align works browser-style: if you align center, your text draws
+   * to the left and right of its position. If you align right, your position
+   * becomes the upper-right corner of the text.
+   * 
    * @param ctx Canvas context.
    * @param color Fill color.
    * @param text Text string.
    * @param position Top-left position.
-   * @param props Optional font, text limit, or alignment.
+   * @param props {@link PrintProps} Optional font, text limit, or alignment.
    */
   print(
     ctx: CanvasRenderingContext2D,
@@ -249,23 +288,19 @@ export const pure = {
     props?: PrintProps,
   ): void {
     const [x, y] = position;
-    const { font = "16px sans-serif", limit, align = "left" } = props ?? {};
+    const { font = "16px sans-serif" } = props ?? {};
     ctx.fillStyle = parseColor(color);
     ctx.font = font;
-
-    if (limit !== undefined) {
-      const lines = wrapText(ctx, text, limit);
+    ctx.textAlign = props?.align ?? "left";
+    if (props && 'width' in props) {
+      const { width } = props;
+      const lines = wrapText(ctx, text, width as any);
       const lineHeight = getFontHeight(ctx);
+      ctx.textBaseline = "top";
       lines.forEach((line, i) => {
-        const lineWidth = ctx.measureText(line).width;
-        const drawX =
-          align === "center"
-            ? x + (limit - lineWidth) / 2
-            : align === "right"
-              ? x + limit - lineWidth
-              : x;
-        ctx.fillText(line, drawX, y + i * lineHeight);
+        ctx.fillText(line, x, y + i * lineHeight, width);
       });
+      ctx.textBaseline = "alphabetic";
     } else {
       ctx.fillText(text, x, y);
     }
@@ -425,53 +460,3 @@ export const pure = {
     ctx.scale(sx, sy);
   },
 };
-
-function wrapText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-): string[] {
-  const words = text.split(" ");
-  const [first, ...rest] = words;
-  const lines: string[] = [];
-  let current = first ?? "";
-  rest.forEach((word) => {
-    if (ctx.measureText(current + " " + word).width < maxWidth) {
-      current += " " + word;
-    } else {
-      lines.push(current);
-      current = word;
-    }
-  });
-  lines.push(current);
-  return lines;
-}
-
-function getFontHeight(ctx: CanvasRenderingContext2D): number {
-  const match = ctx.font.match(/(\d+)px/);
-  return match ? parseInt(match[1]) : 16;
-}
-
-type Bind<F> = F extends (
-  ctx: CanvasRenderingContext2D,
-  ...args: infer A
-) => infer R
-  ? (...args: A) => R
-  : never;
-
-/**
- * A graphics object with a canvas already attatched to it.
- * Calling its methods will draw to the render canvas.
- * See {@link graphics} for more info.
- */
-export type BoundGraphics = {
-  [K in keyof typeof pure]: Bind<(typeof pure)[K]>;
-};
-
-export function bindGraphics(ctx: CanvasRenderingContext2D): BoundGraphics {
-  const bound = {} as BoundGraphics;
-  for (const [name, fn] of Object.entries(pure)) {
-    (bound as any)[name] = (...args: any[]) => (fn as any)(ctx, ...args);
-  }
-  return bound;
-}

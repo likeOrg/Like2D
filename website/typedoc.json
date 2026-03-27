@@ -1,10 +1,14 @@
 {
   "entryPoints": [
-    "../packages/like2d/src/index.ts",
-    "../packages/like2d/src/adapters/callback/index.ts",
-    "../packages/like2d/src/adapters/scene/index.ts"
+    "../like/src/index.ts",
+    "../like/src/audio/index.ts",
+    "../like/src/graphics/index.ts",
+    "../like/src/input/index.ts",
+    "../like/src/math/index.ts",
+    "../like/src/prefab-scenes/index.ts",
+    "../like/src/timer/index.ts",
   ],
-  "tsconfig": "../packages/like2d/tsconfig.json",
+  "tsconfig": "../like/tsconfig.json",
   "plugin": ["typedoc-plugin-markdown"],
   "out": "./api",
   "excludeExternals": true,
