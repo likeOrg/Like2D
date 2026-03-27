@@ -31,6 +31,8 @@ type Bind<F> = F extends (
 
 /**
  * A graphics object with a canvas already attatched to it.
+ * Calling its methods will draw to the render canvas.
+ * See {@link graphics} for more info.
  */
 export type BoundGraphics = {
   [K in keyof typeof draw]: Bind<(typeof draw)[K]>;
