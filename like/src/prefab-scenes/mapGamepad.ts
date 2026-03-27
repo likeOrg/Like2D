@@ -1,5 +1,5 @@
 import { Color, Like, LikeButton, PrintProps } from "..";
-import { defaultMapping, GamepadMapping } from "../core/gamepad";
+import { defaultMapping, GamepadMapping } from "../internal/gamepad";
 import { Vector2 } from "../math/vector2";
 import { Scene } from "../scene";
 
@@ -151,7 +151,7 @@ export class MapGamepad implements Scene {
         ? `Press ${like.gamepad.fullButtonName(active)}!`
         : "Press any button to resume.",
       [2, 10],
-      { font: "1px serif" },
+      { font: "1px sans-serif" },
     );
   }
 

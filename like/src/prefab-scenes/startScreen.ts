@@ -1,6 +1,6 @@
 
 import { type Scene } from '../scene';
-import type { ImageHandle } from '../core/graphics';
+import type { ImageHandle } from '../internal/graphics';
 import { Vec2 } from '../math/vector2';
 import { Like } from '..';
 
@@ -37,7 +37,7 @@ const LOGO = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0i
  * 
  * ```ts
  * import { type Scene } from 'like/scene';
- * import type { ImageHandle } from 'like/core/graphics';
+ * import type { ImageHandle } from 'like/internal/graphics';
  * import { Vec2 } from 'like/math/vector2';
  * import { Like } from 'like';
  * ```

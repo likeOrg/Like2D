@@ -6,16 +6,16 @@
  */
 
 import { Engine } from './engine';
-import type { LikeEvent } from './core/events';
-import type { Like } from './core/like';
+import type { LikeEvent } from './internal/events';
+import type { Like } from './internal/like';
 
-export type { Like } from './core/like';
-export type { LikeEvent, EventType, EventMap } from './core/events';
-export type { CanvasSize, CanvasModeOptions as CanvasModeFlags } from './core/canvas';
-export type { Color, ShapeProps, DrawProps, PrintProps } from './core/graphics';
-export { ImageHandle } from './core/graphics';
-export type { AudioSource, AudioSourceOptions } from './core/audio';
-export { type LikeButton } from './core/gamepad';
+export type { Like } from './internal/like';
+export type { LikeEvent, EventType, EventMap } from './internal/events';
+export type { CanvasSize, CanvasModeOptions as CanvasModeFlags } from './internal/canvas';
+export type { Color, ShapeProps, DrawProps, PrintProps } from './internal/graphics';
+export { ImageHandle } from './internal/graphics';
+export type { AudioSource, AudioSourceOptions } from './internal/audio';
+export { type LikeButton } from './internal/gamepad';
 
 export type TopLevelEventHandler = (event: LikeEvent) => void;
 

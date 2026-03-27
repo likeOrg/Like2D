@@ -19,16 +19,16 @@
  *
  */
 
-import { AudioInternal } from './core/audio';
-import { InputInternal } from './core/input';
-import { TimerInternal } from './core/timer';
-import { KeyboardInternal } from './core/keyboard';
-import { MouseInternal } from './core/mouse';
-import { GamepadInternal } from './core/gamepad';
-import { bindGraphics } from './core/graphics';
-import type { LikeEvent, EventType, EventMap } from './core/events';
-import type { LikeInternal } from './core/like';
-import { CanvasInternal } from './core/canvas';
+import { AudioInternal } from './internal/audio';
+import { InputInternal } from './internal/input';
+import { TimerInternal } from './internal/timer';
+import { KeyboardInternal } from './internal/keyboard';
+import { MouseInternal } from './internal/mouse';
+import { GamepadInternal } from './internal/gamepad';
+import { bindGraphics } from './internal/graphics';
+import type { LikeEvent, EventType, EventMap } from './internal/events';
+import type { LikeInternal } from './internal/like';
+import { CanvasInternal } from './internal/canvas';
 import { Scene, sceneDispatch } from './scene';
 
 export type EngineDispatch = Engine["dispatch"];
