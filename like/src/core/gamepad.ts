@@ -53,7 +53,7 @@ export type GamepadTarget = number | "any";
 export class GamepadInternal {
   private gamepads: Record<number, GamepadState> = {};
   private abort = new AbortController();
-  private autoLoadMapping = false;
+  private autoLoadMapping = true;
 
   constructor(private dispatch: EngineDispatch) {
     // Register event listeners
