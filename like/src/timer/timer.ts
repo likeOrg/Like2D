@@ -12,7 +12,7 @@ export class Timer {
     props.canvas.addEventListener("like:update", this.update.bind(this), { signal: props.abort })
   }
 
-  update(ev: HTMLElementEventMap["like:update"]): void {
+  private update(ev: HTMLElementEventMap["like:update"]): void {
     const {dt} = ev.detail;
     this.currentDelta = dt;
     this.totalTime += dt;
@@ -43,6 +43,12 @@ export class Timer {
     return this.totalTime;
   }
 
+  /**
+   * Whether or not the game is (supposed to be) frozen.
+   * The only callback while sleeping is `draw`, and
+   * calling this outside of `draw` will always return
+   * false -- except if you have a custom runtime.
+   */
   isSleeping(): boolean {
     if (this.sleepUntil === null) return false;
     const currentTime = performance.now();
@@ -55,7 +61,7 @@ export class Timer {
 
   /**
    * Freeze the whole game for a time. Audio will keep playing,
-   * but update functions won't be called.
+   * but update functions won't be called and events won't fire.
    */
   sleep(duration: number): void {
     this.sleepUntil = performance.now() + (duration * 1000);
