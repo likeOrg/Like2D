@@ -37,8 +37,8 @@ const LOGO = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0i
  * 
  * ```ts
  * import { type Scene } from 'like/scene';
- * import type { ImageHandle } from 'like/internal/graphics';
- * import { Vec2 } from 'like/math/vector2';
+ * import type { ImageHandle } from 'like/graphics';
+ * import { Vec2 } from 'like/math';
  * import { Like } from 'like';
  * ```
  *
