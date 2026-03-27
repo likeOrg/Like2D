@@ -69,6 +69,7 @@ export class GamepadInternal {
       (ev: GamepadEvent) => {
         console.log(`[Gamepad] Disconnected ${ev.gamepad.id}`);
         delete this.gamepads[ev.gamepad.index];
+        this.dispatch("gamepaddisconnected", [ev.gamepad.index]);
       },
       { signal: this.abort.signal },
     );
@@ -111,6 +112,7 @@ export class GamepadInternal {
       }
     }
 
+    this.dispatch("gamepadconnected", [ev.gamepad.index]);
   }
 
   _update(): void {

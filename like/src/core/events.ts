@@ -92,6 +92,14 @@ export type EventMap = {
   /** Gamepad button released. `source` is controller index, `name` is derived from a mapping on the raw `num` */
   gamepadreleased: [source: number, name: LikeButton, num: number];
 
+  /**
+   * Fires when a gamepad is connected.
+   */
+  gamepadconnected: [index: number];
+
+  /** Fires when a gamepad is disconnected. */
+  gamepaddisconnected: [index: number];
+
   /** Mapped action triggered. See {@link Input} for action mapping. */
   actionpressed: [action: string];
 

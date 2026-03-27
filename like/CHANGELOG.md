@@ -29,6 +29,11 @@
     - `like.gamepad.loadMapping`, `like.gamepad.saveMapping`: Put persistent mappings in localstorage.
     - `like.gamepad.enableAutoLoadMapping`: Always load saved mappings on gamepad connection.
     - `like.gamepad.getSticks`: Get an array of mapped sticks.
+    - `like.gamepadconnected` and `like.gamepaddisconnected` events.
+  - Documented input module better.
+  - `like.input.setAction` now takes string or InputBinding arguments.
+  - Added `like.input.appendToAction`
+  - Added `like.input.getActionMapping`
 
 ### Fixed
  - **Capture Bug** If another element set cursor capture, LIKE would report capture TRUE.
