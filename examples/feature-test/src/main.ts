@@ -1,7 +1,8 @@
 import { createLike, type ImageHandle, type AudioSource, type Like, type CanvasSize } from "like";
-import { buttonMapAll, buttonMapNES, MapGamepad, StartScreen } from "like/prefab-scenes";
+import { MapGamepad, } from "like/prefab-scenes";
 import { Vec2 } from "like/math/vector2";
 import { Scene } from "like/scene";
+import { buttonSetPS1 } from "like/prefab-scenes";
 
 let pepperImage: ImageHandle | null = null;
 let audioSource: AudioSource | null = null;
@@ -142,5 +143,5 @@ document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
   like.canvas.setFullscreen(true);
 });
 
-like.setScene(new MapGamepad({buttons: buttonMapNES, stickCount: 2}, 0, demoScene));
+like.setScene(new MapGamepad({buttons: buttonSetPS1, stickCount: 2}, 0, demoScene));
 await like.start();

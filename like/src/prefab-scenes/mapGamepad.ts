@@ -3,47 +3,34 @@ import { defaultMapping, GamepadMapping } from "../core/gamepad";
 import { Vector2 } from "../math/vector2";
 import { Scene } from "../scene";
 
-export const buttonSetNES = new Set<LikeButton>([
-  "BBottom",
+const mapOrder: LikeButton[] = [
   "BRight",
-  "MenuRight",
-  "MenuLeft",
+  "BBottom",
+  "Up",
   "Down",
   "Left",
   "Right",
-  "Up",
-]);
-export const buttonSetSNES = buttonSetNES.union(
-  new Set<LikeButton>(["BLeft", "BTop", "L1", "R1"]),
-);
-export const buttoSetPS1 = buttonSetSNES.union(
-  new Set<LikeButton>(["L2", "R2"]),
-);
-export const buttonSetAll = buttoSetPS1.union(
-  new Set<LikeButton>([
-    "LeftStick",
-    "RightStick",
-  ]),
-);
-
-const mapOrder: LikeButton[] = [
-  "BBottom",
-  "BRight",
+  "MenuLeft",
+  "MenuRight",
+  // 8: NES buttons
+  "L1",
+  "R1",
+  // 10: GBA buttons
   "BLeft",
   "BTop",
-  "Down",
-  "Right",
-  "Left",
-  "Up",
-  "L1",
+  // 12: SNES buttons
   "L2",
-  "R1",
   "R2",
-  "MenuLeft",
-  "MenuRight",
+  // 14: PS1 buttons
   "LeftStick",
   "RightStick",
 ];
+
+export const buttonSetNES = new Set<LikeButton>(mapOrder.slice(0, 8));
+export const buttonSetGBA = new Set<LikeButton>(mapOrder.slice(0, 10));
+export const buttonSetSNES = new Set<LikeButton>(mapOrder.slice(0, 12));
+export const buttonSetPS1 = new Set<LikeButton>(mapOrder.slice(0, 14));
+export const buttonSetAll = new Set<LikeButton>(mapOrder);
 
 const drawCircButt = (pos: Vector2, size: number) => (like: Like, color: Color) =>
   like.gfx.circle("fill", color, pos, size);
@@ -128,13 +115,12 @@ export class MapGamepad implements Scene {
         this.currentlyUnmapped.push(btn);
       }
     }
-    this.mapping.buttons = {};
     like.canvas.setMode([320, 240]);
   }
 
   draw(like: Like): void {
     const centerText: PrintProps = {
-        font: "1px serif",
+        font: "1px sans-serif",
         align: "center",
         width: 16,
     }
@@ -144,8 +130,8 @@ export class MapGamepad implements Scene {
     like.gfx.translate([0, 1]);
     like.gfx.print(
       "white",
-      "Choose your buttons.",
-      [8, 0.2],
+      "Map gamepad (click to close)",
+      [8, 0.0],
       centerText,
     );
     for (const prop of this.mapMode.buttons.keys()) {
