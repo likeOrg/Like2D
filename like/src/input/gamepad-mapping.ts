@@ -86,6 +86,7 @@ export const defaultMapping = (stickCount: number): GamepadMapping => ({
 
 export const standardButtonMapping = (): ButtonMapping =>
   Object.fromEntries(buttonMap.map(({ like, num }) => [num, like]));
+const numToName = standardButtonMapping();
 /** @private */
 export const allButtons = new Set<string>(buttonMap.map(({ like }) => like));
 export const fullButtonName = new Map(
@@ -109,7 +110,7 @@ const mappingDb: Map<number, SdlMapping> = new Map(
     {
       ...v,
       mapping: Object.fromEntries(
-        Object.entries(v.mapping).map(([k, v]) => [Number(k), v as LikeButton]),
+        Object.entries(v.mapping).map(([k, v]) => [Number(k), numToName[Number(v)]]),
       ),
     },
   ]),

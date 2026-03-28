@@ -42,6 +42,8 @@ demoScene = {
     like.input.setAction('audio_play_pause', ['KeyP']);
     like.input.setAction('sleep_timer', ['KeyL']);
     like.input.setAction('toggle_pointer_lock', ['KeyC']);
+
+    like.gamepad.enableAutoLoadMapping(false);
   },
 
   update(like: Like, dt: number) {
@@ -149,7 +151,7 @@ demoScene = {
 
      const color1 = "white";
      const color2 = "black";
-     const size = 300;
+     const size = 20;
      // calc center of screen
      const pos = Vec2.div(like.canvas.getSize(), 2);
      const speed = 0.5;
