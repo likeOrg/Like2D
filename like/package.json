@@ -37,6 +37,7 @@
   },
   "files": [
     "dist/**/*",
+    "!dist/__benchmarks__/**/*",
     "assets/**/*",
     "README.md",
     "LICENSE"
