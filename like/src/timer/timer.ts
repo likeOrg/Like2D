@@ -1,4 +1,5 @@
 import { EngineProps } from "../engine";
+import type { LikeEventType } from "../events";
 
 export class Timer {
   private currentDelta = 0;
@@ -12,8 +13,8 @@ export class Timer {
     props.canvas.addEventListener("like:update", this.update.bind(this), { signal: props.abort })
   }
 
-  private update(ev: HTMLElementEventMap["like:update"]): void {
-    const {dt} = ev.detail;
+  private update(ev: Event): void {
+    const {dt} = (ev as LikeEventType<'like:update'>).detail;
     this.currentDelta = dt;
     this.totalTime += dt;
     this.frameCount++;

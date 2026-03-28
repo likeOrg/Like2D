@@ -4,7 +4,9 @@ import { EngineProps } from '../engine';
 
 const mouseButtons = ["left", "middle", "right"] as const;
 const numToButton = (i: number): MouseButton => mouseButtons[i];
-type MouseMoveEvent = HTMLElementEventMap["like:mousemoved"];
+import type { LikeEventType, LikeCanvasElement } from '../events';
+
+type MouseMoveEvent = LikeEventType<'like:mousemoved'>;
 
 type MouseMode =
   | { lock: false, visible: boolean, scrollBlock: boolean }
@@ -24,7 +26,7 @@ export class Mouse {
    * track of the internal (apparent) canvas size.
    */
   private canvasSize: Vector2 = [800, 600];
-  private canvas: HTMLCanvasElement;
+  private canvas: LikeCanvasElement;
 
   // We keep track of a locked mode and an unlocked mode, so that when capture changes
   // we can use the settings from last time.
@@ -65,8 +67,8 @@ export class Mouse {
     );
     this.canvas.addEventListener(
       "like:resizeCanvas",
-      (e: HTMLElementEventMap["like:resizeCanvas"]) => {
-        this.canvasSize = e.detail.size;
+      (e: Event) => {
+        this.canvasSize = (e as LikeEventType<'like:resizeCanvas'>).detail.size;
       },
       { signal: abort }
     );

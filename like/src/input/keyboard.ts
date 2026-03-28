@@ -1,11 +1,11 @@
 import { EngineProps } from "../engine";
-import { Dispatcher } from "../events";
+import { Dispatcher, type LikeCanvasElement } from "../events";
 
 type KEvent = 'keypressed' | 'keyreleased';
 
 export class Keyboard {
   private pressedScancodes = new Set<string>();
-  private canvas: HTMLCanvasElement;
+  private canvas: LikeCanvasElement;
   private dispatch: Dispatcher<KEvent>;
 
   constructor(props: EngineProps<KEvent>) {

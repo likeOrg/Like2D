@@ -1,4 +1,4 @@
-import { type Dispatcher } from "../events";
+import { type Dispatcher, type LikeCanvasElement } from "../events";
 import { Rect, Rectangle } from "../math/rect";
 import { Vec2, type Vector2 } from "../math/vector2";
 
@@ -10,13 +10,13 @@ export class Canvas {
      * If it's the same as displayCanvas, we're in native mode.
      * Otherwise, we're in pixelart mode, consisting of nearest -> linear scaling.
     */
-    private renderCanvas: HTMLCanvasElement;
+    private renderCanvas: LikeCanvasElement;
 
     private resizeTimeoutId: any = 0;
 
     constructor(
         /** The ultimately visible canvas in the browser */
-        private displayCanvas: HTMLCanvasElement,
+        private displayCanvas: LikeCanvasElement,
         private dispatch: Dispatcher<'resize'>,
         private abort: AbortSignal,
     ) {
@@ -238,14 +238,17 @@ export class Canvas {
     }
 
     /** @returns if size was changed.  */
-    static setCanvasElemSize(canvas: HTMLCanvasElement, newSize: Vector2): boolean {
-        if (canvas.width != newSize[0] || canvas.height != newSize[1]) {
-            [canvas.width, canvas.height] = newSize;
-            return true;
-        }
-        return false;
+static setCanvasElemSize(canvas: LikeCanvasElement, newSize: Vector2): boolean {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return false;
+        if (canvas.width === newSize[0] && canvas.height === newSize[1]) return false;
+
+        canvas.width = newSize[0];
+        canvas.height = newSize[1];
+        return true;
     }
-    static getCanvasElemSize(canvas: HTMLCanvasElement): Vector2 {
+
+    static getCanvasElemSize(canvas: LikeCanvasElement): Vector2 {
         return [canvas.width, canvas.height];
     }
 }

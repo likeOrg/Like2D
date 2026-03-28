@@ -10,14 +10,14 @@ import { Keyboard } from './input/keyboard';
 import { Mouse } from './input/mouse';
 import { Gamepad } from './input/gamepad';
 import { bindGraphics } from './graphics/index';
-import type { LikeEvent, EventType, EventMap, Dispatcher } from './events';
+import type { LikeEvent, EventType, EventMap, Dispatcher, LikeCanvasElement } from './events';
 import type { Like } from './like';
 import { Canvas } from './graphics/canvas';
 import { Scene, sceneDispatch } from './scene';
 
 export type EngineDispatcher = Dispatcher<EventType>;
 export type EngineProps<T extends keyof EventMap> = {
-  canvas: HTMLCanvasElement,
+  canvas: LikeCanvasElement,
   abort: AbortSignal,
   dispatch: Dispatcher<T>,
 }
@@ -29,7 +29,7 @@ export type EngineProps<T extends keyof EventMap> = {
 export class Engine {
   /** The canvas on which we bind all events. Not always the same canvas
    * that we render to. */
-  private canvas: HTMLCanvasElement;
+  private canvas: LikeCanvasElement;
   private isRunning = false;
   private lastTime = 0;
   private abort = new AbortController();
@@ -124,9 +124,9 @@ export class Engine {
         this.dispatch('update', [dt]);
       }
 
-      this.canvas.dispatchEvent(new CustomEvent("like:preDraw"));
+      this.canvas.dispatchEvent(new CustomEvent<{}>("like:preDraw"));
       this.dispatch('draw', []);
-      this.canvas.dispatchEvent(new CustomEvent("like:postDraw"));
+      this.canvas.dispatchEvent(new CustomEvent<{}>("like:postDraw"));
       requestAnimationFrame(loop);
     };
 
