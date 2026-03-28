@@ -101,7 +101,7 @@ export const mapStick = (gp: Gamepad, mapping: StickMapping): Vector2 => {
 
 //// ************* SDL Gamepad auto-binding system ******************* ////
 
-import mappingDbRaw from "./controllerdb.json";
+import mappingDbRaw from "./controllerdb.json" with { type: 'json' };
 
 const mappingDb: Map<number, SdlMapping> = new Map(
   Object.entries(mappingDbRaw[detectedOs]).map(([k, v]) => [
