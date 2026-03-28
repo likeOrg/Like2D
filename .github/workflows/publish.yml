@@ -1,0 +1,43 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      
+      - name: Install dependencies
+        run: pnpm install
+      
+      - name: Typecheck
+        run: pnpm --filter like2d typecheck
+      
+      - name: Build
+        run: pnpm --filter like2d build
+      
+      - name: Run tests
+        run: pnpm --filter like2d test
+      
+      - name: Publish to NPM
+        run: npm publish --provenance --access public
+        working-directory: like
+      
+      - name: Publish to JSR
+        run: npx jsr publish
+        working-directory: like
