@@ -32,6 +32,27 @@ import type { Rectangle } from "../math/rect";
 
 export type DrawMode = "fill" | "line";
 
+export type DrawFunctions = {
+  clear(ctx: CanvasRenderingContext2D, color?: Color): void;
+  rectangle(ctx: CanvasRenderingContext2D, mode: DrawMode, color: Color, rect: Rectangle, props?: ShapeProps): void;
+  circle(ctx: CanvasRenderingContext2D, mode: DrawMode, color: Color, position: Vector2, radii: number | Vector2, props?: ShapeProps & {
+    arc?: [number, number];
+    center?: boolean;
+  }): void;
+  line(ctx: CanvasRenderingContext2D, color: Color, points: Vector2[], props?: ShapeProps): void;
+  print(ctx: CanvasRenderingContext2D, color: Color, text: string, position: Vector2, props?: PrintProps): void;
+  draw(ctx: CanvasRenderingContext2D, handle: ImageHandle, position: Vector2, props?: DrawProps): void;
+  newImage(_ctx: CanvasRenderingContext2D, path: string): ImageHandle;
+  clip(ctx: CanvasRenderingContext2D, rect?: Rectangle): void;
+  polygon(ctx: CanvasRenderingContext2D, mode: DrawMode, color: Color, points: Vector2[], props?: ShapeProps): void;
+  points(ctx: CanvasRenderingContext2D, color: Color, pts: Vector2[]): void;
+  push(ctx: CanvasRenderingContext2D): void;
+  pop(ctx: CanvasRenderingContext2D): void;
+  translate(ctx: CanvasRenderingContext2D, offset: Vector2): void;
+  rotate(ctx: CanvasRenderingContext2D, angle: number): void;
+  scale(ctx: CanvasRenderingContext2D, factor: number | Vector2): void;
+};
+
 /**
  * - RGBA array with values 0-1: `[r, g, b, a]`
  * - Alpha defaults to 1 if omitted
@@ -157,7 +178,7 @@ function getFontHeight(ctx: CanvasRenderingContext2D): number {
  * ```
  * 
  */
-export const draw = {
+const drawImpl: DrawFunctions = {
   /**
    * Clears the canvas with a solid color.
    * @param ctx Canvas context.
@@ -460,3 +481,5 @@ export const draw = {
     ctx.scale(sx, sy);
   },
 };
+
+export const draw: DrawFunctions = drawImpl;

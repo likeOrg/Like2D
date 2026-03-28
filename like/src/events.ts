@@ -8,73 +8,13 @@ import type { LikeButton } from './input';
 
 export type MouseButton = 'left' | 'middle' | 'right';
 
-declare global {
-  interface HTMLElementEventMap {
-    ['like:mousemoved']: CustomEvent<{pos: Vector2, delta: Vector2}>;
-    ['like:updateRenderTarget']: CustomEvent<{target: HTMLCanvasElement}>;
-    ['like:resizeCanvas']: CustomEvent<{size: Vector2}>;
-    ['like:preDraw']: CustomEvent<{}>;
-    ['like:postDraw']: CustomEvent<{}>;
-    ['like:update']: CustomEvent<{dt: number}>;
-  }
-}
-
-/**
- * The master type will all events on it.
- */
-export type EventMap = {
-  /** Game initialization. Called once before the first frame. */
-  load: [];
-
-  /** Frame update. dt is delta time in seconds (time since last frame). */
-  update: [dt: number];
-
-  /** Render frame. Clear the screen and draw your game here. */
-  draw: [];
-
-  /** Canvas was resized. Used mostly in native mode, though setMode may send it too. */
-  resize: [size: Vector2];
-
-  /** Physical key pressed. scancode is the physical key, keycode is the character. */
-  keypressed: [scancode: string, keycode: string];
-
-  /** Physical key released. */
-  keyreleased: [scancode: string, keycode: string];
-
-  /** Canvas or tab gained focus. Game may resume audio/updates. */
-  focus: [source: 'canvas' | 'tab'];
-
-  /** Canvas or tab lost focus. Game may pause audio/updates. */
-  blur: [source: 'canvas' | 'tab'];
-
-  /** Mouse moved event. `pos` is absolute, `delta` is relative. */
-  mousemoved: [pos: Vector2, delta: Vector2];
-
-  /** Mouse button pressed. pos in canvas pixels. Button: 1=left, 2=middle, 3=right. */
-  mousepressed: [pos: Vector2, button: MouseButton];
-
-  /** Mouse button released. */
-  mousereleased: [pos: Vector2, button: MouseButton];
-
-  /** Gamepad button pressed. `source` is controller index, `name` is derived from a mapping on the raw `num` */
-  gamepadpressed: [source: number, name: LikeButton, num: number];
-
-  /** Gamepad button released. `source` is controller index, `name` is derived from a mapping on the raw `num` */
-  gamepadreleased: [source: number, name: LikeButton, num: number];
-
-  /**
-   * Fires when a gamepad is connected.
-   */
-  gamepadconnected: [index: number];
-
-  /** Fires when a gamepad is disconnected. */
-  gamepaddisconnected: [index: number];
-
-  /** Mapped action triggered. See {@link Input} for action mapping. */
-  actionpressed: [action: string];
-
-  /** Mapped action released. */
-  actionreleased: [action: string];
+export type LikeCustomEventMap = {
+  'like:mousemoved': CustomEvent<{pos: Vector2, delta: Vector2}>;
+  'like:updateRenderTarget': CustomEvent<{target: HTMLCanvasElement}>;
+  'like:resizeCanvas': CustomEvent<{size: Vector2}>;
+  'like:preDraw': CustomEvent<{}>;
+  'like:postDraw': CustomEvent<{}>;
+  'like:update': CustomEvent<{dt: number}>;
 };
 
 export type EventType = keyof EventMap;
