@@ -1,13 +1,15 @@
 /**
- * @module like2d
- * @description A cozy web-native 2D game framework.
+ * A cozy web-native 2D game framework.
+ * @module like
  */
 
 import { Engine } from './engine';
 import type { Like } from './like';
 
-export type { Like, TopLevelEventHandler } from './like';
-export type { LikeEvent, EventType, EventMap } from './events';
+export type { Like, TopLevelEventHandler, Callbacks, Callback } from './like';
+export type { LikeEvent, EventType, EventMap, LikeCanvasElement, Dispatcher, LikeCanvasEventMap, LikeKeyboardEvent } from './events';
+export type { Scene } from './scene';
+export type { EngineProps } from './engine';
 
 /**
  * Create a new Like2D game instance attached to a DOM container.

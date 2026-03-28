@@ -1,24 +1,34 @@
+/**
+ * Where {@link Keyboard}, {@link Mouse}, {@link Gamepad}, and actions in {@link Input} reside.
+ * @module input
+*/
+
+export type { Keyboard } from "./keyboard";
+export type { Mouse } from "./mouse";
+export type { Gamepad } from "./gamepad";
+export type { Input } from "./input";
+
 export type {
-  Input,
-  InputType,
-  InputBinding,
-} from "./input";
+  MouseSetMode,
+  MouseMode,
+  MouseButton,
+} from "./mouse";
 
 export type {
   GamepadTarget,
-  Gamepad,
 } from "./gamepad"
 
 export type {
   LikeButton,
   GamepadMapping,
+  ButtonMapping,
   StickMapping,
   StickAxisMapping,
 } from "./gamepad-mapping";
 
-export { defaultMapping, allButtons } from "./gamepad-mapping";
-
 export type {
-  MouseSetMode,
-  Mouse,
-} from "./mouse";
+  InputType,
+  InputBinding,
+} from "./input";
+
+export { defaultMapping, allButtons, buttonMap } from "./gamepad-mapping";

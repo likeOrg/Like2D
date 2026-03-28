@@ -1,0 +1,50 @@
+import { Vector2 } from "../math";
+
+/**
+ * An image that can be drawn using {@link like2d.Graphics.draw} 
+ * 
+ * Unlike raw HTMLImageElement, there is no need to wait for it to load.
+ * If the image isn't loaded, it simply won't draw it at all.
+ * 
+ * If you're planning on loading many large images, simply preload
+ * these image handles beforehand so that they're ready.
+*/
+export class ImageHandle {
+  readonly path: string;
+  private element: HTMLImageElement | null = null;
+  private loadPromise: Promise<void>;
+  private isLoaded = false;
+
+  constructor(path: string) {
+    this.path = path;
+
+    this.loadPromise = new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        this.element = img;
+        this.isLoaded = true;
+        resolve();
+      };
+      img.onerror = () => {
+        reject(new Error(`Failed to load image: ${path}`));
+      };
+      img.src = path;
+    });
+  }
+
+  isReady(): boolean {
+    return this.isLoaded;
+  }
+
+  ready(): Promise<void> {
+    return this.loadPromise;
+  }
+
+  get size(): Vector2 {
+    return [this.element?.width ?? 0, this.element?.height ?? 0];
+  }
+
+  getElement(): HTMLImageElement | null {
+    return this.element;
+  }
+}

@@ -1,12 +1,9 @@
 /**
- * @module GamepadMapping
- *
  * A database, generated on module load,
  * which uses SDL's database to coerce
  * browser APIs into physical gamepad button
  * mappings.
  * 
- *
  * Browser API shortcomings:
  *  - [No standard way of exposing vendor/product, Safari doesn't even do it.](https://github.com/w3c/gamepad/issues/199)
  *  - Vendor and product alone doesn't suffice for GUID -- Different controllers have the same, it's good-enough.
@@ -21,13 +18,14 @@
 import type { Vector2 } from "../math";
 
 /**
+ * @private
  * ref: https://www.w3.org/TR/gamepad/#dfn-standard-gamepad
  * note: `num` is only the corresponding number on standard mapping above.
  *
  * The point of the mapping system is to apply that _or_ non-standard mappings,
  * Which are exceedingly common.
  */
-const buttonMap = [
+export const buttonMap = [
   { like: "BBottom", num: 0 as number, name: "Bottom Face Button" },
   { like: "BRight", num: 1, name: "Right Face Button" },
   { like: "BLeft", num: 2, name: "Left Face Button" },
@@ -75,6 +73,7 @@ export type ButtonMapping = Record<number, LikeButton>;
 export type StickMapping = [StickAxisMapping, StickAxisMapping];
 export type StickAxisMapping = { index: number; invert: boolean };
 
+/** @private Get an empty mapping for a gamepad. Good for binding from scratch. */
 export const defaultMapping = (stickCount: number): GamepadMapping => ({
   buttons: {},
   sticks: Array(stickCount)
@@ -87,6 +86,7 @@ export const defaultMapping = (stickCount: number): GamepadMapping => ({
 
 export const standardButtonMapping = (): ButtonMapping =>
   Object.fromEntries(buttonMap.map(({ like, num }) => [num, like]));
+/** @private */
 export const allButtons = new Set<string>(buttonMap.map(({ like }) => like));
 export const fullButtonName = new Map(
   buttonMap.map(({ like, name }) => [like, name]),

@@ -1,9 +1,3 @@
-/**
- * @module scene
- * @description A helpful callback / state management layer, plus utility scenes.
- * 
- */
-
 import type { LikeEvent, EventMap } from './events';
 import type { Like } from './like';
 
@@ -17,7 +11,7 @@ import type { Like } from './like';
  *  - rebind all of the callbacks ourselves
  *  - wrap handleEvent (hint: that's what this does)
  * 
- * Also, some no need to pass around a `like` object.
+ * Also, no need to pass around a `like` object.
  * Here, `like` instead piggybacks on a closure that follows around
  * your running scene and shows up as an additional first argument
  * to every callback.

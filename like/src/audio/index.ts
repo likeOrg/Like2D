@@ -1,1 +1,1 @@
-export type { AudioSource, Audio, AudioSourceOptions} from "./audio"
+export type { Audio, AudioSource, AudioSourceOptions} from "./audio"

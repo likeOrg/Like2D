@@ -1,8 +1,3 @@
-/**
- * @module like
- * @description A catalogue of subsystems
- */
-
 import type { Audio } from './audio/index';
 import type { Timer } from './timer/index';
 import type { Input } from './input/index';
@@ -14,11 +9,14 @@ import type { Graphics } from './graphics/index';
 import { EventMap, EventType, LikeEvent } from './events';
 import { Scene } from './scene';
 
+/** @private */
 export type TopLevelEventHandler = (event: LikeEvent) => void;
 
-type Callback<K extends EventType> = (...args: EventMap[K]) => void;
+/** @private */
+export type Callback<K extends EventType> = (...args: EventMap[K]) => void;
 
-type Callbacks = {
+/** @private */
+export type Callbacks = {
   [K in EventType]?: Callback<K>;
 };
 

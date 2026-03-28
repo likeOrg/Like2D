@@ -1,19 +1,53 @@
 {
   "entryPoints": [
     "../like/src/index.ts",
-    "../like/src/audio/index.ts",
     "../like/src/graphics/index.ts",
     "../like/src/input/index.ts",
+    "../like/src/audio/index.ts",
+    "../like/src/timer/index.ts",
     "../like/src/math/index.ts",
-    "../like/src/prefab-scenes/index.ts",
-    "../like/src/timer/index.ts"
+    "../like/src/prefab-scenes/index.ts"
   ],
   "tsconfig": "../like/tsconfig.json",
   "out": "./dist/api",
   "excludeExternals": true,
   "excludePrivate": true,
   "excludeProtected": true,
-  "sort": ["source-order"],
+  "sort": [
+    "kind",
+    "static-first",
+    "visibility",
+    "alphabetical"
+  ],
+  "sortEntryPoints": false,
+  "groupOrder": [
+    "Modules",
+    "*"
+  ],
+  "categoryOrder": [
+    "Classes",
+    "Interfaces",
+    "Type Aliases",
+    "Functions",
+    "Variables",
+    "*"
+  ],
+  "kindSortOrder": [
+    "Project",
+    "Module",
+    "Namespace",
+    "Enum",
+    "EnumMember",
+    "Class",
+    "Interface",
+    "TypeAlias",
+    "Constructor",
+    "Property",
+    "Method",
+    "Function",
+    "Variable",
+    "Accessor"
+  ],
   "readme": "none",
   "hideGenerator": true,
   "categorizeByGroup": true,

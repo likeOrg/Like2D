@@ -1,6 +1,8 @@
 import { Vec2, type Vector2 } from '../math/vector2';
-import { type MouseButton, type Dispatcher, type LikeMouseEvent } from '../events';
+import { type Dispatcher, type LikeMouseEvent } from '../events';
 import { EngineProps } from '../engine';
+
+export type MouseButton = 'left' | 'middle' | 'right';
 
 const mouseButtons = ["left", "middle", "right"] as const;
 const numToButton = (i: number): MouseButton => mouseButtons[i];
@@ -8,14 +10,42 @@ import type { LikeCanvasElement, LikeCanvasEventMap } from '../events';
 
 type MouseMoveEvent = LikeCanvasEventMap['like:mousemoved'];
 
-type MouseMode =
+export type MouseMode =
   | { lock: false, visible: boolean, scrollBlock: boolean }
   | { lock: true, speed: number };
 
 export type MouseSetMode = Partial<MouseMode> & { lock: boolean };
 
 /**
- * Mouse input handling. Bound to canvas. Emits relative movement when pointer locked.
+ * LIKE's mouse wrapper.
+ *  
+ * Mouse coordinates are scaled for convenience. For example call:
+ * ```
+ * like.canvas.setMode([240, 160])
+ * ```
+ * and your game will now be 240x160 pixels.
+ * 
+ * Your mouse coords will stay within the rectangle `[0, 0]` and `[240, 160]`.
+ * 
+ * If you intend to allow scrolling on your page while the mouse is above the game, use:
+ * ```
+ * like.mouse.setMode({ lock: false, scrollBlock: false })
+ * ```
+ * 
+ * ### Capture
+ * 
+ * Some games benefit from capture aka pointer lock. Call
+ * ```ts
+ * like.mouse.setMode({ lock: true, speed: 1 })
+ * ```
+ * to use capture, and now the mouse is locked to the game.
+ * 
+ * When you enter capture, the mouse `pos` becomes virtual, bounded to canvas edges, plus controlled via the speed setting and teleport-able via {@link setCapturedPos}.
+ * 
+ * When you exit capture, the mouse will be in the same spot the capture was started in.
+ * 
+ * Note that your mode settings from non-capture mode are preserved in capture mode and vice-versa.
+ * 
  */
 export class Mouse {
   private dispatch: Dispatcher<LikeMouseEvent>;
@@ -142,7 +172,7 @@ export class Mouse {
    * In locked mode, the cursor cannot escape the canvas.
    * It also becomes invisible.
    * However, it can move infinitely, sensitivity can be controlled,
-   * and the emulated cursor (in `pos` of {@link mousemoved}) can be freely repositioned.
+   * and the emulated cursor (in `pos` of {@link like.EventMap.mousemoved}) can be freely repositioned.
    * 
    * ```ts
    * {
@@ -154,7 +184,7 @@ export class Mouse {
    * reset mode to default.
    * 
    * ### Note on `pos` vs `delta`
-   * Event {@link mousemoved} passes both `pos` and `delta` args.
+   * Event {@link like.EventMap.mousemoved} passes both `pos` and `delta` args.
    * 
    * Though the emulated cursor in locked mode
    * (locked mode doesn't natively track absolute position)

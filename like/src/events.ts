@@ -5,9 +5,9 @@
 
 import type { Vector2 } from './math/vector2';
 import type { LikeButton } from './input';
+import { MouseButton } from './input/mouse';
 
-export type MouseButton = 'left' | 'middle' | 'right';
-
+/** @private */
 export type LikeCanvasEventMap = HTMLElementEventMap & {
   'like:mousemoved': CustomEvent<{pos: Vector2, delta: Vector2}>;
   'like:updateRenderTarget': CustomEvent<{target: HTMLCanvasElement}>;
@@ -17,9 +17,7 @@ export type LikeCanvasEventMap = HTMLElementEventMap & {
   'like:update': CustomEvent<{dt: number}>;
 };
 
-export type LikeCanvasEvent = LikeCanvasEventMap
-
-// Custom canvas type that uses our event map as the single source of truth
+/** @private Custom canvas type that uses our event map as the single source of truth */
 export interface LikeCanvasElement extends HTMLCanvasElement {
   // Overload for our custom events
   addEventListener<K extends keyof LikeCanvasEventMap>(
@@ -30,7 +28,13 @@ export interface LikeCanvasElement extends HTMLCanvasElement {
 }
 
 /**
- * The master type will all events on it.
+ * It's a list of every possible event in like2d!
+ * 
+ * Not just that, but these events translate directly into `like` callbacks.
+ * 
+ * For example: `keypressed: [scancode: string, keycode: string]` translates to
+ * setting `like.keypressed = (scancode, keycode) => { ... }`!
+ * 
  */
 export type EventMap = {
   /** Game initialization. Called once before the first frame. */
@@ -80,20 +84,27 @@ export type EventMap = {
   /** Fires when a gamepad is disconnected. */
   gamepaddisconnected: [index: number];
 
-  /** Mapped action triggered. See {@link Input} for action mapping. */
+  /** Mapped action triggered. See {@link input.Input} for action mapping. */
   actionpressed: [action: string];
 
   /** Mapped action released. */
   actionreleased: [action: string];
 };
 
+/** @private */
 export type EventType = keyof EventMap;
 
+/** @private */
 export type LikeMouseEvent = 'mousemoved' | 'mousepressed' | 'mousereleased';
+/** @private */
 export type LikeKeyboardEvent = 'keypressed' | 'keyreleased';
+/** @private */
 export type LikeGamepadEvent = 'gamepadpressed' | 'gamepadreleased' | 'gamepadconnected' | 'gamepaddisconnected';
+/** @private */
+export type LikeActionEvent = 'actionpressed' | 'actionreleased';
 
 /**
+ * @private
  * Generic dispatcher - each module defines its own event subset
  */
 export type Dispatcher<T extends EventType> = <K extends T>(
@@ -102,6 +113,7 @@ export type Dispatcher<T extends EventType> = <K extends T>(
 ) => void;
 
 /**
+ * @private
  * Discriminated union of all event objects.
  */
 export type LikeEvent = {

@@ -20,7 +20,6 @@
       "types": "./dist/prefab-scenes/index.d.ts"
     },
     "./graphics": {
-      "import": "./dist/graphics/index.js",
       "types": "./dist/graphics/index.d.ts"
     },
     "./audio": {

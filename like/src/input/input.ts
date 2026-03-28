@@ -1,8 +1,9 @@
 import type { Keyboard } from './keyboard';
-import type { Mouse } from './mouse';
+import type { Mouse, MouseButton } from './mouse';
 import { Gamepad, GamepadTarget } from './gamepad';
 import { allButtons, LikeButton } from './gamepad-mapping';
-import { MouseButton, Dispatcher } from '../events';
+import { Dispatcher, LikeActionEvent } from '../events';
+import { EngineProps } from '../engine';
 
 export type InputType = InputBinding['type'];
 export type InputBinding =
@@ -10,6 +11,55 @@ export type InputBinding =
   | { type: 'mouse'; button: MouseButton }
   | { type: 'gamepad'; gamepad: GamepadTarget, button: LikeButton };
 
+/** 
+ * Used to map inputs (from keyboard, mouse, or gamepad) into actions.
+ * 
+ * {@link setAction} allows for set-and-forget mappings. Good for one-off games.
+ * 
+ * Example:
+ * ```js
+ * // bind action jump
+ * like.load() {
+ *   like.input.setAction('jump', ['KeyX', 'Space', 'ButtonBottom'])
+ * }
+ * 
+ * like.actionpressed(action) {
+ *   if (action == 'jump') {
+ *     player.tryJumping();
+ *   }
+ * }
+ * ```
+ * 
+ * For more sophisticated games, see also:
+ *  - {@link appendToAction}
+ *  - {@link getActionMapping}
+ * 
+ * These allow for programmatic binding based on events. For example:
+ * ```js
+ * let currentlyMapping = 'jump';
+ * 
+ * // Watch for gamepad and keyboard events
+ * like.keypressed = (code) => {
+ *   if (currentlyMapping) {
+ *     like.input.appendToAction(currentlyMapping, code);
+ *   }
+ * }
+ * like.gamepadpressed = (name) => {
+ *   if (currentlyMapping) {
+ *     like.input.appendToAction(currentlyMapping, name);
+ *   }
+ * }
+ * 
+ * // Print some info about the current mapping
+ * like.draw = () => {
+ *   if (currentlyMapping) {
+ *     myGame.statusLine =
+ *       `Mapped ${like.input.getActionMapping(currentlyMapping)} to ${currentlyMapping}`
+ *   }
+ * }
+ * 
+ * ```
+*/
 export class Input {
   private currState = new Set<string>();
   private prevState = new Set<string>();
@@ -17,9 +67,10 @@ export class Input {
   private keyboard: Keyboard;
   private mouse: Mouse;
   private gamepad: Gamepad;
+  private dispatch: Dispatcher<LikeActionEvent>
 
   constructor(
-    private dispatch: Dispatcher<'actionpressed' | 'actionreleased'>,
+    props: EngineProps<LikeActionEvent>,
     deps: {
       keyboard: Keyboard;
       mouse: Mouse;
@@ -29,6 +80,11 @@ export class Input {
     this.keyboard = deps.keyboard;
     this.mouse = deps.mouse;
     this.gamepad = deps.gamepad;
+
+    this.dispatch = props.dispatch;
+    props.canvas.addEventListener("like:update", () => this.update(), {
+      signal: props.abort,
+    });
   }
 
   /**
@@ -45,6 +101,7 @@ export class Input {
    *    - Numeric: `Digit0`, `Digit1`, ...
    *    - `ArrowLeft`, `ArrowRight`, `ArrowUp`, `ArrowDown`
    *    - `ShiftLeft`, `ShiftRight`
+   *    - `Space`
    *    - `Minus`
    *    - `Equal` (also has a plus sign)
    *    - `BracketLeft` and `BracketRight`
@@ -101,7 +158,7 @@ export class Input {
     return !this.currState.has(action) && this.prevState.has(action);
   }
 
-  update() {
+  private update() {
     [this.prevState, this.currState] = [this.currState, this.prevState];
     this.currState.clear();
 

@@ -1,7 +1,14 @@
 /**
+ * Where we draw with {@link Graphics} on to the {@link Canvas}.
  * @module graphics
- * @description a reduced-state, Love2D-like wrapper around browser canvas
  */
+
+export type { Graphics } from "./graphics";
+export type { Canvas } from "./canvas";
+
+export type {
+  ImageHandle
+} from './image';
 
 export type {
   Color,
@@ -9,14 +16,10 @@ export type {
   ShapeProps,
   DrawProps,
   PrintProps,
-  ImageHandle,
 } from "./graphics";
 
-export { Graphics } from "./graphics";
-
 export type {
-  CanvasModeOptions,
   CanvasSize,
-  Canvas,
+  CanvasModeOptions,
 } from "./canvas";
 

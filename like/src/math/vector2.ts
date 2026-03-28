@@ -1,5 +1,6 @@
 import { mod as mmod } from "./index.js";
 
+/** @private */
 export type Pair<T> = [T, T];
 
 /** A pair of numbers `[x, y]`

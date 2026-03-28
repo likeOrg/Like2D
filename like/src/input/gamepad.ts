@@ -14,8 +14,18 @@ export type GamepadTarget = number | "any";
  * 
  * If you're planning on supporting gamepads, please include a
  * way to generate {@link GamepadMapping} and set it with {@link Gamepad.setMapping}.
+ * Perhaps trigger it on {@link EventMap.gamepadconnected} events.
  * 
- * If you don't want to make your own, take a look at `prefab-scenes/mapGamepad`.
+ * If you don't want to make your own, take a look at {@link mapGamepad}
+ * 
+ * ## When to use gamepad remapping
+ * 
+ * For games with heavy and varied gamepad use, mapping buttons is essential.
+ * 
+ * But if your game relies on a small set of logical actions like 'accept' or 'jump', don't hesitate to
+ * reach for {@link input} in order to map based on actions instead.
+ * 
+ * 
  */
 export class Gamepad {
   private dispatch: Dispatcher<LikeGamepadEvent>;

@@ -94,6 +94,7 @@ demoScene = {
   },
 
   draw(like: Like) {
+
     const { timer, mouse, gamepad, gfx } = like;
     gfx.clear([0.1, 0.1, 0.15, 1]);
     const canvasSize = like.canvas.getMode().size;
@@ -144,6 +145,27 @@ demoScene = {
     } else {
       gfx.print('gray', 'No gamepad connected', [20, 260], { font: '14px sans-serif' });
     }
+
+
+     const color1 = "white";
+     const color2 = "black";
+     const size = 300;
+     // calc center of screen
+     const pos = Vec2.div(like.canvas.getSize(), 2);
+     const speed = 0.5;
+
+     like.gfx.push();
+     like.gfx.translate(pos);
+     like.gfx.rotate(like.timer.getTime() * Math.PI * 2 * speed);
+     like.gfx.scale(size);
+     like.gfx.circle("fill", color1, [0, 0], 2);
+     // use the arc parameter to fill in a semicircle. Note that it's clockwise from {x:1, y:0}.
+     like.gfx.circle("fill", color2, [0, 0], 2, { arc: [Math.PI/2, Math.PI*3/2] });
+     like.gfx.circle("fill", color2, [0, -1], 1);
+     like.gfx.circle("fill", color1, [0, 1], 1);
+     like.gfx.circle("fill", color2, [0, 1], 1/3);
+     like.gfx.circle("fill", color1, [0, -1], 1/3);
+     like.gfx.pop();
   },
 };
 

@@ -1,31 +1,25 @@
-/**
- * @module engine
- * @description Core game engine - lifecycle management and event dispatch.
- */
-
 import { Audio } from './audio/audio';
 import { Input } from './input/input';
 import { Timer } from './timer/timer';
 import { Keyboard } from './input/keyboard';
 import { Mouse } from './input/mouse';
 import { Gamepad } from './input/gamepad';
-import { Graphics } from './graphics/index';
+import { Graphics } from './graphics/graphics';
 import type { LikeEvent, EventType, EventMap, Dispatcher, LikeCanvasElement } from './events';
 import type { Like } from './like';
 import { Canvas } from './graphics/canvas';
 import { Scene, sceneDispatch } from './scene';
 
+/** @private */
 export type EngineDispatcher = Dispatcher<EventType>;
+/** @private */
 export type EngineProps<T extends keyof EventMap> = {
   canvas: LikeCanvasElement,
   abort: AbortSignal,
   dispatch: Dispatcher<T>,
 }
 
-/**
- * @private
- * Core game engine managing the event loop and subsystems.
- */
+/** @private */
 export class Engine {
   /** The canvas on which we bind all events. Not always the same canvas
    * that we render to. */
@@ -60,7 +54,7 @@ export class Engine {
     const keyboard = new Keyboard(props);
     const mouse = new Mouse(props);
     const gamepad = new Gamepad(props);
-    const input = new Input(props.dispatch, { keyboard, mouse, gamepad });
+    const input = new Input(props, { keyboard, mouse, gamepad });
 
     this.like = {
       audio,

@@ -29,6 +29,7 @@
 
 import { Vec2, type Vector2 } from "../math/vector2";
 import type { Rectangle } from "../math/rect";
+import { ImageHandle } from "./image";
 
 export type DrawMode = "fill" | "line";
 
@@ -59,45 +60,6 @@ export type PrintProps = {
   align?: CanvasTextAlign,
 };
 
-export class ImageHandle {
-  readonly path: string;
-  private element: HTMLImageElement | null = null;
-  private loadPromise: Promise<void>;
-  private isLoaded = false;
-
-  constructor(path: string) {
-    this.path = path;
-
-    this.loadPromise = new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        this.element = img;
-        this.isLoaded = true;
-        resolve();
-      };
-      img.onerror = () => {
-        reject(new Error(`Failed to load image: ${path}`));
-      };
-      img.src = path;
-    });
-  }
-
-  isReady(): boolean {
-    return this.isLoaded;
-  }
-
-  ready(): Promise<void> {
-    return this.loadPromise;
-  }
-
-  get size(): Vector2 {
-    return [this.element?.width ?? 0, this.element?.height ?? 0];
-  }
-
-  getElement(): HTMLImageElement | null {
-    return this.element;
-  }
-}
 
 function parseColor(color: Color): string {
   if (typeof color === "string") return color;
@@ -146,16 +108,41 @@ function getFontHeight(ctx: CanvasRenderingContext2D): number {
 }
 
 /**
- * All of these methods exist on `like.gfx`, but with `ctx`
- * bound to the first arg.
+ * LIKE's way of drawing to the screen.
  * 
- * Acts as the core of the graphics system, but can be used separately.
+ * More specifically: a system for wrapping canvas draw calls conveniently.
  * 
+ *  - Reduces state in calls -- no `setColor`, etc. Everything is passed in.
+ *  - Abstracts away common drawing operations.
+ * 
+ * ### Examples
+ * Draw a spinning symbol in the center of the screen using transforms.
  * ```ts
- * import { draw } from "like/graphics"
- * draw.clear(my2dContext, "red");
- * ```
+ * function drawSpinningYinYang(like: Like) {
+ *   const color1 = "black";
+ *   const color2 = "white";
+ *   const size = 50;
+ *   const pos = Vec2.div(like.canvas.getSize(), 2); // calc center of screen
+ *   const speed = 0.5; // rotations per second
  * 
+ *   like.gfx.push();
+ *   like.gfx.translate(pos);
+ *   like.gfx.rotate(like.timer.getTime() * Math.PI * 2.0 * speed);
+ *   like.gfx.scale(size);
+ *   like.gfx.circle("fill", color1, [0, 0], 2);
+ *   // use the arc parameter to fill in a semicircle. Note that it's clockwise from {x:1, y:0}.
+ *   like.gfx.circle("fill", color2, [0, 0], 2, { arc: [Math.PI/2, Math.PI*3/2] });
+ *   like.gfx.circle("fill", color2, [0, -1], 1);
+ *   like.gfx.circle("fill", color1, [0, 1], 1);
+ *   like.gfx.circle("fill", color2, [0, 1], 1/3);
+ *   like.gfx.circle("fill", color1, [0, -1], 1/3);
+ *   like.gfx.pop();
+ * }
+ * 
+ * like.draw = (like: Like) => {
+ *   drawSpinningYinYang(like);
+ * }
+ * ```
  */
 export class Graphics {
   constructor(private ctx: CanvasRenderingContext2D) {}
@@ -171,7 +158,6 @@ export class Graphics {
 
   /**
    * Clears the canvas with a solid color.
-   * @param this.ctx Canvas context.
    * @param color Fill color.
    */
   clear(color: Color = [0, 0, 0, 1]): void {
@@ -181,7 +167,6 @@ export class Graphics {
 
   /**
    * Draws a rectangle.
-   * @param this.ctx Canvas context.
    * @param mode Fill or line.
    * @param color Fill or stroke color.
    * @param rect Rectangle [x, y, w, h].
@@ -206,7 +191,7 @@ export class Graphics {
 
   /**
    * Draws a circle or ellipse.
-   * @param this.ctx Canvas context.
+   
    * @param mode Fill or line.
    * @param color Fill or stroke color.
    * @param position Center position.
@@ -252,7 +237,7 @@ export class Graphics {
 
   /**
    * Draws connected line segments.
-   * @param this.ctx Canvas context.
+   
    * @param color Stroke color.
    * @param points Array of [x, y] positions.
    * @param props Optional stroke properties.
@@ -282,7 +267,7 @@ export class Graphics {
    * to the left and right of its position. If you align right, your position
    * becomes the upper-right corner of the text.
    * 
-   * @param this.ctx Canvas context.
+   
    * @param color Fill color.
    * @param text Text string.
    * @param position Top-left position.
@@ -319,7 +304,7 @@ export class Graphics {
    * @remarks named "draw" because it draws anything _drawable_
    * in the long run.
    * 
-   * @param this.ctx Canvas context.
+   
    * @param handle Image handle from newImage.
    * @param position Draw position.
    * @param props Optional rotation, scale, origin, or quad.
@@ -354,7 +339,7 @@ export class Graphics {
   /**
    * Loads an image from a path.
    * Unlike built-in loading, this pretends to be synchronous.
-   * @param this.ctx Canvas context.
+   
    * @param path Image file path.
    * @returns ImageHandle for use with draw.
    */
@@ -364,7 +349,7 @@ export class Graphics {
 
   /**
    * Sets the clipping region.
-   * @param this.ctx Canvas context.
+   
    * @param rect Clipping rectangle, or full canvas if omitted.
    */
   clip(rect?: Rectangle): void {
@@ -380,7 +365,7 @@ export class Graphics {
 
   /**
    * Draws a polygon.
-   * @param this.ctx Canvas context.
+   
    * @param mode Fill or line.
    * @param color Fill or stroke color.
    * @param points Array of [x, y] vertices.
@@ -411,7 +396,7 @@ export class Graphics {
 
   /**
    * Draws individual pixels.
-   * @param this.ctx Canvas context.
+   
    * @param color Fill color.
    * @param pts Array of [x, y] positions.
    */
@@ -422,7 +407,7 @@ export class Graphics {
 
   /**
    * Saves canvas state.
-   * @param this.ctx Canvas context.
+   
    */
   push(): void {
     this.ctx.save();
@@ -430,7 +415,7 @@ export class Graphics {
 
   /**
    * Restores canvas state.
-   * @param this.ctx Canvas context.
+   
    */
   pop(): void {
     this.ctx.restore();
@@ -438,7 +423,7 @@ export class Graphics {
 
   /**
    * Applies a translation.
-   * @param this.ctx Canvas context.
+   
    * @param offset [x, y] offset.
    */
   translate(offset: Vector2): void {
@@ -448,7 +433,7 @@ export class Graphics {
 
   /**
    * Applies a rotation.
-   * @param this.ctx Canvas context.
+   
    * @param angle Rotation in radians.
    */
   rotate(angle: number): void {
@@ -457,7 +442,7 @@ export class Graphics {
 
   /**
    * Applies a scale.
-   * @param this.ctx Canvas context.
+   
    * @param factor Scale factor (number or [x, y]).
    */
   scale(factor: number | Vector2): void {

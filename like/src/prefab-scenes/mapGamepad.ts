@@ -97,6 +97,19 @@ export type MapMode = {
   stickCount: number;
 };
 
+/**
+ * An automagical gamepad mapper.
+ * 
+ * ```ts
+ * like.gamepadconnected = (index) =>
+ *   like.setScene(new MapGamepad({buttons: buttonSetGBA, sticks: 0}), index)
+ * ```
+ * 
+ * Add this to your codebase and activating a gamepad causes a button mapping screen to pop up.
+ * It will request to map any buttons not already covered by the automapping database.
+ * 
+ * Note: many browsers do this on first button press, so always writing "P2: press any button" is a fine idea.
+ */
 export class MapGamepad implements Scene {
   private currentlyUnmapped: LikeButton[] = [];
   private mapping!: GamepadMapping;

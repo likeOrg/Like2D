@@ -1,14 +1,37 @@
 import { EngineProps } from "../engine";
-import { Dispatcher, type LikeCanvasElement } from "../events";
+import { Dispatcher, type LikeCanvasElement, type LikeKeyboardEvent } from "../events";
 
-type KEvent = 'keypressed' | 'keyreleased';
 
+/**
+ * A basic wrapper around keyboard.
+ * 
+ * Keyboard uses scancodes by default, which are based on physical key
+ * positions rather than the logical (letter) meaning of the key.
+ *  
+ * ## When to use Keyboard
+ * 
+ * Using keyboard directly is discouraged, but of course allowed.
+ * Take a look at the actions system in {@link input} for a better solution.
+ * 
+ * Also where there's text input such as `enter your name`, use the key code.
+ * This allows the user to use their intended keyboard layout.
+ * 
+ * ```
+ * like.keypressed = (_code, key) => {
+ *   name += key;
+ * }
+ * ```
+ * 
+ * Even if your game is heavily keyboard-reliant (like nethack), it is best to avoid mapping directly.
+ * Referring to action `drink` instead of code `KeyD` is also more programmer-ergonomic.
+ * 
+ */
 export class Keyboard {
   private pressedScancodes = new Set<string>();
   private canvas: LikeCanvasElement;
-  private dispatch: Dispatcher<KEvent>;
+  private dispatch: Dispatcher<LikeKeyboardEvent>;
 
-  constructor(props: EngineProps<KEvent>) {
+  constructor(props: EngineProps<LikeKeyboardEvent>) {
     this.canvas = props.canvas;
     this.dispatch = props.dispatch;
     const { abort } = props;

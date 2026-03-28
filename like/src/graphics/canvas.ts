@@ -2,9 +2,17 @@ import { type Dispatcher, type LikeCanvasElement } from "../events";
 import { Rect, Rectangle } from "../math/rect";
 import { Vec2, type Vector2 } from "../math/vector2";
 
+/**
+ * A set of options passed into {@link Canvas.setMode}
+ */
 export type CanvasModeOptions = { fullscreen: boolean };
 export type CanvasSize = Vector2 | 'native';
 
+/**
+ * A manager for the HTML canvas element, similar to `love.window`.
+ * 
+ * Controls game size / scaling -- both native and pixelart mode via {@link Canvas.setMode}, as well as fullscreen functions.
+ */
 export class Canvas {
     /** The canvas that we're drawing to with `like.gfx` functions.
      * If it's the same as displayCanvas, we're in native mode.
