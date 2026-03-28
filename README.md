@@ -39,7 +39,15 @@ npm install
 npm run dev
 ```
 
-[Read the full documentation](https://github.com/44100hertz/Like2D/tree/master/like)
+## Links
+
+[Full Documentation](https://44100hertz.github.io/Like2D/api/documents/README.html) 
+
+[NPM](https://www.npmjs.com/package/like2d)
+
+[JSR](https://jsr.io/@like2d/like)
+
+[GitHub](https://github.com/44100hertz/Like2D)
 
 ## Why the Spade?
 

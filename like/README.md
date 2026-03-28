@@ -110,13 +110,15 @@ LIKE's API is not the same as LOVE, but similar in spirit. Notable differences:
 - Theres an actions system -- `input.setAction` / `actionpressed` and `actionreleased` callbacks.
 - Some things are missing either due to browser limitations or smaller scope.
 
-## Feedback welcome
+## Links
 
-[LIKE is on GitHub.](https://github.com/44100hertz/Like2D)
+[NPM](https://www.npmjs.com/package/like2d)
 
-[Check out the docs for our long-term vision.](https://github.com/44100hertz/Like2D/tree/master/docs)
+[JSR](https://jsr.io/@like2d/like)
 
-[Feature requests welcome. PRs discouraged for now.](https://github.com/44100hertz/Like2D/issues/)
+[GitHub](https://github.com/44100hertz/Like2D)
+
+[Full Documentation](https://44100hertz.github.io/Like2D/api/documents/README.html) 
 
 ## License
 

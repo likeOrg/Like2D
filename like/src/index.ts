@@ -1,13 +1,6 @@
 /**
  * A cozy web-native 2D game framework.
  * 
- * [NPM](https://www.npmjs.com/package/like2d)
- * 
- * [JSR](https://jsr.io/@like2d/like)
- * 
- * [GitHub](https://github.com/44100hertz/Like2D)
- * 
- * @packageDocumentation
  */
 
 /**
