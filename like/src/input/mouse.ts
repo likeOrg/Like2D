@@ -172,7 +172,7 @@ export class Mouse {
    * In locked mode, the cursor cannot escape the canvas.
    * It also becomes invisible.
    * However, it can move infinitely, sensitivity can be controlled,
-   * and the emulated cursor (in `pos` of {@link like.EventMap.mousemoved}) can be freely repositioned.
+   * and the emulated cursor (in `pos` of {@link index.EventMap.mousemoved}) can be freely repositioned.
    * 
    * ```ts
    * {
@@ -184,7 +184,7 @@ export class Mouse {
    * reset mode to default.
    * 
    * ### Note on `pos` vs `delta`
-   * Event {@link like.EventMap.mousemoved} passes both `pos` and `delta` args.
+   * Event {@link index.EventMap.mousemoved} passes both `pos` and `delta` args.
    * 
    * Though the emulated cursor in locked mode
    * (locked mode doesn't natively track absolute position)

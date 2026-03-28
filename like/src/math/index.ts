@@ -1,7 +1,7 @@
 /**
  * A purely functional math library, mostly for 2d.
  * 
- * Check out {@link vector2} and {@link rect}
+ * Check out {@link Vector2} and {@link Rect}
  * 
  * Why purely functional?
  *   1. Plays nice with stream iterators.
@@ -9,7 +9,6 @@
  *   3. Construction is as easy as building an array.
  * 
  * @module math 
- * 
  */
 
 export { type Vector2, Vec2, type Pair } from "./vector2";

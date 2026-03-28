@@ -1,14 +1,14 @@
 import { Vector2 } from "../math";
 
 /**
- * An image that can be drawn using {@link like2d.Graphics.draw} 
+ * An image that can be drawn using {@link Graphics.draw} 
  * 
  * Unlike raw HTMLImageElement, there is no need to wait for it to load.
  * If the image isn't loaded, it simply won't draw it at all.
  * 
  * If you're planning on loading many large images, simply preload
  * these image handles beforehand so that they're ready.
-*/
+ */
 export class ImageHandle {
   readonly path: string;
   private element: HTMLImageElement | null = null;
