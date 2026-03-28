@@ -51,7 +51,7 @@ LIKE is a cozy way to make 2d games for browser.
 - **👟Consistent APIs:** Colors 0-1, not 0-255. Seconds, not milliseconds. Physical gamepad buttons, not "A" or "B".
 - **👉 Actions System:** An input layer maps inputs to actions, which fire usable events.
 - **🌎 Global control:** Choose how to handle LIKE events, and manage resources with centralized trackers. LIKE is a great foundation for your own engine.
-- **🐦 Light and Elegant:** Zero dependencies and less than 5000 lines of code -- focused entirely on what matters.
+- **🐦 Light and Elegant:** Zero dependencies and less than 5000 lines of code. Size less than 100KiB compressed.
 
 ## Installation
 

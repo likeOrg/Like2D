@@ -1,5 +1,7 @@
 # Changelog
 
+## [2.12.0] - UNRELEASED
+
 ## [2.11.1] - 2026-03-28
 
 Document almost everything and [put up a website.](https://44100hertz.github.io/Like2D/api/documents/README.html)
