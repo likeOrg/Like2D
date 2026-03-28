@@ -37,7 +37,7 @@
   },
   "files": [
     "dist/**/*",
-    "!dist/__benchmarks__/**/*",
+    "!dist/**/*.ts.map",
     "assets/**/*",
     "README.md",
     "LICENSE"
