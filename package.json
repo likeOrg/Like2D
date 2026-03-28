@@ -12,11 +12,12 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "publish:lib": "pnpm build:lib && cd like && npm publish",
-    "update-gamepad-db": "node scripts/update-gamecontrollerdb.ts",
+    "update-gamepad-db": "pnpx tsx scripts/update-gamecontrollerdb.ts",
     "clean": "pnpm -r exec rm -rf dist node_modules/.cache",
     "deploy:docs": "pnpm --filter website deploy"
   },
   "devDependencies": {
+    "@types/node": "^22.19.15",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.1.0"
