@@ -4,17 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vitepress dev",
-    "build": "pnpm run docs:generate && vitepress build",
-    "preview": "vitepress preview",
+    "build": "typedoc --options typedoc.json",
+    "preview": "npx serve dist",
     "docs:generate": "typedoc --options typedoc.json",
+    "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
-    "lint": "echo 'No linting configured'"
+    "lint": "echo 'No linting configured'",
+    "deploy": "pnpm build && cp index.html dist/ && gh-pages -d dist"
   },
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "typedoc": "^0.28.17",
     "typedoc-plugin-markdown": "^4.10.0",
-    "typescript": "^5.9.3",
-    "vitepress": "^1.6.4"
+    "typescript": "^5.9.3"
   }
 }

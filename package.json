@@ -6,16 +6,15 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter feature-test dev",
-    "dev:website": "pnpm --filter website dev",
     "build": "pnpm -r build",
     "build:lib": "pnpm --filter like build",
     "build:website": "pnpm --filter website build",
-    "preview:website": "pnpm --filter website preview",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",
     "publish:lib": "pnpm build:lib && cd like && npm publish",
     "update-gamepad-db": "node scripts/update-gamecontrollerdb.ts",
-    "clean": "pnpm -r exec rm -rf dist node_modules/.cache"
+    "clean": "pnpm -r exec rm -rf dist node_modules/.cache",
+    "deploy:docs": "pnpm --filter website deploy"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

@@ -6,18 +6,17 @@
     "../like/src/input/index.ts",
     "../like/src/math/index.ts",
     "../like/src/prefab-scenes/index.ts",
-    "../like/src/timer/index.ts",
+    "../like/src/timer/index.ts"
   ],
   "tsconfig": "../like/tsconfig.json",
-  "plugin": ["typedoc-plugin-markdown"],
-  "out": "./api",
+  "out": "./dist/api",
   "excludeExternals": true,
   "excludePrivate": true,
   "excludeProtected": true,
   "sort": ["source-order"],
   "readme": "none",
-  "hideBreadcrumbs": true,
-  "hidePageTitle": false,
-  "outputFileStrategy": "modules",
-  "membersWithOwnFile": ["Class", "Enum", "Interface"]
+  "hideGenerator": true,
+  "categorizeByGroup": true,
+  "searchInComments": true,
+  "cleanOutputDir": true
 }
