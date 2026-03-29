@@ -28,7 +28,7 @@ const LOGO = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0i
  * like.draw = function () { ... }
  *
  * // Set up the start screen
- * like.setScene(new StartScreen())
+ * like.pushScene(new StartScreen())
  * like.start();
  * ```
  * 
@@ -57,7 +57,6 @@ export class StartScreen implements Scene {
   private logo!: ImageHandle;
 
   constructor(
-    private next: Scene,
     private onDraw?: (like: Like) => void
   ) { }
 
@@ -77,6 +76,6 @@ export class StartScreen implements Scene {
   }
 
   mousepressed(like: Like): void {
-    like.setScene(this.next);
+    like.popScene();
   }
 }

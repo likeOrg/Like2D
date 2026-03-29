@@ -9,6 +9,9 @@
  - `r` field of gfx transforms is now `angle`.
 
 ### Added
+ - **Scene Stack architecture**
+ - [x] Add like.getScene()
+ - [x] Add like.pushScene() and like.popScene()
  - `like.canvas.hasFocus`
  - All draw calls now support transforms (`angle`, `scale`, `origin`) in their props table.
  - `polygon()` has a `translate` prop to offset the entire shape.

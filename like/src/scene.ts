@@ -16,13 +16,26 @@ import type { Like } from './like';
  * your running scene and shows up as an additional first argument
  * to every callback.
  * 
+ * ## The scene stack
+ * 
+ * There is a stack of scenes for state management.
+ * 
+ * You might assume that the purpose of a scene stack is
+ * visual. Actually, the example `composing scenes` below is a
+ * cleaner pattern to achieve that. You can still use {@link Like.getScene}
+ * if you really want to propogate events to the parent scene.
+ * 
+ * Use {@link Like.pushScene} and {@link Like.popScene} to manage the stack.
+ * 
+ * {@link like.setScene} Sets the top of the stack only, replacing the current scene if any.
+ * 
  * ## Quick Start
  *
  * Have a scene handle all the callbacks, disabling global
  * callbacks.
  * ```typescript
  * // set up a scene
- * class MagicalGrowingRectangle extends Scene {
+ * class MagicalGrowingRectangle implements Scene {
  *   rectangleSize = 10;
  *   constructor() {}
  * 
@@ -36,16 +49,16 @@ import type { Like } from './like';
  *   }
  * }
  * 
- * like.setScene(new MagicalGrowingRectangle());
+ * like.pushScene(new MagicalGrowingRectangle());
  * ```
  * 
- * To get back to global callbacks, just use `like.handleEvent = undefined`
+ * To get back to global callbacks, just use {@link Like.popScene}
  *
  * ## Scene Lifecycle
  * 
  * Works a lot like global callbacks.
  *
- * 1. `like.setScene(scene)` is called
+ * 1. `like.setScene(scene)` or `like.pushScene(scene)` is called
  * 2. Scene's `load` callback fires immediately
  * 3. `update` and `draw` begin on next frame
  * 4. Scene receives input events as they occur
@@ -58,9 +71,9 @@ import type { Like } from './like';
  * 
  * ```typescript
  * class UI implements Scene {
- *   constructor(public game: Game) {}
+ *   constructor(public game: Scene) {}
  * 
- *   handleEvent(like: Like, event: Like2DEvent) {
+ *   handleEvent(like: Like, event: LikeEvent) {
  *     // Block mouse events in order to create a top bar. 
  *     const mouseY = like.mouse.getPosition()[1];
  *     if (!event.type.startsWith('mouse') || mouseY > 100) {
@@ -78,7 +91,7 @@ import type { Like } from './like';
  *   ...
  * }
  * 
- * like.setScene(new UI(new Game()))
+ * like.pushScene(new UI(new Game()))
  * ```
  * 
  * Composing scenes lets you filter events, layer game elements,

@@ -27,6 +27,7 @@ export class Engine {
   private isRunning = false;
   private lastTime = 0;
   private abort = new AbortController();
+  private sceneStack: Scene[] = [];
 
   /**
    * The Like interface providing access to all engine subsystems.
@@ -67,14 +68,28 @@ export class Engine {
       canvas,
       start: this.start.bind(this),
       dispose: this.dispose.bind(this),
-      setScene: (scene: Scene | null) => {
-        if (scene !== null) {
-          this.like.handleEvent = (event) => sceneDispatch(scene, this.like, event);
-          if (this.isRunning) this.dispatch("load", []);
-        } else {
-          this.like.handleEvent = undefined;
-        }
+
+      getScene: (pos = -1): Scene | undefined => {
+        return this.sceneStack.at(pos);
       },
+
+      pushScene: (scene: Scene) => {
+        this.sceneStack.push(scene);
+        this.refreshScene();
+      },
+
+      popScene: (): Scene | undefined => {
+        const s = this.sceneStack.pop();
+        this.refreshScene();
+        return s;
+      },
+
+      setScene: (scene: Scene) => {
+        const idx = Math.max(0, this.sceneStack.length - 1);
+        this.sceneStack[idx] = scene;
+        this.refreshScene();
+      },
+
       callOwnHandlers: (event: LikeEvent) => {
         if (event.type in this.like)
           (this.like as any)[event.type](...event.args)
@@ -84,6 +99,18 @@ export class Engine {
     window.addEventListener('focus', () => this.dispatch('focus', ['tab']));
     window.addEventListener('blur', () => this.dispatch('blur', ['tab']));
     this.canvas.addEventListener('focus', () => this.dispatch('focus', ['canvas']));
+  }
+
+  private refreshScene() {
+    const topScene = this.sceneStack.at(-1);
+    if (topScene) {
+      this.like.handleEvent = (event) => sceneDispatch(topScene, this.like, event);
+      if (this.isRunning) {
+        this.dispatch("load", []);
+      }
+    } else {
+      this.like.handleEvent = undefined;
+    }
   }
 
   private dispatch<K extends EventType>(type: K, args: EventMap[K]): void {

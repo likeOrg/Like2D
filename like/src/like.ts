@@ -60,23 +60,52 @@ export type Like = Callbacks & {
    */
   dispose(): void;
 
-  /**
-   * A simple way to set the current scene, which acts like a pluggable
-   * set of callbacks. Pass `null` to clear the current scene.
+  /** 
+   * Push a scene to the scene stack.
    */
-  setScene(scene: Scene | null): void;
+  pushScene(scene: Scene): void
+
+  /**
+   * Pop the current scene off the stack.
+   * 
+   * To clear the stack, just run:
+   * ```ts
+   * while (like.popScene());
+   * ```
+   */
+  popScene(): Scene | undefined,
+
+  /**
+   * Set the current scene at the top of the scene stack.
+   * If the stack is empty, push it onto the stack.
+   * 
+   * Equivalent to `popScene` + `pushScene`.
+   * 
+   * Use {@link popScene} to clear away the current scene,
+   * and to possibly revert to callback mode.
+   */
+  setScene(scene: Scene): void;
+
+  /**
+   * Get the current scene, or a specific index.
+   * 
+   * Uses `Array.at` under the hood, so -1 is the
+   * top scene, -2 is the parent scene, etc.
+   */
+  getScene(index?: number): Scene | undefined;
 
   /**
    * LIKE's runtime is built around calling handleEvent.
    * 
    * This function recieves all events. If set to undefined,
-   * `like.callOwnHandlers(ev)` is the default behavior.
+   * {@link callOwnHandlers} is the default behavior.
    * 
    * Otherwise, you can really customize LIKE by setting this
    * to a custom handler.
    * 
    * For example, the scene architecture is built around
-   * setting this function.
+   * setting this function. Setting it to a custom
+   * function will disable the scene system.
    */
   handleEvent?: TopLevelEventHandler;
 

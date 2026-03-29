@@ -102,7 +102,7 @@ export type MapMode = {
  * 
  * ```ts
  * like.gamepadconnected = (index) =>
- *   like.setScene(new MapGamepad({buttons: buttonSetGBA, sticks: 0}), index)
+ *   like.pushScene(new MapGamepad({buttons: buttonSetGBA, sticks: 0}), index)
  * ```
  * 
  * Add this to your codebase and activating a gamepad causes a button mapping screen to pop up.
@@ -120,7 +120,6 @@ export class MapGamepad implements Scene {
   constructor(
     private mapMode: MapMode,
     private targetPad: number,
-    private next: Scene | null,
   ) { }
 
   load(like: Like): void {
@@ -192,7 +191,7 @@ export class MapGamepad implements Scene {
       this.held = active;
     } else if (!active) {
       like.gamepad.setMapping(this.targetPad, this.mapping);
-      setTimeout(() => like.setScene(this.next), 100);
+      setTimeout(() => like.popScene(), 100);
     }
   }
 
@@ -209,6 +208,6 @@ export class MapGamepad implements Scene {
   }
 
   mousepressed(like: Like): void {
-    like.setScene(this.next);
+    like.popScene();
   }
 }
