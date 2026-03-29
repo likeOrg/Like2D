@@ -62,9 +62,9 @@ export type Like = Callbacks & {
 
   /**
    * A simple way to set the current scene, which acts like a pluggable
-   * set of callbacks. 
+   * set of callbacks. Pass `null` to clear the current scene.
    */
-  setScene(scene?: Scene): void;
+  setScene(scene: Scene | null): void;
 
   /**
    * LIKE's runtime is built around calling handleEvent.

@@ -67,8 +67,8 @@ export class Engine {
       canvas,
       start: this.start.bind(this),
       dispose: this.dispose.bind(this),
-      setScene: (scene?: Scene) => {
-        if (scene) {
+      setScene: (scene: Scene | null) => {
+        if (scene !== null) {
           this.like.handleEvent = (event) => sceneDispatch(scene, this.like, event);
           if (this.isRunning) this.dispatch("load", []);
         } else {

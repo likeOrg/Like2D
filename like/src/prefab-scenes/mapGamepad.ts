@@ -120,7 +120,7 @@ export class MapGamepad implements Scene {
   constructor(
     private mapMode: MapMode,
     private targetPad: number,
-    private next?: Scene,
+    private next: Scene | null,
   ) { }
 
   load(like: Like): void {

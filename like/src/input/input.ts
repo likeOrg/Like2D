@@ -90,9 +90,9 @@ export class Input {
   /**
    * This is the easiest way to set-and-forget input => action mapping.
    * 
-   * Or, it's a helper to remove actions -- `setAction(action)`
+   * Or, it's a helper to remove actions -- `setAction(action, [])`
    * will simply clear the action away.
-   * 
+   *
    * For input strings:
    *  - Mouse is `MouseLeft`, `MouseRight`, or `MouseMiddle`.
    *  - Joypad is 'Left', 'L1', or any joypad button. {@link LikeButton}
@@ -118,7 +118,7 @@ export class Input {
    * @param action 
    * @param inputs 
    */
-  setAction(action: string, inputs: (string | InputBinding)[] = []): void {
+  setAction(action: string, inputs: (string | InputBinding)[]): void {
     if (inputs.length) {
       this.actionTable[action] = inputs.map(parseInput);
     } else {

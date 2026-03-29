@@ -3,6 +3,8 @@
 ## [2.12.0] - UNRELEASED
 
 ### Breaking Changes
+ - `like.setScene()` now requires an explicit `Scene | null` argument. Passing `null` clears the scene.
+ - `like.input.setAction()` no longer has a default value for the `inputs` parameter. Use an explicit empty array `[]` to remove an action.
  - gfx functions no longer accept a single number as `origin`.
 
 ### Updates
