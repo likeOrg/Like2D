@@ -1,4 +1,5 @@
-import { createLike, type ImageHandle } from "like";
+import { type ImageHandle } from "like2d/graphics";
+import { createLike } from "like2d";
 
 let image: ImageHandle;
 const like = createLike(document.getElementById("game-container")!);

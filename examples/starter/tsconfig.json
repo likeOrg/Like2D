@@ -15,9 +15,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
-    "paths": {
-      "like": ["../../like/src/index.ts"]
-    }
   },
   "include": ["src/**/*"]
 }
