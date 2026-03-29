@@ -27,7 +27,7 @@
  * - Angles in radians, 0 is right, positive is clockwise
  */
 
-import { Vec2, type Vector2 } from "../math/vector2";
+import type { Vector2 } from "../math/vector2";
 import type { Rectangle } from "../math/rect";
 import { ImageHandle } from "./image";
 
@@ -40,24 +40,31 @@ export type DrawMode = "fill" | "line";
  */
 export type Color = [number, number, number, number?] | string;
 
+export type TransformProps = {
+  r?: number;
+  scale?: number | Vector2;
+  origin?: Vector2;
+};
+
 export type ShapeProps = {
   lineWidth?: number;
   lineCap?: CanvasLineCap;
   lineJoin?: CanvasLineJoin;
   miterLimit?: number;
-};
+} & TransformProps;
 
 export type DrawProps = ShapeProps & {
   quad?: Rectangle;
-  r?: number;
-  scale?: number | Vector2;
-  origin?: Vector2;
 };
 
 export type PrintProps = {
   font?: string;
   width?: number,
   align?: CanvasTextAlign,
+} & TransformProps;
+
+export type PolygonProps = ShapeProps & {
+  translate?: Vector2;
 };
 
 
@@ -179,14 +186,18 @@ export class Graphics {
     props?: ShapeProps,
   ): void {
     const c = applyColor(color);
+    this.ctx.save();
+    const [x, y, w, h] = rect;
+    this.applyTransform([x, y], props);
     if (mode === "fill") {
       this.ctx.fillStyle = c;
-      this.ctx.fillRect(...rect);
+      this.ctx.fillRect(0, 0, w, h);
     } else {
       setStrokeProps(this.ctx, props);
       this.ctx.strokeStyle = c;
-      this.ctx.strokeRect(...rect);
+      this.ctx.strokeRect(0, 0, w, h);
     }
+    this.ctx.restore();
   }
 
   /**
@@ -212,18 +223,17 @@ export class Graphics {
     const c = applyColor(color);
     const size: Vector2 = typeof radii === "number" ? [radii, radii] : radii;
     const [startAngle, endAngle] = props?.arc ?? [0, Math.PI * 2];
-    if (!center) {
-      position = Vec2.add(position, size);
-    }
-
+    
     this.ctx.save();
-    this.ctx.translate(...position);
+    this.applyTransform(position, props);
+    if (!center) {
+      this.ctx.translate(...size);
+    }
     this.ctx.scale(...size);
     this.ctx.beginPath();
     this.ctx.arc(0, 0, 1, startAngle, endAngle);
     if (mode == 'fill') this.ctx.lineTo(0, 0);
     this.ctx.closePath();
-    this.ctx.restore();
 
     if (mode === "fill") {
       this.ctx.fillStyle = c;
@@ -233,6 +243,7 @@ export class Graphics {
       this.ctx.strokeStyle = c;
       this.ctx.stroke();
     }
+    this.ctx.restore();
   }
 
   /**
@@ -279,8 +290,9 @@ export class Graphics {
     position: Vector2,
     props?: PrintProps,
   ): void {
-    const [x, y] = position;
     const { font = "16px sans-serif" } = props ?? {};
+    this.ctx.save();
+    this.applyTransform(position, props);
     this.ctx.fillStyle = parseColor(color);
     this.ctx.font = font;
     this.ctx.textAlign = props?.align ?? "left";
@@ -290,12 +302,13 @@ export class Graphics {
       const lineHeight = getFontHeight(this.ctx);
       this.ctx.textBaseline = "top";
       lines.forEach((line, i) => {
-        this.ctx.fillText(line, x, y + i * lineHeight, width);
+        this.ctx.fillText(line, 0, i * lineHeight, width);
       });
       this.ctx.textBaseline = "alphabetic";
     } else {
-      this.ctx.fillText(text, x, y);
+      this.ctx.fillText(text, 0, 0);
     }
+    this.ctx.restore();
   }
 
   /**
@@ -317,24 +330,15 @@ export class Graphics {
     const element = handle.getElement();
     if (!element) return;
 
-    let {
-      r = 0,
-      scale = 1,
-      origin = [0, 0],
-      quad,
-    } = props ?? {};
-
-    origin = Vec2.sub([0, 0], origin);
+    const { quad } = props ?? {};
 
     this.ctx.save();
-    this.translate(position);
-    this.ctx.rotate(r);
-    this.scale(scale);
+    this.applyTransform(position, props);
     if (quad) {
       const [,, qw, qh] = quad;
-      this.ctx.drawImage(element, ...quad, ...origin, qw, qh);
+      this.ctx.drawImage(element, ...quad, 0, 0, qw, qh);
     } else {
-      this.ctx.drawImage(element, ...origin);
+      this.ctx.drawImage(element, 0, 0);
     }
     this.ctx.restore();
   }
@@ -368,20 +372,23 @@ export class Graphics {
 
   /**
    * Draws a polygon.
-   
+    
    * @param mode Fill or line.
    * @param color Fill or stroke color.
    * @param points Array of [x, y] vertices.
-   * @param props Optional stroke properties.
+   * @param props Optional stroke and transform properties.
    */
   polygon(
     mode: DrawMode,
     color: Color,
     points: Vector2[],
-    props?: ShapeProps,
+    props?: PolygonProps,
   ): void {
     if (points.length < 3) return;
     const c = applyColor(color);
+    const translate = props?.translate ?? [0, 0];
+    this.ctx.save();
+    this.applyTransform(translate, props);
     this.ctx.beginPath();
     const [[x0, y0], ...rest] = points;
     this.ctx.moveTo(x0, y0);
@@ -395,6 +402,7 @@ export class Graphics {
       this.ctx.strokeStyle = c;
       this.ctx.stroke();
     }
+    this.ctx.restore();
   }
 
   /**
@@ -403,14 +411,32 @@ export class Graphics {
    * @param color Fill color.
    * @param pts Array of [x, y] positions.
    */
-  points(color: Color, pts: Vector2[]): void {
+  points(
+    color: Color,
+    pts: Vector2[],
+    props?: TransformProps,
+  ): void {
+    this.ctx.save();
+    this.applyTransform([0, 0], props);
     this.ctx.fillStyle = applyColor(color);
     pts.forEach(([x, y]) => this.ctx.fillRect(x, y, 1, 1));
+    this.ctx.restore();
+  }
+
+  private applyTransform(position: Vector2, props?: TransformProps): void {
+    const { r = 0, scale = 1, origin = [0, 0] } = props ?? {};
+    this.ctx.translate(...position);
+    if (r !== 0) this.ctx.rotate(r);
+    if (scale !== 1) {
+      const [sx, sy] = typeof scale === "number" ? [scale, scale] : scale;
+      this.ctx.scale(sx, sy);
+    }
+    this.ctx.translate(-origin[0], -origin[1]);
   }
 
   /**
    * Saves canvas state.
-   
+    
    */
   push(): void {
     this.ctx.save();

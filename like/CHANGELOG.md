@@ -9,6 +9,8 @@
 
 ### Added
  - `like.canvas.hasFocus`
+ - All draw calls now support transforms (`r`, `scale`, `origin`) in their props table.
+ - `polygon()` has a `translate` prop to offset the entire shape.
 
 ### Updates
  - **Better pixels**: Image smoothing is enabled only in native mode, and disabled in pixel mode
