@@ -41,7 +41,7 @@ export type DrawMode = "fill" | "line";
 export type Color = [number, number, number, number?] | string;
 
 export type TransformProps = {
-  r?: number;
+  angle?: number;
   scale?: number | Vector2;
   origin?: Vector2;
 };
@@ -424,9 +424,9 @@ export class Graphics {
   }
 
   private applyTransform(position: Vector2, props?: TransformProps): void {
-    const { r = 0, scale = 1, origin = [0, 0] } = props ?? {};
+    const { angle = 0, scale = 1, origin = [0, 0] } = props ?? {};
     this.ctx.translate(...position);
-    if (r !== 0) this.ctx.rotate(r);
+    if (angle !== 0) this.ctx.rotate(angle);
     if (scale !== 1) {
       const [sx, sy] = typeof scale === "number" ? [scale, scale] : scale;
       this.ctx.scale(sx, sy);

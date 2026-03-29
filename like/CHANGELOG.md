@@ -6,10 +6,11 @@
  - `like.setScene()` now requires an explicit `Scene | null` argument. Passing `null` clears the scene.
  - `like.input.setAction()` no longer has a default value for the `inputs` parameter. Use an explicit empty array `[]` to remove an action.
  - gfx functions no longer accept a single number as `origin`.
+ - `r` field of gfx transforms is now `angle`.
 
 ### Added
  - `like.canvas.hasFocus`
- - All draw calls now support transforms (`r`, `scale`, `origin`) in their props table.
+ - All draw calls now support transforms (`angle`, `scale`, `origin`) in their props table.
  - `polygon()` has a `translate` prop to offset the entire shape.
 
 ### Updates
