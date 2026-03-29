@@ -37,9 +37,6 @@ export class Engine {
   constructor(private container: HTMLElement) {
     this.canvas = document.createElement('canvas') as LikeCanvasElement;
     const canvas = new Canvas(this.canvas, this.dispatch.bind(this) as any, this.abort.signal);
-    this.canvas.addEventListener("like:updateRenderTarget", (event) => {
-      this.like.gfx.setContext(event.detail.target.getContext("2d")!)
-    });
 
     this.container.appendChild(this.canvas);
 
@@ -49,7 +46,7 @@ export class Engine {
       abort: this.abort.signal,
     }
     
-    const gfx =  new Graphics(this.canvas.getContext('2d')!);
+    const gfx =  new Graphics(canvas.getContext());
     const audio = new Audio();
     const timer = new Timer(props);
     const keyboard = new Keyboard(props);

@@ -132,18 +132,18 @@ function getFontHeight(ctx: CanvasRenderingContext2D): number {
  *   const pos = Vec2.div(like.canvas.getSize(), 2); // calc center of screen
  *   const speed = 0.5; // rotations per second
  * 
- *   like.gfx.push();
- *   like.gfx.translate(pos);
- *   like.gfx.rotate(like.timer.getTime() * Math.PI * 2.0 * speed);
- *   like.gfx.scale(size);
- *   like.gfx.circle("fill", color1, [0, 0], 2);
- *   // use the arc parameter to fill in a semicircle. Note that it's clockwise from {x:1, y:0}.
- *   like.gfx.circle("fill", color2, [0, 0], 2, { arc: [Math.PI/2, Math.PI*3/2] });
- *   like.gfx.circle("fill", color2, [0, -1], 1);
- *   like.gfx.circle("fill", color1, [0, 1], 1);
- *   like.gfx.circle("fill", color2, [0, 1], 1/3);
- *   like.gfx.circle("fill", color1, [0, -1], 1/3);
- *   like.gfx.pop();
+ *   like.gfx.withTransform(() => {
+ *     like.gfx.translate(pos);
+ *     like.gfx.rotate(like.timer.getTime() * Math.PI * 2.0 * speed);
+ *     like.gfx.scale(size);
+ *     like.gfx.circle("fill", color1, [0, 0], 2);
+ *     // use the arc parameter to fill in a semicircle. Note that it's clockwise from {x:1, y:0}.
+ *     like.gfx.circle("fill", color2, [0, 0], 2, { arc: [Math.PI/2, Math.PI*3/2] });
+ *     like.gfx.circle("fill", color2, [0, -1], 1);
+ *     like.gfx.circle("fill", color1, [0, 1], 1);
+ *     like.gfx.circle("fill", color2, [0, 1], 1/3);
+ *     like.gfx.circle("fill", color1, [0, -1], 1/3);
+ *   })
  * }
  * 
  * like.draw = (like: Like) => {
@@ -153,15 +153,6 @@ function getFontHeight(ctx: CanvasRenderingContext2D): number {
  */
 export class Graphics {
   constructor(private ctx: CanvasRenderingContext2D) {}
-
-  /**
-   * Get the underlying CanvasRenderingContext2D.
-   * Be aware: this will change if switching between
-   * native and pixel mode. Avoid storing this value.
-   */
-  getContext(): CanvasRenderingContext2D {
-    return this.ctx;
-  }
 
   /**
    * Clears the canvas with a solid color.
@@ -349,7 +340,7 @@ export class Graphics {
 
   /**
    * Loads an image from a path.
-   * Unlike built-in loading, this pretends to be synchronous.
+   * Unlike fetch, this pretends to be synchronous.
    
    * @param path Image file path.
    * @returns ImageHandle for use with draw.

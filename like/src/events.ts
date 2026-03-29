@@ -10,7 +10,6 @@ import { MouseButton } from './input/mouse';
 /** @private */
 export type LikeCanvasEventMap = HTMLElementEventMap & {
   'like:mousemoved': CustomEvent<{pos: Vector2, delta: Vector2}>;
-  'like:updateRenderTarget': CustomEvent<{target: HTMLCanvasElement}>;
   'like:resizeCanvas': CustomEvent<{size: Vector2}>;
   'like:preDraw': CustomEvent<{}>;
   'like:postDraw': CustomEvent<{}>;

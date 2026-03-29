@@ -17,7 +17,7 @@
  - `like.canvas.hasFocus`
  - All draw calls now support transforms (`angle`, `scale`, `origin`) in their props table.
  - `polygon()` has a `translate` prop to offset the entire shape.
- - Expose escape-hatch context in `like.gfx.getContext()`. You're free now!
+ - Expose escape-hatch context in `like.canvas.getContext()`
  - Add `withTransform` for lower-state transform abstraction.
  - 
 
