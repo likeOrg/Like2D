@@ -206,7 +206,7 @@ export class Graphics {
     mode: DrawMode,
     color: Color,
     position: Vector2,
-    radii: number | Vector2,
+    radius: number,
     props?: ShapeProps & {
       arc?: [number, number];
       center?: boolean;
@@ -214,20 +214,15 @@ export class Graphics {
   ): void {
     const center = (props && 'center' in props) ? props.center : true;
     const c = applyColor(color);
-    const size: Vector2 = typeof radii === "number" ? [radii, radii] : radii;
     const [startAngle, endAngle] = props?.arc ?? [0, Math.PI * 2];
     
     this.ctx.save();
-    if (mode === "line") {
-      setStrokeProps(this.ctx, props);
-    }
     this.applyTransform(position, props);
     if (!center) {
-      this.ctx.translate(...size);
+      this.ctx.translate(radius, radius);
     }
-    this.ctx.scale(...size);
     this.ctx.beginPath();
-    this.ctx.arc(0, 0, 1, startAngle, endAngle);
+    this.ctx.arc(0, 0, radius, startAngle, endAngle);
     if (mode == 'fill') this.ctx.lineTo(0, 0);
     this.ctx.closePath();
 
@@ -235,6 +230,7 @@ export class Graphics {
       this.ctx.fillStyle = c;
       this.ctx.fill();
     } else {
+      setStrokeProps(this.ctx, props);
       this.ctx.strokeStyle = c;
       this.ctx.stroke();
     }
