@@ -2,11 +2,9 @@ import { createLike, Like, } from "like";
 import { ImageHandle } from "like/graphics";
 import { AudioSource } from "like/audio";
 import { CanvasSize } from "like/graphics";
-import { MapGamepad, } from "like/prefab-scenes";
 import { Vec2 } from "like/math";
 import { Scene } from "like/scene";
-import { buttonSetPS1 } from "like/prefab-scenes";
-import { StartScreen } from "like/prefab-scenes";
+import { MapGamepad, StartScreen, buttonSetPS1 } from "like/prefab-scenes";
 
 let pepperImage: ImageHandle;
 let audioSource: AudioSource | null = null;

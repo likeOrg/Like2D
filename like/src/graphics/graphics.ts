@@ -188,12 +188,14 @@ export class Graphics {
     const c = applyColor(color);
     this.ctx.save();
     const [x, y, w, h] = rect;
+    if (mode === "line") {
+      setStrokeProps(this.ctx, props);
+    }
     this.applyTransform([x, y], props);
     if (mode === "fill") {
       this.ctx.fillStyle = c;
       this.ctx.fillRect(0, 0, w, h);
     } else {
-      setStrokeProps(this.ctx, props);
       this.ctx.strokeStyle = c;
       this.ctx.strokeRect(0, 0, w, h);
     }
@@ -225,6 +227,9 @@ export class Graphics {
     const [startAngle, endAngle] = props?.arc ?? [0, Math.PI * 2];
     
     this.ctx.save();
+    if (mode === "line") {
+      setStrokeProps(this.ctx, props);
+    }
     this.applyTransform(position, props);
     if (!center) {
       this.ctx.translate(...size);
@@ -239,7 +244,6 @@ export class Graphics {
       this.ctx.fillStyle = c;
       this.ctx.fill();
     } else {
-      setStrokeProps(this.ctx, props);
       this.ctx.strokeStyle = c;
       this.ctx.stroke();
     }
@@ -293,8 +297,8 @@ export class Graphics {
     const { font = "16px sans-serif" } = props ?? {};
     this.ctx.save();
     this.applyTransform(position, props);
-    this.ctx.fillStyle = parseColor(color);
     this.ctx.font = font;
+    this.ctx.fillStyle = parseColor(color);
     this.ctx.textAlign = props?.align ?? "left";
     if (props && 'width' in props) {
       const { width } = props;
@@ -388,6 +392,9 @@ export class Graphics {
     const c = applyColor(color);
     const translate = props?.translate ?? [0, 0];
     this.ctx.save();
+    if (mode === "line") {
+      setStrokeProps(this.ctx, props);
+    }
     this.applyTransform(translate, props);
     this.ctx.beginPath();
     const [[x0, y0], ...rest] = points;
@@ -398,7 +405,6 @@ export class Graphics {
       this.ctx.fillStyle = c;
       this.ctx.fill();
     } else {
-      setStrokeProps(this.ctx, props);
       this.ctx.strokeStyle = c;
       this.ctx.stroke();
     }
