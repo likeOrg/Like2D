@@ -8,10 +8,4 @@ It might not be much work for this, and it would be a big win.
 
 Investigate this, how hard would it be?
 
-### Website
-
-See how well the API docs translate to the website.
-
-Other than some tutorials, I think they will be good `:)`
-
 ### Video tutorials?
