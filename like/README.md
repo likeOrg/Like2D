@@ -75,13 +75,41 @@ npx degit 44100hertz/Like2D/examples/starter my-game
 
 ## Usage Example
 
+HTML that puts LIKE in fullscreen.
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+      html {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        margin: 0;
+        height: 100%;
+        display: grid;
+        place-items: center;
+        background: black;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
+```
+
+TypeScript:
 ```typescript
 import { createLike } from "like2d";
 
 const like = createLike(document.body);
 
 like.load = () => {
-  like.setMode([800, 600]);
+  like.canvas.setMode([800, 600]);
   like.input.setAction("jump", ["Space", "BBottom"]);
 };
 
