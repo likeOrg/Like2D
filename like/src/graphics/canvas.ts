@@ -199,7 +199,8 @@ export class Canvas {
      * rendering a frame.
      */
     private preDraw() {
-        if (this.renderCanvas == this.displayCanvas) {
+        const native = this.renderCanvas == this.displayCanvas;
+        if (native) {
             const realSize = this.getDisplayPixelSize();
             if ((realSize[0] != this.displayCanvas.width ||
               realSize[1] != this.displayCanvas.height) &&
@@ -214,7 +215,9 @@ export class Canvas {
               this.resizeTimeoutId = setTimeout(() => { this.resizeTimeoutId = 0; }, 250);
             }
         }
-        this.renderCanvas.getContext('2d')!.resetTransform();
+        const ctx = this.renderCanvas.getContext('2d')!
+        ctx.resetTransform();
+        ctx.imageSmoothingEnabled = native;
     }
 
     /** Called every frame by the engine after drawing */

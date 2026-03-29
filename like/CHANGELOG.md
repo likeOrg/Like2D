@@ -2,6 +2,10 @@
 
 ## [2.12.0] - UNRELEASED
 
+### Updates
+ - **Better pixels** 
+   - Image smoothing is enabled only in native mode, and disabled in pixel mode
+
 ## [2.11.1] - 2026-03-28
 
 Document almost everything and [put up a website.](https://44100hertz.github.io/Like2D/api/documents/README.html)

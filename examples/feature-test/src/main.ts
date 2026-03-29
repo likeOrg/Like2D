@@ -7,7 +7,7 @@ import { Vec2 } from "like/math";
 import { Scene } from "like/scene";
 import { buttonSetPS1 } from "like/prefab-scenes";
 
-let pepperImage: ImageHandle | null = null;
+let pepperImage: ImageHandle;
 let audioSource: AudioSource | null = null;
 
 const player = {
@@ -96,9 +96,14 @@ demoScene = {
   },
 
   draw(like: Like) {
-
     const { timer, mouse, gamepad, gfx } = like;
+
+
     gfx.clear([0.1, 0.1, 0.15, 1]);
+
+    gfx.push()
+    gfx.draw(pepperImage, like.mouse.getPosition(), { origin: [15, 15], scale: 1});
+    gfx.pop()
     const canvasSize = like.canvas.getMode().size;
     const center = Vec2.mul(canvasSize, 0.5);
     const [w, h] = canvasSize;
@@ -116,14 +121,6 @@ demoScene = {
     gfx.circle('line', 'yellow', center, 60);
     gfx.line('gray', [[200, 100], [350, 180]]);
     gfx.polygon('fill', 'magenta', [[350, 100], [400, 150], [350, 200], [300, 150]]);
-
-    if (pepperImage?.isReady()) {
-      gfx.push()
-      gfx.rotate(timer.getTime())
-      gfx.draw(pepperImage, [380, 220]);
-      gfx.draw(pepperImage, [420, 220], { scale: 0.5 });
-      gfx.pop()
-    }
 
     const mousePos = mouse.getPosition();
     gfx.print('cyan', `Mouse: (${Math.round(mousePos[0])}, ${Math.round(mousePos[1])})`, [20, 180], { font: '16px sans-serif' });
