@@ -182,6 +182,11 @@ export class Canvas {
         return this.displayCanvas === document.fullscreenElement;
     }
 
+    /** Does the canvas have focus? */
+    hasFocus(): boolean {
+        return document.activeElement === this.displayCanvas;
+    }
+
     /** Set fullscreen. */
     setFullscreen(fullscreen: boolean) {
         if (fullscreen) {

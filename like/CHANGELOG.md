@@ -7,6 +7,9 @@
  - `like.input.setAction()` no longer has a default value for the `inputs` parameter. Use an explicit empty array `[]` to remove an action.
  - gfx functions no longer accept a single number as `origin`.
 
+### Added
+ - `like.canvas.hasFocus`
+
 ### Updates
  - **Better pixels**: Image smoothing is enabled only in native mode, and disabled in pixel mode
 
