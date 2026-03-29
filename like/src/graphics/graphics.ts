@@ -155,12 +155,12 @@ export class Graphics {
   constructor(private ctx: CanvasRenderingContext2D) {}
 
   /**
-   * Set the 2d drawing context for graphics. 
-   * 
-   * Be aware that that `like` can set this value at any time.
+   * Get the underlying CanvasRenderingContext2D.
+   * Be aware: this will change if switching between
+   * native and pixel mode. Avoid storing this value.
    */
-  setContext(ctx: CanvasRenderingContext2D) {
-    this.ctx = ctx;
+  getContext(): CanvasRenderingContext2D {
+    return this.ctx;
   }
 
   /**
@@ -359,22 +359,6 @@ export class Graphics {
   }
 
   /**
-   * Sets the clipping region.
-   
-   * @param rect Clipping rectangle, or full canvas if omitted.
-   */
-  clip(rect?: Rectangle): void {
-    this.ctx.beginPath();
-    if (rect) {
-      const [x, y, w, h] = rect;
-      this.ctx.rect(x, y, w, h);
-    } else {
-      this.ctx.rect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    }
-    this.ctx.clip();
-  }
-
-  /**
    * Draws a polygon.
     
    * @param mode Fill or line.
@@ -483,5 +467,33 @@ export class Graphics {
   scale(factor: number | Vector2): void {
     const [sx, sy] = typeof factor === "number" ? [factor, factor] : factor;
     this.ctx.scale(sx, sy);
+  }
+
+  /**
+   * Temporarily switches the drawing context to another canvas.
+   * @param canvas The canvas to draw to.
+   * @param callback Functions that will be called while drawing to the target.
+   */
+  withRenderTarget(
+    canvas: HTMLCanvasElement,
+    callback: (ctx: CanvasRenderingContext2D) => void,
+  ): void {
+    const oldCtx = this.ctx;
+    const newCtx = canvas.getContext("2d")!;
+    this.ctx = newCtx;
+    callback(newCtx);
+    this.ctx = oldCtx;
+  }
+
+  /**
+   * Calls a function with its own state. Automatically saves and
+   * restores.
+   * 
+   * @param callback the drawing logic.
+   */
+  withTransform(callback: () => void): void {
+    this.ctx.save();
+    callback();
+    this.ctx.restore();
   }
 };

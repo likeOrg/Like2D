@@ -7,6 +7,8 @@
  - `like.input.setAction()` no longer has a default value for the `inputs` parameter. Use an explicit empty array `[]` to remove an action.
  - gfx functions no longer accept a single number as `origin`.
  - `r` field of gfx transforms is now `angle`.
+ - Remove setClip -- Very incomplete, just use the canvas escape hatch for now.
+ - Remove overly stateful and untested `setContext` -- replaced with `withRenderTarget`.
 
 ### Added
  - **Scene Stack architecture**
@@ -15,6 +17,9 @@
  - `like.canvas.hasFocus`
  - All draw calls now support transforms (`angle`, `scale`, `origin`) in their props table.
  - `polygon()` has a `translate` prop to offset the entire shape.
+ - Expose escape-hatch context in `like.gfx.getContext()`. You're free now!
+ - Add `withTransform` for lower-state transform abstraction.
+ - 
 
 ### Updates
  - **Better pixels**: Image smoothing is enabled only in native mode, and disabled in pixel mode

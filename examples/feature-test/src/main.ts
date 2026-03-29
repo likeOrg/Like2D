@@ -99,10 +99,9 @@ const demoScene: Scene = {
 
     gfx.clear([0.1, 0.1, 0.15, 1]);
 
-    gfx.push()
     gfx.draw(pepperImage, like.mouse.getPosition(), { origin: [15, 15], scale: 1});
-    gfx.pop()
     const canvasSize = like.canvas.getMode().size;
+
     const center = Vec2.mul(canvasSize, 0.5);
     const [w, h] = canvasSize;
 
@@ -151,18 +150,18 @@ const demoScene: Scene = {
      const pos = Vec2.div(like.canvas.getSize(), 2);
      const speed = 0.5;
 
-     like.gfx.push();
-     like.gfx.translate(pos);
-     like.gfx.rotate(like.timer.getTime() * Math.PI * 2 * speed);
-     like.gfx.scale(size);
-     like.gfx.circle("fill", color1, [0, 0], 2);
-     // use the arc parameter to fill in a semicircle. Note that it's clockwise from {x:1, y:0}.
-     like.gfx.circle("fill", color2, [0, 0], 2, { arc: [Math.PI/2, Math.PI*3/2] });
-     like.gfx.circle("fill", color2, [0, -1], 1);
-     like.gfx.circle("fill", color1, [0, 1], 1);
-     like.gfx.circle("fill", color2, [0, 1], 1/3);
-     like.gfx.circle("fill", color1, [0, -1], 1/3);
-     like.gfx.pop();
+     like.gfx.withTransform(() => {
+       like.gfx.translate(pos);
+       like.gfx.rotate(like.timer.getTime() * Math.PI * 2 * speed);
+       like.gfx.scale(size);
+       like.gfx.circle("fill", color1, [0, 0], 2);
+       // use the arc parameter to fill in a semicircle. Note that it's clockwise from {x:1, y:0}.
+       like.gfx.circle("fill", color2, [0, 0], 2, { arc: [Math.PI/2, Math.PI*3/2] });
+       like.gfx.circle("fill", color2, [0, -1], 1);
+       like.gfx.circle("fill", color1, [0, 1], 1);
+       like.gfx.circle("fill", color2, [0, 1], 1/3);
+       like.gfx.circle("fill", color1, [0, -1], 1/3);
+     });
   },
 };
 

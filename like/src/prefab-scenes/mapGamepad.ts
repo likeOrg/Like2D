@@ -37,25 +37,25 @@ const drawCircButt = (pos: Vector2, size: number) => (like: Like, color: Color) 
   like.gfx.circle("fill", color, pos, size);
 
 const drawDpadPart = (rot: number) => (like: Like, color: Color) => {
-  like.gfx.push();
-  like.gfx.translate([2.5, 6]);
-  like.gfx.rotate(rot);
-  like.gfx.rectangle("fill", color, [0.5, -0.5, 1.3, 1]);
-  like.gfx.pop();
+  like.gfx.withTransform(() => {
+    like.gfx.translate([2.5, 6]);
+    like.gfx.rotate(rot);
+    like.gfx.rectangle("fill", color, [0.5, -0.5, 1.3, 1]);
+  });
 };
 
 const drawShoulder = (y: number, width: number, flip: boolean) => (like: Like, color: Color) => {
     const r = 0.8;
     const rectPos: Vector2 = [5-width, y];
     const circPos: Vector2 = [5-width-r, y];
-    like.gfx.push()
-    if (flip) {
-        like.gfx.translate([16, 0]);
-        like.gfx.scale([-1, 1]);
-    }
-    like.gfx.circle("fill", color, circPos, r, { arc: [Math.PI, Math.PI*3/2], center: false });
-    like.gfx.rectangle("fill", color, [...rectPos, width, r]);
-    like.gfx.pop();
+    like.gfx.withTransform(() => {
+        if (flip) {
+            like.gfx.translate([16, 0]);
+            like.gfx.scale([-1, 1]);
+        }
+        like.gfx.circle("fill", color, circPos, r, { arc: [Math.PI, Math.PI*3/2], center: false });
+        like.gfx.rectangle("fill", color, [...rectPos, width, r]);
+    });
 }
 
 // Buttons assume a centered resolution of 16x9px. Transforms exist for a reason lol.
