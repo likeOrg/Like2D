@@ -4,8 +4,6 @@
 
 **Named exports only** - No default exports. Every import is explicit.
 
-**Private Methods** - Prefix all non-API methods with `_`. Each module is named `ThingInternal`. Use `Public<T>` in like.ts to get `Thing`.
-
 **0-1 color range** - Colors use 0.0-1.0, not 0-255.
 
 **Seconds** - No milliseconds.
