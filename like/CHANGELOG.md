@@ -2,9 +2,11 @@
 
 ## [2.12.0] - UNRELEASED
 
+### Breaking Changes
+ - gfx functions no longer accept a single number as `origin`.
+
 ### Updates
- - **Better pixels** 
-   - Image smoothing is enabled only in native mode, and disabled in pixel mode
+ - **Better pixels**: Image smoothing is enabled only in native mode, and disabled in pixel mode
 
 ## [2.11.1] - 2026-03-28
 

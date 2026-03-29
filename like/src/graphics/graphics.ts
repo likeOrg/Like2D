@@ -51,7 +51,7 @@ export type DrawProps = ShapeProps & {
   quad?: Rectangle;
   r?: number;
   scale?: number | Vector2;
-  origin?: number | Vector2;
+  origin?: Vector2;
 };
 
 export type PrintProps = {
@@ -303,7 +303,6 @@ export class Graphics {
    * 
    * @remarks named "draw" because it draws anything _drawable_
    * in the long run.
-   * 
    
    * @param handle Image handle from newImage.
    * @param position Draw position.
@@ -318,20 +317,24 @@ export class Graphics {
     const element = handle.getElement();
     if (!element) return;
 
-    const [x, y] = position;
-    const { r = 0, scale = 1, origin = 0, quad } = props ?? {};
-    const [sx, sy] = typeof scale === "number" ? [scale, scale] : scale;
-    const [ox, oy] = typeof origin === "number" ? [origin, origin] : origin;
+    let {
+      r = 0,
+      scale = 1,
+      origin = [0, 0],
+      quad,
+    } = props ?? {};
+
+    origin = Vec2.sub([0, 0], origin);
 
     this.ctx.save();
-    this.ctx.translate(x, y);
+    this.translate(position);
     this.ctx.rotate(r);
-    this.ctx.scale(sx, sy);
+    this.scale(scale);
     if (quad) {
-      const [qx, qy, qw, qh] = quad;
-      this.ctx.drawImage(element, qx, qy, qw, qh, -ox, -oy, qw, qh);
+      const [,, qw, qh] = quad;
+      this.ctx.drawImage(element, ...quad, ...origin, qw, qh);
     } else {
-      this.ctx.drawImage(element, -ox, -oy);
+      this.ctx.drawImage(element, ...origin);
     }
     this.ctx.restore();
   }
