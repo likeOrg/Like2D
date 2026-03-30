@@ -42,7 +42,8 @@ export class Canvas {
             const rawPos: Vector2 = [ev.offsetX, ev.offsetY];
             const rawDelta: Vector2 = [ev.movementX, ev.movementY];
 
-            // Always use pixelart-style math for mouse coordinates
+            /* Recreation of object-fit */
+
             const csize: Vector2 = [
                 this.displayCanvas.clientWidth,
                 this.displayCanvas.clientHeight
@@ -190,8 +191,7 @@ export class Canvas {
     }
 
     /** 
-     * Called internally by the engine before
-     * rendering a frame.
+     * Trigered by `like:preDraw` 
      */
     private preDraw() {
         if (this.isNativeMode) {
@@ -217,7 +217,7 @@ export class Canvas {
         ctx.imageSmoothingEnabled = this.isNativeMode;
     }
 
-    /** Called every frame by the engine after drawing */
+    /** Triggered by `like:postDraw` */
     private postDraw() {
         // Always blit from render canvas to display canvas
         if (this.isNativeMode) {
@@ -247,13 +247,9 @@ export class Canvas {
     }
 
     /** @returns if size was changed.  */
-static setCanvasElemSize(canvas: LikeCanvasElement, newSize: Vector2): boolean {
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return false;
+    static setCanvasElemSize(canvas: LikeCanvasElement, newSize: Vector2): boolean {
         if (canvas.width === newSize[0] && canvas.height === newSize[1]) return false;
-
-        canvas.width = newSize[0];
-        canvas.height = newSize[1];
+        [canvas.width, canvas.height] = newSize;
         return true;
     }
 
