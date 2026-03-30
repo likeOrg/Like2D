@@ -117,7 +117,6 @@ const demoScene: Scene = {
     gfx.circle('fill', 'blue', center, 50);
     gfx.circle('line', 'yellow', center, 60);
     gfx.line('gray', [[200, 100], [350, 180]]);
-    gfx.polygon('fill', 'magenta', [[350, 100], [400, 150], [350, 200], [300, 150]]);
 
     const mousePos = mouse.getPosition();
     gfx.print('cyan', `Mouse: (${Math.round(mousePos[0])}, ${Math.round(mousePos[1])})`, [20, 180], { font: '16px sans-serif' });
@@ -162,6 +161,8 @@ const demoScene: Scene = {
        like.gfx.circle("fill", color2, [0, 1], 1/3);
        like.gfx.circle("fill", color1, [0, -1], 1/3);
      });
+
+    gfx.polygon('fill', 'magenta', [30, 30], [[350, 100], [400, 150], [350, 200], [300, 150]]);
   },
 };
 
