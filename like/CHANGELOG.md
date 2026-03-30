@@ -3,23 +3,24 @@
 ## [2.12.0] - UNRELEASED
 
 ### Breaking Changes
- - `like.setScene()` now requires an explicit `Scene | null` argument. Passing `null` clears the scene.
  - `like.input.setAction()` no longer has a default value for the `inputs` parameter. Use an explicit empty array `[]` to remove an action.
  - gfx functions no longer accept a single number as `origin`.
  - `r` field of gfx transforms is now `angle`.
  - Remove setClip -- Very incomplete, just use the canvas escape hatch for now.
- - Remove overly stateful and untested `setContext` -- replaced with `withRenderTarget`.
+ - Remove overly stateful `setContext` -- replaced with `withRenderTarget`.
+ - Removed redundant radii setting of circle drawing. Just use scale directly
+ - Added `position` arg to polygon drawing func.
 
 ### Added
  - **Scene Stack architecture**
- - [x] Add like.getScene()
- - [x] Add like.pushScene() and like.popScene()
- - `like.canvas.hasFocus`
+    - `like.getScene(index)` -- Get stack top or other index.
+    - `like.setScene(scene)` -- Now sets stack top
+    - `like.pushScene(scene, overlay: boolean)` -- Put a scene on top. `overlay` for pause screens etc.
  - All draw calls now support transforms (`angle`, `scale`, `origin`) in their props table.
+ - `like.canvas.hasFocus`
  - `polygon()` has a `translate` prop to offset the entire shape.
  - Expose escape-hatch context in `like.canvas.getContext()`
  - Add `withTransform` for lower-state transform abstraction.
- - 
 
 ### Updates
  - **Better pixels**: Image smoothing is enabled only in native mode, and disabled in pixel mode

@@ -63,11 +63,6 @@ export type PrintProps = {
   align?: CanvasTextAlign,
 } & TransformProps;
 
-export type PolygonProps = ShapeProps & {
-  translate?: Vector2;
-};
-
-
 function parseColor(color: Color): string {
   if (typeof color === "string") return color;
   const [r, g, b, a = 1] = color;
@@ -356,17 +351,17 @@ export class Graphics {
   polygon(
     mode: DrawMode,
     color: Color,
+    position: Vector2,
     points: Vector2[],
-    props?: PolygonProps,
+    props?: ShapeProps,
   ): void {
     if (points.length < 3) return;
     const c = applyColor(color);
-    const translate = props?.translate ?? [0, 0];
     this.ctx.save();
     if (mode === "line") {
       setStrokeProps(this.ctx, props);
     }
-    this.applyTransform(translate, props);
+    this.applyTransform(position, props);
     this.ctx.beginPath();
     const [[x0, y0], ...rest] = points;
     this.ctx.moveTo(x0, y0);
@@ -457,24 +452,35 @@ export class Graphics {
   }
 
   /**
-   * Temporarily switches the drawing context to another canvas.
+   * The idiomatic way to render to an external canvas.
+   * 
+   * Within this scope, the target canvas has changed.
+   * 
+   * Outside, it stays the same.
+   * 
    * @param canvas The canvas to draw to.
    * @param callback Functions that will be called while drawing to the target.
    */
   withRenderTarget(
-    canvas: HTMLCanvasElement,
-    callback: (ctx: CanvasRenderingContext2D) => void,
+    context: CanvasRenderingContext2D,
+    callback: () => void,
   ): void {
     const oldCtx = this.ctx;
-    const newCtx = canvas.getContext("2d")!;
-    this.ctx = newCtx;
-    callback(newCtx);
+    this.ctx = context;
+    callback();
     this.ctx = oldCtx;
   }
 
   /**
-   * Calls a function with its own state. Automatically saves and
-   * restores.
+   * _For Expressive Purposes_
+   * 
+   * A simple wrapper around push/pop (save/restore)
+   * that clearly allows a set of statements to have their
+   * own transform matrix.
+   * 
+   * In other words, any `scale`, `translate`, etc.
+   * performed in this block does not affect the
+   * outside world.
    * 
    * @param callback the drawing logic.
    */

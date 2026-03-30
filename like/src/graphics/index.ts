@@ -16,7 +16,6 @@ export type {
   ShapeProps,
   DrawProps,
   PrintProps,
-  PolygonProps,
 } from "./graphics";
 
 export type {
