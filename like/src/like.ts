@@ -42,9 +42,9 @@ export type LikeBase = {
   /** Graphics module: LOVE-style rendering, plus a pseudo-synchronous way to load images. */
   readonly gfx: Graphics;
 
-  /** I think you meant to type `canvas`. */
+  /** @private Use {@link canvas} instead. */
   window?: never;
-  /** Shortened to `like.gfx`. */
+  /** @private Use {@link gfx} instead. */
   graphics?: never;
 
   /**

@@ -8,7 +8,7 @@
     "preview": "npx serve dist",
     "dev": "concurrently \"npm run build:watch\" \"npm run serve:watch\"",
     "build:watch": "typedoc --options typedoc.json --watch",
-    "serve:watch": "browser-sync dist --watch --port 3000",
+    "serve:watch": "browser-sync . --watch --port 3000 --files 'dist/**/*, index.html'",
     "docs:generate": "typedoc --options typedoc.json",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
