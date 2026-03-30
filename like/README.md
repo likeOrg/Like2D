@@ -70,7 +70,7 @@ To try Like2D quickly, use this starter with
 hot reloading and a basic webpage.
 
 ```bash
-npx degit LikeOrg/Like2D/examples/starter my-game
+npx degit likeOrg/Like2D/examples/starter my-game
 ```
 
 ## Usage Example
@@ -144,7 +144,7 @@ LIKE's API is not the same as LOVE, but similar in spirit. Notable differences:
 
 [JSR](https://jsr.io/@like2d/like)
 
-[GitHub](https://github.com/LikeOrg/Like2D)
+[GitHub](https://github.com/likeOrg/Like2D)
 
 [Full Documentation](https://likeorg.github.io/Like2D/api/documents/README.html) 
 

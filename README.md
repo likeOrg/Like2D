@@ -33,7 +33,7 @@ The code base is intentionally kept as small and simple as possible, so you can 
 Clone a simple starter this way:
 
 ```bash
-npx degit LikeOrg/Like2D/examples/starter my-game
+npx degit likeOrg/Like2D/examples/starter my-game
 cd my-game
 npm install
 npm run dev
@@ -47,7 +47,7 @@ npm run dev
 
 [JSR](https://jsr.io/@like2d/like)
 
-[GitHub](https://github.com/LikeOrg/Like2D)
+[GitHub](https://github.com/likeOrg/Like2D)
 
 ## Why the Spade?
 
