@@ -63,7 +63,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/44100hertz/Like2D"
+    "url": "https://github.com/LikeOrg/Like2D"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

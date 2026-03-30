@@ -10,7 +10,7 @@
 
 **How to use a starter:**
 ```bash
-npx degit 44100hertz/Like2D/examples/starter my-game
+npx degit likeorg/Like2D/examples/starter my-game
 cd my-game
 npm install
 npm run dev
