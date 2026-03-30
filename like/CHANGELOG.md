@@ -2,6 +2,29 @@
 
 ## [2.12.0] - UNRELEASED
 
+### Breaking Changes
+ - `like.input.setAction()` no longer has a default value for the `inputs` parameter. Use an explicit empty array `[]` to remove an action.
+ - gfx functions no longer accept a single number as `origin`.
+ - `r` field of gfx transforms is now `angle`.
+ - Remove setClip -- Very incomplete, just use the canvas escape hatch for now.
+ - Remove overly stateful `setContext` -- replaced with `withRenderTarget`.
+ - Removed redundant radii setting of circle drawing. Just use scale directly
+ - Added `position` arg to polygon drawing func.
+
+### Added
+ - **Scene Stack architecture**
+    - `like.getScene(index)` -- Get stack top or other index.
+    - `like.setScene(scene)` -- Now sets stack top
+    - `like.pushScene(scene, overlay: boolean)` -- Put a scene on top. `overlay` for pause screens etc.
+ - All draw calls now support transforms (`angle`, `scale`, `origin`) in their props table.
+ - `like.canvas.hasFocus`
+ - `polygon()` has a `translate` prop to offset the entire shape.
+ - Expose escape-hatch context in `like.canvas.getContext()`
+ - Add `withTransform` for lower-state transform abstraction.
+
+### Updates
+ - **Better pixels**: Image smoothing is enabled only in native mode, and disabled in pixel mode
+
 ## [2.11.1] - 2026-03-28
 
 Document almost everything and [put up a website.](https://44100hertz.github.io/Like2D/api/documents/README.html)

@@ -27,6 +27,7 @@ export class Engine {
   private isRunning = false;
   private lastTime = 0;
   private abort = new AbortController();
+  private sceneStack: Scene[] = [];
 
   /**
    * The Like interface providing access to all engine subsystems.
@@ -36,9 +37,6 @@ export class Engine {
   constructor(private container: HTMLElement) {
     this.canvas = document.createElement('canvas') as LikeCanvasElement;
     const canvas = new Canvas(this.canvas, this.dispatch.bind(this) as any, this.abort.signal);
-    this.canvas.addEventListener("like:updateRenderTarget", (event) => {
-      this.like.gfx.setContext(event.detail.target.getContext("2d")!)
-    });
 
     this.container.appendChild(this.canvas);
 
@@ -48,7 +46,7 @@ export class Engine {
       abort: this.abort.signal,
     }
     
-    const gfx =  new Graphics(this.canvas.getContext('2d')!);
+    const gfx =  new Graphics(canvas.getContext());
     const audio = new Audio();
     const timer = new Timer(props);
     const keyboard = new Keyboard(props);
@@ -67,14 +65,28 @@ export class Engine {
       canvas,
       start: this.start.bind(this),
       dispose: this.dispose.bind(this),
-      setScene: (scene?: Scene) => {
-        if (scene) {
-          this.like.handleEvent = (event) => sceneDispatch(scene, this.like, event);
-          if (this.isRunning) this.dispatch("load", []);
-        } else {
-          this.like.handleEvent = undefined;
-        }
+
+      getScene: (pos = -1): Scene | undefined => {
+        return this.sceneStack.at(pos);
       },
+
+      pushScene: (scene: Scene, overlay: boolean) => {
+        this.sceneStack.push(scene);
+        this.refreshScene();
+      },
+
+      popScene: (): Scene | undefined => {
+        const s = this.sceneStack.pop();
+        this.refreshScene();
+        return s;
+      },
+
+      setScene: (scene: Scene) => {
+        const idx = Math.max(0, this.sceneStack.length - 1);
+        this.sceneStack[idx] = scene;
+        this.refreshScene();
+      },
+
       callOwnHandlers: (event: LikeEvent) => {
         if (event.type in this.like)
           (this.like as any)[event.type](...event.args)
@@ -84,6 +96,18 @@ export class Engine {
     window.addEventListener('focus', () => this.dispatch('focus', ['tab']));
     window.addEventListener('blur', () => this.dispatch('blur', ['tab']));
     this.canvas.addEventListener('focus', () => this.dispatch('focus', ['canvas']));
+  }
+
+  private refreshScene() {
+    const topScene = this.sceneStack.at(-1);
+    if (topScene) {
+      this.like.handleEvent = (event) => sceneDispatch(topScene, this.like, event);
+      if (this.isRunning) {
+        this.dispatch("load", []);
+      }
+    } else {
+      this.like.handleEvent = undefined;
+    }
   }
 
   private dispatch<K extends EventType>(type: K, args: EventMap[K]): void {

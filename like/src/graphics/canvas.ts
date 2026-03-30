@@ -12,15 +12,16 @@ export type CanvasSize = Vector2 | 'native';
  * A manager for the HTML canvas element, similar to `love.window`.
  * 
  * Controls game size / scaling -- both native and pixelart mode via {@link Canvas.setMode}, as well as fullscreen functions.
+ * 
+ * The canvas keeps two canvases: render and display. Each frame, it copies render to display before the canvas is presented.
+ * This allows for pixel-accurate scaling.
  */
 export class Canvas {
-    /** The canvas that we're drawing to with `like.gfx` functions.
-     * If it's the same as displayCanvas, we're in native mode.
-     * Otherwise, we're in pixelart mode, consisting of nearest -> linear scaling.
-    */
+    /** The canvas that we're drawing to with `like.gfx` functions.  */
     private renderCanvas: LikeCanvasElement;
 
     private resizeTimeoutId: any = 0;
+    private isNativeMode = true;
 
     constructor(
         /** The ultimately visible canvas in the browser */
@@ -31,47 +32,42 @@ export class Canvas {
         displayCanvas.tabIndex = 0;
         displayCanvas.style.width = '100%';
         displayCanvas.style.height = '100%';
-        this.renderCanvas = this.displayCanvas;
+        displayCanvas.style.objectFit = 'contain';
+        
+        // Always create a separate render canvas
+        this.renderCanvas = document.createElement('canvas') as LikeCanvasElement;
+        
         this.setMode('native');
 
         /** Only the canvas can really transform the mouse to the game size.
          * This hack sends an event for the mouse module to listen to.
          */
         this.displayCanvas.addEventListener('mousemove', (ev: MouseEvent) => {
-            let pos;
-            let delta;
             const rawPos: Vector2 = [ev.offsetX, ev.offsetY];
             const rawDelta: Vector2 = [ev.movementX, ev.movementY];
 
-            if (this.renderCanvas == this.displayCanvas) {
-                /* Native mode. */
-                pos = Vec2.mul(rawPos, window.devicePixelRatio ?? 1);
-                delta = Vec2.mul(rawDelta, window.devicePixelRatio ?? 1);
-            } else {
-                /* Pixelart mode. This math simulates object-fit: contain,
-                * which preserves aspect ratio.
-                */
-                const csize: Vector2 = [
-                    this.displayCanvas.clientWidth,
-                    this.displayCanvas.clientHeight
-                ];
-                /* Scale of both dimensions */
-                const scale: number = calcAspectFriendlyScale(this.getSize(), csize)
-                /* Upper-left corner */
-                const offset = Vec2.div(
-                    Vec2.sub(csize, Vec2.mul(this.getSize(), scale)),
-                    2,
-                );
-                pos = Vec2.div(
-                    Vec2.sub(rawPos, offset),
-                    scale
-                );
-                delta = Vec2.div(rawDelta, scale);
+            /* Recreation of object-fit */
 
-                /* Only handle mousemove events that are in bounds. */
-                if (!Rect.containsPoint(this.getRect(), pos)) {
-                    return;
-                }
+            const csize: Vector2 = [
+                this.displayCanvas.clientWidth,
+                this.displayCanvas.clientHeight
+            ];
+            /* Scale of both dimensions */
+            const scale: number = calcAspectFriendlyScale(this.getSize(), csize);
+            /* Upper-left corner */
+            const offset = Vec2.div(
+                Vec2.sub(csize, Vec2.mul(this.getSize(), scale)),
+                2,
+            );
+            const pos = Vec2.div(
+                Vec2.sub(rawPos, offset),
+                scale
+            );
+            const delta = Vec2.div(rawDelta, scale);
+
+            /* Only handle mousemove events that are in bounds. */
+            if (!Rect.containsPoint(this.getRect(), pos)) {
+                return;
             }
 
             this.displayCanvas.dispatchEvent(new CustomEvent('like:mousemoved', {
@@ -92,6 +88,15 @@ export class Canvas {
           this.postDraw.bind(this),
           { signal: this.abort },
         );
+    }
+
+    /**
+     * Get the canvas that graphics functions render to.
+     * This is separate from the display canvas; it is
+     * not visibly exposed but rather copied each frame.
+    */
+    getContext(): CanvasRenderingContext2D {
+        return this.renderCanvas.getContext('2d')!;
     }
 
     /** Get a unified canvas info object. */
@@ -120,27 +125,13 @@ export class Canvas {
      * @param flags optional options.
      */
     setMode(size: CanvasSize, flags: Partial<CanvasModeOptions> = {}) {
-        // set up sizing / render target
-        const prevRenderCanvas = this.renderCanvas;
-        if (size == 'native') {
-            this.displayCanvas.style.objectFit = 'fill';
-            this.renderCanvas = this.displayCanvas;
-        } else {
-            this.displayCanvas.style.objectFit = 'contain';
-            this.renderCanvas = document.createElement('canvas');
+        this.isNativeMode = size === 'native';
+        
+        if (size !== 'native') {
             const changed = Canvas.setCanvasElemSize(this.renderCanvas, size);
             if (changed) {
                 this.dispatchResize(size);
             }
-        }
-        if (prevRenderCanvas != this.renderCanvas) {
-            this.displayCanvas.dispatchEvent(
-              new CustomEvent("like:updateRenderTarget", {
-                detail: {
-                  target: this.renderCanvas,
-                },
-              }),
-            );
         }
 
         if ('fullscreen' in flags) {
@@ -182,6 +173,11 @@ export class Canvas {
         return this.displayCanvas === document.fullscreenElement;
     }
 
+    /** Does the canvas have focus? */
+    hasFocus(): boolean {
+        return document.activeElement === this.displayCanvas;
+    }
+
     /** Set fullscreen. */
     setFullscreen(fullscreen: boolean) {
         if (fullscreen) {
@@ -195,35 +191,40 @@ export class Canvas {
     }
 
     /** 
-     * Called internally by the engine before
-     * rendering a frame.
+     * Trigered by `like:preDraw` 
      */
     private preDraw() {
-        if (this.renderCanvas == this.displayCanvas) {
+        if (this.isNativeMode) {
+            // In native mode, renderCanvas tracks display size
             const realSize = this.getDisplayPixelSize();
-            if ((realSize[0] != this.displayCanvas.width ||
-              realSize[1] != this.displayCanvas.height) &&
+            if ((realSize[0] != this.renderCanvas.width ||
+              realSize[1] != this.renderCanvas.height) &&
               !this.resizeTimeoutId)
             {
               /** In native scaling mode, zooming and resizing the window cause us
                * to set canvas width and height every frame, which could cause
                * tons of canvas bitmap reallocations. So wait 1/4 second..
                */
-              Canvas.setCanvasElemSize(this.displayCanvas, realSize);
+              Canvas.setCanvasElemSize(this.renderCanvas, realSize);
               this.dispatchResize(realSize);
               this.resizeTimeoutId = setTimeout(() => { this.resizeTimeoutId = 0; }, 250);
             }
         }
-        this.renderCanvas.getContext('2d')!.resetTransform();
+        
+        const ctx = this.renderCanvas.getContext('2d')!
+        ctx.resetTransform();
+        // Enable smoothing in native mode, disable in pixelart mode
+        ctx.imageSmoothingEnabled = this.isNativeMode;
     }
 
-    /** Called every frame by the engine after drawing */
+    /** Triggered by `like:postDraw` */
     private postDraw() {
-        if (this.renderCanvas != this.displayCanvas) {
-            /* We're in pixelart mode,
-             * so set output canvas size to an ideal integer scale.
-             * No debounce: changes to integer ratio are infrequent.
-             */
+        // Always blit from render canvas to display canvas
+        if (this.isNativeMode) {
+            // In native mode, display canvas matches render canvas size
+            Canvas.setCanvasElemSize(this.displayCanvas, this.getSize());
+        } else {
+            // In pixelart mode, set output canvas size to an ideal integer scale
             Canvas.setCanvasElemSize(
                 this.displayCanvas,
                 Vec2.mul(
@@ -233,26 +234,22 @@ export class Canvas {
                     )
                 )
             );
-
-            // Copy the internal canvas to the visible one.
-            const ctx = this.displayCanvas.getContext('2d')!;
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(
-                this.renderCanvas,
-                0, 0, this.renderCanvas.width, this.renderCanvas.height,
-                0, 0, this.displayCanvas.width, this.displayCanvas.height,
-            );
         }
+
+        // Copy the render canvas to the visible one
+        const displayCtx = this.displayCanvas.getContext('2d')!;
+        displayCtx.imageSmoothingEnabled = false;
+        displayCtx.drawImage(
+            this.renderCanvas,
+            0, 0, this.renderCanvas.width, this.renderCanvas.height,
+            0, 0, this.displayCanvas.width, this.displayCanvas.height,
+        );
     }
 
     /** @returns if size was changed.  */
-static setCanvasElemSize(canvas: LikeCanvasElement, newSize: Vector2): boolean {
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return false;
+    static setCanvasElemSize(canvas: LikeCanvasElement, newSize: Vector2): boolean {
         if (canvas.width === newSize[0] && canvas.height === newSize[1]) return false;
-
-        canvas.width = newSize[0];
-        canvas.height = newSize[1];
+        [canvas.width, canvas.height] = newSize;
         return true;
     }
 

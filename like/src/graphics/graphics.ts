@@ -27,7 +27,7 @@
  * - Angles in radians, 0 is right, positive is clockwise
  */
 
-import { Vec2, type Vector2 } from "../math/vector2";
+import type { Vector2 } from "../math/vector2";
 import type { Rectangle } from "../math/rect";
 import { ImageHandle } from "./image";
 
@@ -40,26 +40,28 @@ export type DrawMode = "fill" | "line";
  */
 export type Color = [number, number, number, number?] | string;
 
+export type TransformProps = {
+  angle?: number;
+  scale?: number | Vector2;
+  origin?: Vector2;
+};
+
 export type ShapeProps = {
   lineWidth?: number;
   lineCap?: CanvasLineCap;
   lineJoin?: CanvasLineJoin;
   miterLimit?: number;
-};
+} & TransformProps;
 
 export type DrawProps = ShapeProps & {
   quad?: Rectangle;
-  r?: number;
-  scale?: number | Vector2;
-  origin?: number | Vector2;
 };
 
 export type PrintProps = {
   font?: string;
   width?: number,
   align?: CanvasTextAlign,
-};
-
+} & TransformProps;
 
 function parseColor(color: Color): string {
   if (typeof color === "string") return color;
@@ -125,18 +127,18 @@ function getFontHeight(ctx: CanvasRenderingContext2D): number {
  *   const pos = Vec2.div(like.canvas.getSize(), 2); // calc center of screen
  *   const speed = 0.5; // rotations per second
  * 
- *   like.gfx.push();
- *   like.gfx.translate(pos);
- *   like.gfx.rotate(like.timer.getTime() * Math.PI * 2.0 * speed);
- *   like.gfx.scale(size);
- *   like.gfx.circle("fill", color1, [0, 0], 2);
- *   // use the arc parameter to fill in a semicircle. Note that it's clockwise from {x:1, y:0}.
- *   like.gfx.circle("fill", color2, [0, 0], 2, { arc: [Math.PI/2, Math.PI*3/2] });
- *   like.gfx.circle("fill", color2, [0, -1], 1);
- *   like.gfx.circle("fill", color1, [0, 1], 1);
- *   like.gfx.circle("fill", color2, [0, 1], 1/3);
- *   like.gfx.circle("fill", color1, [0, -1], 1/3);
- *   like.gfx.pop();
+ *   like.gfx.withTransform(() => {
+ *     like.gfx.translate(pos);
+ *     like.gfx.rotate(like.timer.getTime() * Math.PI * 2.0 * speed);
+ *     like.gfx.scale(size);
+ *     like.gfx.circle("fill", color1, [0, 0], 2);
+ *     // use the arc parameter to fill in a semicircle. Note that it's clockwise from {x:1, y:0}.
+ *     like.gfx.circle("fill", color2, [0, 0], 2, { arc: [Math.PI/2, Math.PI*3/2] });
+ *     like.gfx.circle("fill", color2, [0, -1], 1);
+ *     like.gfx.circle("fill", color1, [0, 1], 1);
+ *     like.gfx.circle("fill", color2, [0, 1], 1/3);
+ *     like.gfx.circle("fill", color1, [0, -1], 1/3);
+ *   })
  * }
  * 
  * like.draw = (like: Like) => {
@@ -146,15 +148,6 @@ function getFontHeight(ctx: CanvasRenderingContext2D): number {
  */
 export class Graphics {
   constructor(private ctx: CanvasRenderingContext2D) {}
-
-  /**
-   * Set the 2d drawing context for graphics. 
-   * 
-   * Be aware that that `like` can set this value at any time.
-   */
-  setContext(ctx: CanvasRenderingContext2D) {
-    this.ctx = ctx;
-  }
 
   /**
    * Clears the canvas with a solid color.
@@ -179,14 +172,20 @@ export class Graphics {
     props?: ShapeProps,
   ): void {
     const c = applyColor(color);
+    this.ctx.save();
+    const [x, y, w, h] = rect;
+    if (mode === "line") {
+      setStrokeProps(this.ctx, props);
+    }
+    this.applyTransform([x, y], props);
     if (mode === "fill") {
       this.ctx.fillStyle = c;
-      this.ctx.fillRect(...rect);
+      this.ctx.fillRect(0, 0, w, h);
     } else {
-      setStrokeProps(this.ctx, props);
       this.ctx.strokeStyle = c;
-      this.ctx.strokeRect(...rect);
+      this.ctx.strokeRect(0, 0, w, h);
     }
+    this.ctx.restore();
   }
 
   /**
@@ -202,7 +201,7 @@ export class Graphics {
     mode: DrawMode,
     color: Color,
     position: Vector2,
-    radii: number | Vector2,
+    radius: number,
     props?: ShapeProps & {
       arc?: [number, number];
       center?: boolean;
@@ -210,20 +209,17 @@ export class Graphics {
   ): void {
     const center = (props && 'center' in props) ? props.center : true;
     const c = applyColor(color);
-    const size: Vector2 = typeof radii === "number" ? [radii, radii] : radii;
     const [startAngle, endAngle] = props?.arc ?? [0, Math.PI * 2];
-    if (!center) {
-      position = Vec2.add(position, size);
-    }
-
+    
     this.ctx.save();
-    this.ctx.translate(...position);
-    this.ctx.scale(...size);
+    this.applyTransform(position, props);
+    if (!center) {
+      this.ctx.translate(radius, radius);
+    }
     this.ctx.beginPath();
-    this.ctx.arc(0, 0, 1, startAngle, endAngle);
+    this.ctx.arc(0, 0, radius, startAngle, endAngle);
     if (mode == 'fill') this.ctx.lineTo(0, 0);
     this.ctx.closePath();
-    this.ctx.restore();
 
     if (mode === "fill") {
       this.ctx.fillStyle = c;
@@ -233,6 +229,7 @@ export class Graphics {
       this.ctx.strokeStyle = c;
       this.ctx.stroke();
     }
+    this.ctx.restore();
   }
 
   /**
@@ -279,10 +276,11 @@ export class Graphics {
     position: Vector2,
     props?: PrintProps,
   ): void {
-    const [x, y] = position;
     const { font = "16px sans-serif" } = props ?? {};
-    this.ctx.fillStyle = parseColor(color);
+    this.ctx.save();
+    this.applyTransform(position, props);
     this.ctx.font = font;
+    this.ctx.fillStyle = parseColor(color);
     this.ctx.textAlign = props?.align ?? "left";
     if (props && 'width' in props) {
       const { width } = props;
@@ -290,12 +288,13 @@ export class Graphics {
       const lineHeight = getFontHeight(this.ctx);
       this.ctx.textBaseline = "top";
       lines.forEach((line, i) => {
-        this.ctx.fillText(line, x, y + i * lineHeight, width);
+        this.ctx.fillText(line, 0, i * lineHeight, width);
       });
       this.ctx.textBaseline = "alphabetic";
     } else {
-      this.ctx.fillText(text, x, y);
+      this.ctx.fillText(text, 0, 0);
     }
+    this.ctx.restore();
   }
 
   /**
@@ -303,7 +302,6 @@ export class Graphics {
    * 
    * @remarks named "draw" because it draws anything _drawable_
    * in the long run.
-   * 
    
    * @param handle Image handle from newImage.
    * @param position Draw position.
@@ -318,27 +316,22 @@ export class Graphics {
     const element = handle.getElement();
     if (!element) return;
 
-    const [x, y] = position;
-    const { r = 0, scale = 1, origin = 0, quad } = props ?? {};
-    const [sx, sy] = typeof scale === "number" ? [scale, scale] : scale;
-    const [ox, oy] = typeof origin === "number" ? [origin, origin] : origin;
+    const { quad } = props ?? {};
 
     this.ctx.save();
-    this.ctx.translate(x, y);
-    this.ctx.rotate(r);
-    this.ctx.scale(sx, sy);
+    this.applyTransform(position, props);
     if (quad) {
-      const [qx, qy, qw, qh] = quad;
-      this.ctx.drawImage(element, qx, qy, qw, qh, -ox, -oy, qw, qh);
+      const [,, qw, qh] = quad;
+      this.ctx.drawImage(element, ...quad, 0, 0, qw, qh);
     } else {
-      this.ctx.drawImage(element, -ox, -oy);
+      this.ctx.drawImage(element, 0, 0);
     }
     this.ctx.restore();
   }
 
   /**
    * Loads an image from a path.
-   * Unlike built-in loading, this pretends to be synchronous.
+   * Unlike fetch, this pretends to be synchronous.
    
    * @param path Image file path.
    * @returns ImageHandle for use with draw.
@@ -348,37 +341,27 @@ export class Graphics {
   }
 
   /**
-   * Sets the clipping region.
-   
-   * @param rect Clipping rectangle, or full canvas if omitted.
-   */
-  clip(rect?: Rectangle): void {
-    this.ctx.beginPath();
-    if (rect) {
-      const [x, y, w, h] = rect;
-      this.ctx.rect(x, y, w, h);
-    } else {
-      this.ctx.rect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    }
-    this.ctx.clip();
-  }
-
-  /**
    * Draws a polygon.
-   
+    
    * @param mode Fill or line.
    * @param color Fill or stroke color.
    * @param points Array of [x, y] vertices.
-   * @param props Optional stroke properties.
+   * @param props Optional stroke and transform properties.
    */
   polygon(
     mode: DrawMode,
     color: Color,
+    position: Vector2,
     points: Vector2[],
     props?: ShapeProps,
   ): void {
     if (points.length < 3) return;
     const c = applyColor(color);
+    this.ctx.save();
+    if (mode === "line") {
+      setStrokeProps(this.ctx, props);
+    }
+    this.applyTransform(position, props);
     this.ctx.beginPath();
     const [[x0, y0], ...rest] = points;
     this.ctx.moveTo(x0, y0);
@@ -388,10 +371,10 @@ export class Graphics {
       this.ctx.fillStyle = c;
       this.ctx.fill();
     } else {
-      setStrokeProps(this.ctx, props);
       this.ctx.strokeStyle = c;
       this.ctx.stroke();
     }
+    this.ctx.restore();
   }
 
   /**
@@ -400,14 +383,32 @@ export class Graphics {
    * @param color Fill color.
    * @param pts Array of [x, y] positions.
    */
-  points(color: Color, pts: Vector2[]): void {
+  points(
+    color: Color,
+    pts: Vector2[],
+    props?: TransformProps,
+  ): void {
+    this.ctx.save();
+    this.applyTransform([0, 0], props);
     this.ctx.fillStyle = applyColor(color);
     pts.forEach(([x, y]) => this.ctx.fillRect(x, y, 1, 1));
+    this.ctx.restore();
+  }
+
+  private applyTransform(position: Vector2, props?: TransformProps): void {
+    const { angle = 0, scale = 1, origin = [0, 0] } = props ?? {};
+    this.ctx.translate(...position);
+    if (angle !== 0) this.ctx.rotate(angle);
+    if (scale !== 1) {
+      const [sx, sy] = typeof scale === "number" ? [scale, scale] : scale;
+      this.ctx.scale(sx, sy);
+    }
+    this.ctx.translate(-origin[0], -origin[1]);
   }
 
   /**
    * Saves canvas state.
-   
+    
    */
   push(): void {
     this.ctx.save();
@@ -448,5 +449,44 @@ export class Graphics {
   scale(factor: number | Vector2): void {
     const [sx, sy] = typeof factor === "number" ? [factor, factor] : factor;
     this.ctx.scale(sx, sy);
+  }
+
+  /**
+   * The idiomatic way to render to an external canvas.
+   * 
+   * Within this scope, the target canvas has changed.
+   * 
+   * Outside, it stays the same.
+   * 
+   * @param canvas The canvas to draw to.
+   * @param callback Functions that will be called while drawing to the target.
+   */
+  withRenderTarget(
+    context: CanvasRenderingContext2D,
+    callback: () => void,
+  ): void {
+    const oldCtx = this.ctx;
+    this.ctx = context;
+    callback();
+    this.ctx = oldCtx;
+  }
+
+  /**
+   * _For Expressive Purposes_
+   * 
+   * A simple wrapper around push/pop (save/restore)
+   * that clearly allows a set of statements to have their
+   * own transform matrix.
+   * 
+   * In other words, any `scale`, `translate`, etc.
+   * performed in this block does not affect the
+   * outside world.
+   * 
+   * @param callback the drawing logic.
+   */
+  withTransform(callback: () => void): void {
+    this.ctx.save();
+    callback();
+    this.ctx.restore();
   }
 };

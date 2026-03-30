@@ -4,7 +4,39 @@ import type { ImageHandle } from '../graphics/index';
 import { Vec2 } from '../math/vector2';
 import { Like } from '..';
 
-const LOGO = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCEtLSBDcmVhdGVkIHdpdGggSW5rc2NhcGUgKGh0dHA6Ly93d3cuaW5rc2NhcGUub3JnLykgLS0+Cjxzdmcgd2lkdGg9IjMwMG1tIiBoZWlnaHQ9IjEwNW1tIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAzMDAgMTA1IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogPHJlY3QgeD0iMTAiIHk9IjExLjIzIiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjgzLjU0NCIgZmlsbD0iI2U0ODA4MCIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjIiLz4KIDxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+CiAgPHJlY3QgeD0iOTcuNDg0IiB5PSIxMS4yMyIgd2lkdGg9IjUyLjUxNiIgaGVpZ2h0PSI0Ni4yMzciLz4KICA8cmVjdCB4PSIxNTAiIHk9IjExLjIzIiB3aWR0aD0iMzUuMDExIiBoZWlnaHQ9IjQ2LjIzNyIvPgogIDxyZWN0IHg9IjE4NS4wMSIgeT0iMTEuMjMiIHdpZHRoPSI1Mi41MTYiIGhlaWdodD0iNDYuMjM3Ii8+CiAgPHJlY3QgeD0iMjM3LjUzIiB5PSIxMS4yMyIgd2lkdGg9IjUyLjUxNiIgaGVpZ2h0PSI0Ni4yMzciLz4KIDwvZz4KIDxnPgogIDxyZWN0IHg9IjEzMi40OSIgeT0iMTEuMjMiIHdpZHRoPSIxNy41MDUiIGhlaWdodD0iMjcuNDYxIi8+CiAgPHJlY3QgeD0iMTUwIiB5PSIyOS4zMDIiIHdpZHRoPSI4Ljc1MjciIGhlaWdodD0iMTguNzc2Ii8+CiAgPHJlY3QgeD0iMTc2LjI2IiB5PSIyOS4zMDIiIHdpZHRoPSI4Ljc1MjciIGhlaWdodD0iMTguNzc2Ii8+CiA8L2c+CiA8cmVjdCB4PSIxNTAiIHk9IjExLjIzIiB3aWR0aD0iMTcuNTA1IiBoZWlnaHQ9IjguNjg0NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiA8cmVjdCB4PSIxNjcuNTEiIHk9IjExLjIzIiB3aWR0aD0iMTcuNTA1IiBoZWlnaHQ9IjguNjg0NSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDAwIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiA8Zz4KICA8cGF0aCBkPSJtMjM3LjUzIDM4LjY5MS0xNy41MDUtOS4zODgyIDE3LjUwNS0xOC4wNzN6Ii8+CiAgPHJlY3QgeD0iMjAyLjg4IiB5PSI0OC4wNzkiIHdpZHRoPSIxNi43NzIiIGhlaWdodD0iOS4zODgyIi8+CiAgPHJlY3QgeD0iMjcyLjU0IiB5PSIyMC4yNjYiIHdpZHRoPSIxNi43NzIiIGhlaWdodD0iOS4zODgyIi8+CiAgPHJlY3QgeD0iMjcyLjU0IiB5PSIzOC42OTEiIHdpZHRoPSIxNi43NzIiIGhlaWdodD0iOS4zODgyIi8+CiAgPHBhdGggZD0ibTIwMi41MiAyOS4zMDIgMC4zNjY4NS0xOC4wNzNoMTcuMTM5eiIvPgogPC9nPgogPHBhdGggZD0ibTY0LjA3OCAxLjAwNDItMzMuMzc1IDMzLjM3NS0wLjAxNzQzIDAuMDE3NGEyMy42MTIgMjMuNjEyIDAgMCAwIDAgMzMuMzkyIDIzLjYxMiAyMy42MTIgMCAwIDAgMzAuMDEyIDIuODAyMiAyMy42MTIgMjMuNjEyIDAgMCAxIDdlLTMgMC41NzAzNCAyMy42MTIgMjMuNjEyIDAgMCAxLTIzLjYxMiAyMy42MTJoNTMuOTdhMjMuNjEyIDIzLjYxMiAwIDAgMS0yMy42MTEtMjMuNjEyIDIzLjYxMiAyMy42MTIgMCAwIDEgN2UtMyAtMC41NzAzNCAyMy42MTIgMjMuNjEyIDAgMCAwIDMwLjAxMi0yLjgwMjkgMjMuNjEyIDIzLjYxMiAwIDAgMC02Ljg4ZS00IC0zMy4zOTJ6IiBmaWxsPSIjODBjM2U0IiBzdHJva2U9IiMwMDAiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KIDxnIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzAwMCIgc3Ryb2tlLXdpZHRoPSIuNSI+CiAgPGNpcmNsZSB0cmFuc2Zvcm09InJvdGF0ZSgxMzUpIiBjeD0iLTIwLjk4OCIgY3k9Ii05My4yNDMiIHI9IjIzLjYxMiIvPgogIDxjaXJjbGUgdHJhbnNmb3JtPSJyb3RhdGUoMTM1KSIgY3g9IjIuNjIzOCIgY3k9Ii02OS42MzIiIHI9IjIzLjYxMiIvPgogIDxjaXJjbGUgY3g9IjkxLjA2MiIgY3k9IjcxLjE2MSIgcj0iMjMuNjEyIi8+CiAgPGNpcmNsZSBjeD0iMzcuMDkzIiBjeT0iNzEuMTYxIiByPSIyMy42MTIiLz4KIDwvZz4KPC9zdmc+Cg=='
+const LOGO = 
+  'data:image/svg+xml;base64,' +
+  'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPCEtLSBDcmVhdGVkIHdpdGgg' +
+  'SW5rc2NhcGUgKGh0dHA6Ly93d3cuaW5rc2NhcGUub3JnLykgLS0+Cjxzdmcgd2lkdGg9IjI1Nm1t' +
+  'IiBoZWlnaHQ9Ijg1bW0iIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDI1NiA4NSIgeG1sbnM9' +
+  'Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KIDxyZWN0IHg9IjguNDk0OSIgeT0iMTQuODQx' +
+  'IiB3aWR0aD0iMjM5LjEzIiBoZWlnaHQ9IjYwLjMzNyIgcnk9IjE0LjM2OSIvPgogPHBhdGggZD0i' +
+  'bTQ5LjUxOSAyLjE5MzMtMjIuODQxIDIyLjg1NC0wLjAxMTkzIDAuMDExOTNhMTYuMTU5IDE2LjE2' +
+  'OCAwIDAgMCAwIDIyLjg2NiAxNi4xNTkgMTYuMTY4IDAgMCAwIDIwLjUzOSAxLjkxODkgMTYuMTU5' +
+  'IDE2LjE2OCAwIDAgMSAwLjAwNDggMC4zOTA1NSAxNi4xNTkgMTYuMTY4IDAgMCAxLTE2LjE1OSAx' +
+  'Ni4xNjloMzYuOTM1YTE2LjE1OSAxNi4xNjggMCAwIDEtMTYuMTU5LTE2LjE2OSAxNi4xNTkgMTYu' +
+  'MTY4IDAgMCAxIDAuMDA1NC0wLjM5MDU1IDE2LjE1OSAxNi4xNjggMCAwIDAgMjAuNTM5LTEuOTE5' +
+  'MyAxNi4xNTkgMTYuMTY4IDAgMCAwLTQuNzZlLTQgLTIyLjg2NnoiIGZpbGw9IiNiYTJiMmIiIHN0' +
+  'cm9rZT0iI2ZmY2Y0MiIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIgc3Ryb2tlLXdpZHRoPSIuNSIv' +
+  'PgogPGcgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZjZjQyIiBzdHJva2Utd2lkdGg9Ii41Ij4KICA8' +
+  'Y2lyY2xlIHRyYW5zZm9ybT0ibWF0cml4KC0uNzA2OSAuNzA3MzEgLS43MDY5IC0uNzA3MzEgMCAw' +
+  'KSIgY3g9Ii0xNy4zMTEiIGN5PSItNjguOTAzIiByPSIxNi4xNjQiLz4KICA8Y2lyY2xlIHRyYW5z' +
+  'Zm9ybT0ibWF0cml4KC0uNzA2OSAuNzA3MzEgLS43MDY5IC0uNzA3MzEgMCAwKSIgY3g9Ii0xLjE0' +
+  'NyIgY3k9Ii01Mi43MzkiIHI9IjE2LjE2NCIvPgogIDxlbGxpcHNlIGN4PSI2Ny45ODYiIGN5PSI1' +
+  'MC4yMzQiIHJ4PSIxNi4xNTkiIHJ5PSIxNi4xNjgiLz4KICA8ZWxsaXBzZSBjeD0iMzEuMDUxIiBj' +
+  'eT0iNTAuMjM0IiByeD0iMTYuMTU5IiByeT0iMTYuMTY4Ii8+CiA8L2c+CiA8ZyBmaWxsPSIjZmZj' +
+  'ZjQyIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iLjUiPgogIDxwYXRoIGQ9Im04OS45MjQg' +
+  'MjEuOTc5djM2LjM3NWgyOC4xMDN2LTE0Ljc3MWgtMTIuMDI5di0yMS42MDR6Ii8+CiAgPHBhdGgg' +
+  'ZD0ibTEyNy45NCAyNC42Nzh2Ny42NjVoNS4wNDUzdjExLjA0NmgtNS4wNDUzdjE0Ljk2NmgyNC43' +
+  'NDh2LTE0Ljk2NmgtNS4wNDh2LTExLjA0Nmg1LjA0OHYtNy42NjVoLTEyLjM3N3oiLz4KICA8cGF0' +
+  'aCBkPSJtMjA2Ljg5IDIyLjA4OHYzNi4zNzVoMzMuNzM5di0xMy4xNzloLTEwLjkwOHYtNS4wNjc4' +
+  'aDEwLjkwOHYtNy4xMDloLTEwLjkwOHYtNS4wNjloMTAuOTA4di01Ljk1MDR6Ii8+CiAgPHBhdGgg' +
+  'ZD0ibTE2Mi43NiAxOS43N3YzOC42OTNoMTIuMjgxdi01LjA2OWgxMS41MjN2NS4wNjloMTIuMjgx' +
+  'czEuMDQ4Mi0xNS4xMTUtMi4yMDEyLTE4Ljc2OGMtMy40NzA0LTMuOTAxOC02LjM3MjMtNC41MjA5' +
+  'LTYuMzcyMy00LjUyMDlsOC44ODQ4LTEzLjA4N2gtMTMuNjE1bC02LjQxMDggMTMuMDIyLTQuMzQy' +
+  'MyAwLjAzNjk4LThlLTMgLTE1LjM3N3oiLz4KICA8ZWxsaXBzZSBjeD0iMTMyLjk5IiBjeT0iMTYu' +
+  'MTIyIiByeD0iNi4wMjIxIiByeT0iNi4xMTgyIi8+CiAgPGVsbGlwc2UgY3g9IjE0Ny40OSIgY3k9' +
+  'IjE2LjEyMiIgcng9IjYuMDIyMSIgcnk9IjYuMTE4MiIvPgogPC9nPgo8L3N2Zz4K';
 
 /**
  * ## Why
@@ -28,7 +60,7 @@ const LOGO = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0i
  * like.draw = function () { ... }
  *
  * // Set up the start screen
- * like.setScene(new StartScreen())
+ * like.pushScene(new StartScreen())
  * like.start();
  * ```
  * 
@@ -57,7 +89,6 @@ export class StartScreen implements Scene {
   private logo!: ImageHandle;
 
   constructor(
-    private next: Scene,
     private onDraw?: (like: Like) => void
   ) { }
 
@@ -69,14 +100,23 @@ export class StartScreen implements Scene {
     if (this.onDraw) {
       this.onDraw(like);
     } else if (this.logo.isReady()) {
-      like.gfx.clear([0.05, 0.05, 0.08, 1]);
+      like.gfx.clear([0.5, 0, 0.5, 1]);
       const winSize = like.canvas.getSize();
       const scale = (winSize[0] * 0.5) / this.logo.size[0];
-      like.gfx.draw(this.logo, Vec2.div(winSize, 2), { scale, origin: Vec2.div(this.logo.size, 2) });
+      like.gfx.draw(this.logo, Vec2.div(winSize, 2), {
+        scale,
+        origin: Vec2.div(this.logo.size, 2),
+      });
+      like.gfx.print(
+        [1, 1, 0, 0.5 + 0.5 * Math.sin(like.timer.getTime() * 3)],
+        "▶️ click to start ◀️",
+        Vec2.mul(winSize, [0.5, 0.8]),
+        { align: "center", font: "25px sans" },
+      );
     }
   }
 
   mousepressed(like: Like): void {
-    like.setScene(this.next);
+    like.popScene();
   }
 }

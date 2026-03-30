@@ -2,12 +2,11 @@ import { createLike, Like, } from "like";
 import { ImageHandle } from "like/graphics";
 import { AudioSource } from "like/audio";
 import { CanvasSize } from "like/graphics";
-import { MapGamepad, } from "like/prefab-scenes";
 import { Vec2 } from "like/math";
 import { Scene } from "like/scene";
-import { buttonSetPS1 } from "like/prefab-scenes";
+import { MapGamepad, StartScreen, buttonSetPS1 } from "like/prefab-scenes";
 
-let pepperImage: ImageHandle | null = null;
+let pepperImage: ImageHandle;
 let audioSource: AudioSource | null = null;
 
 const player = {
@@ -26,8 +25,7 @@ let scaleIndex = 0;
 const container = document.getElementById('game-container')!;
 const like = createLike(container);
 
-let demoScene: Scene;
-demoScene = {
+const demoScene: Scene = {
   load(like: Like) {
     like.canvas.setMode(scales[0]);
     pepperImage = like.gfx.newImage('pepper.png');
@@ -92,14 +90,18 @@ demoScene = {
   gamepadpressed: (_ignore, ...args) => console.log(args),
 
   gamepadconnected: (like, index) => {
-    like.setScene(new MapGamepad({buttons: buttonSetPS1, stickCount: 2}, index, demoScene));
+    like.pushScene(new MapGamepad({buttons: buttonSetPS1, stickCount: 2}, index), true);
   },
 
   draw(like: Like) {
-
     const { timer, mouse, gamepad, gfx } = like;
+
+
     gfx.clear([0.1, 0.1, 0.15, 1]);
+
+    gfx.draw(pepperImage, like.mouse.getPosition(), { origin: [15, 15], scale: 1});
     const canvasSize = like.canvas.getMode().size;
+
     const center = Vec2.mul(canvasSize, 0.5);
     const [w, h] = canvasSize;
 
@@ -115,15 +117,6 @@ demoScene = {
     gfx.circle('fill', 'blue', center, 50);
     gfx.circle('line', 'yellow', center, 60);
     gfx.line('gray', [[200, 100], [350, 180]]);
-    gfx.polygon('fill', 'magenta', [[350, 100], [400, 150], [350, 200], [300, 150]]);
-
-    if (pepperImage?.isReady()) {
-      gfx.push()
-      gfx.rotate(timer.getTime())
-      gfx.draw(pepperImage, [380, 220]);
-      gfx.draw(pepperImage, [420, 220], { scale: 0.5 });
-      gfx.pop()
-    }
 
     const mousePos = mouse.getPosition();
     gfx.print('cyan', `Mouse: (${Math.round(mousePos[0])}, ${Math.round(mousePos[1])})`, [20, 180], { font: '16px sans-serif' });
@@ -156,18 +149,20 @@ demoScene = {
      const pos = Vec2.div(like.canvas.getSize(), 2);
      const speed = 0.5;
 
-     like.gfx.push();
-     like.gfx.translate(pos);
-     like.gfx.rotate(like.timer.getTime() * Math.PI * 2 * speed);
-     like.gfx.scale(size);
-     like.gfx.circle("fill", color1, [0, 0], 2);
-     // use the arc parameter to fill in a semicircle. Note that it's clockwise from {x:1, y:0}.
-     like.gfx.circle("fill", color2, [0, 0], 2, { arc: [Math.PI/2, Math.PI*3/2] });
-     like.gfx.circle("fill", color2, [0, -1], 1);
-     like.gfx.circle("fill", color1, [0, 1], 1);
-     like.gfx.circle("fill", color2, [0, 1], 1/3);
-     like.gfx.circle("fill", color1, [0, -1], 1/3);
-     like.gfx.pop();
+     like.gfx.withTransform(() => {
+       like.gfx.translate(pos);
+       like.gfx.rotate(like.timer.getTime() * Math.PI * 2 * speed);
+       like.gfx.scale(size);
+       like.gfx.circle("fill", color1, [0, 0], 2);
+       // use the arc parameter to fill in a semicircle. Note that it's clockwise from {x:1, y:0}.
+       like.gfx.circle("fill", color2, [0, 0], 2, { arc: [Math.PI/2, Math.PI*3/2] });
+       like.gfx.circle("fill", color2, [0, -1], 1);
+       like.gfx.circle("fill", color1, [0, 1], 1);
+       like.gfx.circle("fill", color2, [0, 1], 1/3);
+       like.gfx.circle("fill", color1, [0, -1], 1/3);
+     });
+
+    gfx.polygon('fill', 'magenta', [30, 30], [[350, 100], [400, 150], [350, 200], [300, 150]]);
   },
 };
 
@@ -175,6 +170,7 @@ document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
   like.canvas.setFullscreen(true);
 });
 
-like.setScene(demoScene);
+like.pushScene(demoScene, false);
+like.pushScene(new StartScreen(), false);
 
 await like.start();
