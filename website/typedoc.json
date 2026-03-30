@@ -8,6 +8,7 @@
     "../like/src/math/index.ts",
     "../like/src/prefab-scenes/index.ts"
   ],
+  "useTsLinkResolution": true,
   "projectDocuments": ["../like/README.md"],
   "tsconfig": "../like/tsconfig.json",
   "out": "./dist/api",

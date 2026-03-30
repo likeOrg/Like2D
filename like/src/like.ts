@@ -20,13 +20,12 @@ export type Callbacks = {
   [K in EventType]?: Callback<K>;
 };
 
-/**
- * The main Like instance.
- * Use this object much how you would the `love` object in Love2D.
- * This is the interface returned by {@link createLike}.
+/** 
+ * The main modules and builtins of `like`, aside from {@link EventMap | optional callbacks}.
+ * @interface
  */
-export type Like = Callbacks & {
-  /** Handle a pool of pseudo-synchronous audio sources with global volume control and more. */
+export type LikeBase = {
+  /** Handle a pool of audio sources with global volume control and more. */
   readonly audio: Audio;
   /** Misc. time functions, including sleeping the game. ZZZ */
   readonly timer: Timer;
@@ -86,7 +85,7 @@ export type Like = Callbacks & {
    * 
    * Equivalent to `popScene` + `pushScene`.
    * 
-   * Use {@link popScene} to clear away the current scene,
+    * Use {@link index.Like | popScene} to clear away the current scene,
    * and to possibly revert to callback mode.
    */
   setScene(scene: Scene): void;
@@ -103,7 +102,7 @@ export type Like = Callbacks & {
    * LIKE's runtime is built around calling handleEvent.
    * 
    * This function recieves all events. If set to undefined,
-   * {@link callOwnHandlers} is the default behavior.
+    * {@link index.Like | Like.callOwnHandlers} is the default behavior.
    * 
    * Otherwise, you can really customize LIKE by setting this
    * to a custom handler.
@@ -121,3 +120,12 @@ export type Like = Callbacks & {
    */
   callOwnHandlers(event: LikeEvent): void;
 }
+
+/**
+ * The main Like instance.
+ * Use this object much how you would the `love` object in Love2D.
+ * This is the interface returned by {@link createLike}.
+ * 
+ * Check out all the {@link EventMap | callbacks}.
+ */
+export type Like = Callbacks & LikeBase;

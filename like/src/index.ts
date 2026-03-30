@@ -7,15 +7,13 @@
  * Here are the top-level events, modules, and the scene system.
  * 
  * See {@link createLike} to get started.
- * 
- * @module like
  */
 
 
 import { Engine } from './engine';
 import type { Like } from './like';
 
-export type { Like, TopLevelEventHandler, Callbacks, Callback } from './like';
+export type { Like, LikeBase, TopLevelEventHandler, Callbacks, Callback } from './like';
 export type { LikeEvent, EventType, EventMap, LikeCanvasElement, Dispatcher, LikeCanvasEventMap, LikeKeyboardEvent } from './events';
 export type { Scene } from './scene';
 export type { EngineProps } from './engine';

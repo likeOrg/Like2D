@@ -194,7 +194,7 @@ export class Graphics {
    * @param mode Fill or line.
    * @param color Fill or stroke color.
    * @param position Center position.
-   * @param radii Radius (number) or [rx, ry] for ellipse.
+   * @param radius
    * @param props Optional arc, center, and stroke properties. Center is true by default.
    */
   circle(
@@ -458,7 +458,7 @@ export class Graphics {
    * 
    * Outside, it stays the same.
    * 
-   * @param canvas The canvas to draw to.
+   * @param context The context to call when drawing.
    * @param callback Functions that will be called while drawing to the target.
    */
   withRenderTarget(

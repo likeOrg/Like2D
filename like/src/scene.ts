@@ -20,9 +20,9 @@ import type { Like } from './like';
  * 
  * There is a stack of scenes for state management and/or overlays.
  * 
- * Use {@link Like.pushScene} and {@link Like.popScene} to manage the stack.
+ * Use {@link LikeBase.pushScene | pushScene} and {@link LikeBase.popScene | Like.popScene} to manage the stack.
  * 
- * {@link like.setScene} Sets the top of the stack only, replacing the current scene if any.
+ * {@link LikeBase.setScene | setScene} Sets the top of the stack only, replacing the current scene if any.
  * 
  * ## Quick Start
  *
@@ -47,7 +47,7 @@ import type { Like } from './like';
  * like.pushScene(new MagicalGrowingRectangle(), false);
  * ```
  * 
- * To get back to global callbacks, just use {@link Like.popScene}
+ * To get back to global callbacks, just use {@link index.Like | Like.popScene}
  *
  * ## Scene Lifecycle
  * 
@@ -122,6 +122,8 @@ import type { Like } from './like';
  * The only technical difference between overlay and
  * opaque is whether or not the scene we've pushed
  * on top of stays loaded.
+ * 
+ * @interface
  * 
  */
 
