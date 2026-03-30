@@ -62,7 +62,7 @@ export type Pair<T> = [T, T];
  * #### Squaring each element of a Vector2
  * ```ts
  * const squareVec2 = Vec2.map(a: number => a**2);
- * squareVec2([6, 7]) // returns [36, 42]
+ * squareVec2([6, 7]) // returns [36, 49]
  * // one in one line...
  * Vec2.map(a: number => a**2)([6, 7]);
  * ```
