@@ -2,7 +2,7 @@
 
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
-<svg width="256mm" height="85mm" version="1.1" viewBox="0 0 256 85" xmlns="http://www.w3.org/2000/svg">
+<svg version="1.1" viewBox="0 0 256 85" xmlns="http://www.w3.org/2000/svg">
  <rect x="8.4949" y="14.841" width="239.13" height="60.337" ry="14.369"/>
  <path d="m49.519 2.1933-22.841 22.854-0.01193 0.01193a16.159 16.168 0 0 0 0 22.866 16.159 16.168 0 0 0 20.539 1.9189 16.159 16.168 0 0 1 0.0048 0.39055 16.159 16.168 0 0 1-16.159 16.169h36.935a16.159 16.168 0 0 1-16.159-16.169 16.159 16.168 0 0 1 0.0054-0.39055 16.159 16.168 0 0 0 20.539-1.9193 16.159 16.168 0 0 0-4.76e-4 -22.866z" fill="#ba2b2b" stroke="#ffcf42" stroke-linejoin="round" stroke-width=".5"/>
  <g fill="none" stroke="#ffcf42" stroke-width=".5">
