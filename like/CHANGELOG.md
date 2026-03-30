@@ -1,6 +1,6 @@
 # Changelog
 
-## [2.12.0] - UNRELEASED
+## [2.12.0] - 2026-03-30
 
 ### Breaking Changes
  - `like.input.setAction()` no longer has a default value for the `inputs` parameter. Use an explicit empty array `[]` to remove an action.
