@@ -12,6 +12,9 @@ export type CanvasSize = Vector2 | 'native';
  * A manager for the HTML canvas element, similar to `love.window`.
  * 
  * Controls game size / scaling -- both native and pixelart mode via {@link Canvas.setMode}, as well as fullscreen functions.
+ * 
+ * The canvas keeps two canvases: render and display. Each frame, it copies render to display before the canvas is presented.
+ * This allows for pixel-accurate scaling.
  */
 export class Canvas {
     /** The canvas that we're drawing to with `like.gfx` functions.  */
@@ -29,6 +32,7 @@ export class Canvas {
         displayCanvas.tabIndex = 0;
         displayCanvas.style.width = '100%';
         displayCanvas.style.height = '100%';
+        displayCanvas.style.objectFit = 'contain';
         
         // Always create a separate render canvas
         this.renderCanvas = document.createElement('canvas') as LikeCanvasElement;
@@ -123,11 +127,7 @@ export class Canvas {
     setMode(size: CanvasSize, flags: Partial<CanvasModeOptions> = {}) {
         this.isNativeMode = size === 'native';
         
-        if (size === 'native') {
-            this.displayCanvas.style.objectFit = 'fill';
-            // In native mode, renderCanvas size tracks display size (set in preDraw)
-        } else {
-            this.displayCanvas.style.objectFit = 'contain';
+        if (size !== 'native') {
             const changed = Canvas.setCanvasElemSize(this.renderCanvas, size);
             if (changed) {
                 this.dispatchResize(size);
