@@ -35,7 +35,7 @@ h1, h2, h3 { font-family: 'Quicksand', sans-serif; }
     padding: 40px;
     flex: 1;
     border: 32px solid transparent;
-    border-image: url("public/border.svg") 378 fill / 30mm / 32px repeat;
+    border-image: url("border.svg") 378 fill / 30mm / 32px repeat;
     border-image-outset: 32px;
     margin: 32px;
 }
@@ -65,7 +65,7 @@ h1, h2, h3 { font-family: 'Quicksand', sans-serif; }
 
 .features-wrapper {
     border: 32px solid transparent;
-    border-image: url("public/border.svg") 378 fill / 30mm / 32px repeat;
+    border-image: url("border.svg") 378 fill / 30mm / 32px repeat;
     border-image-outset: 32px;
     margin: 32px;
 }
@@ -90,7 +90,7 @@ h1, h2, h3 { font-family: 'Quicksand', sans-serif; }
 
 .code-container {
     border: 32px solid transparent;
-    border-image: url('./public/border.svg') 378 fill / 30mm / 32px repeat;
+    border-image: url('border.svg') 378 fill / 30mm / 32px repeat;
     border-image-outset: 32px;
     margin: 32px;
     background: rgba(0,0,0,0.5);

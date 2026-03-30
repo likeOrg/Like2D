@@ -11,7 +11,7 @@
   "useTsLinkResolution": true,
   "projectDocuments": ["../like/README.md"],
   "tsconfig": "../like/tsconfig.json",
-  "out": "./dist/api",
+  "out": "./public/api",
   "excludeExternals": true,
   "excludePrivate": true,
   "excludeProtected": true,
