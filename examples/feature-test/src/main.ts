@@ -90,7 +90,7 @@ const demoScene: Scene = {
   gamepadpressed: (_ignore, ...args) => console.log(args),
 
   gamepadconnected: (like, index) => {
-    like.pushScene(new MapGamepad({buttons: buttonSetPS1, stickCount: 2}, index));
+    like.pushScene(new MapGamepad({buttons: buttonSetPS1, stickCount: 2}, index), true);
   },
 
   draw(like: Like) {
@@ -170,7 +170,7 @@ document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
   like.canvas.setFullscreen(true);
 });
 
-like.pushScene(demoScene);
-like.pushScene(new StartScreen());
+like.pushScene(demoScene, false);
+like.pushScene(new StartScreen(), false);
 
 await like.start();
