@@ -70,7 +70,7 @@ export class Engine {
         return this.sceneStack.at(pos);
       },
 
-      pushScene: (scene: Scene, overlay: boolean) => {
+      pushScene: (scene: Scene, _overlay: boolean) => {
         this.sceneStack.push(scene);
         this.refreshScene();
       },
