@@ -62,8 +62,12 @@ export type Like = Callbacks & {
 
   /** 
    * Push a scene to the scene stack.
+   * 
+   * If the engine is running, this is the new running scene replacing the old one.
+   * 
+   * @param overlay is for forwards compat with scene unloading. Set overlay = true for things like pause screens, otherwise false.
    */
-  pushScene(scene: Scene): void
+  pushScene(scene: Scene, overlay: boolean): void
 
   /**
    * Pop the current scene off the stack.
