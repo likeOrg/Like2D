@@ -93,6 +93,9 @@ function map2x2<I, O>(
       : [op(a[0], b), op(a[1], b)];
 }
 
+/** 
+ * The full library of {@link Vector2} functions. 
+*/
 export const Vec2 = {
   /**
    * Turn a unary function into a pair-wise unary function.

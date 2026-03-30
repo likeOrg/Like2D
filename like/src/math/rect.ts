@@ -43,6 +43,7 @@ import { Vec2, type Vector2 } from '../math/vector2';
  * */
 export type Rectangle = [number, number, number, number];
 
+/** The full library of {@link Rectangle} functions. */
 export const Rect = {
   fromPoints(a: Vector2, b: Vector2): Rectangle {
     const minX = Math.min(a[0], b[0]);

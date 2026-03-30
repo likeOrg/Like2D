@@ -183,13 +183,13 @@ export class Mouse {
    * Avoid binding the `ESC` key in captured mode. This will exit the capture and
    * reset mode to default.
    * 
-   * ### Note on `pos` vs `delta`
-   * Event {@link index.EventMap.mousemoved} passes both `pos` and `delta` args.
-   * 
-   * Though the emulated cursor in locked mode
-   * (locked mode doesn't natively track absolute position)
-   * may be stuck on canvas edges, the `delta` field always
-   * represents mouse movement, even against edges.
+ * ### Note on `pos` vs `delta`
+ * Event {@link index.EventMap.mousemoved} passes both `pos` and `delta` args.
+ * 
+ * Though the emulated cursor in locked mode
+ * (locked mode doesn't natively track absolute position)
+ * may be stuck on canvas edges, the `delta` field always
+ * represents mouse movement, even against edges.
    */
   setMode(mode: MouseSetMode) {
     this.lockPointer(mode.lock);

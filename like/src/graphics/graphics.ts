@@ -5,7 +5,7 @@
  * # Graphics Module
  * 
  * A wrapper around browser Canvas.
- * In standard usage `like.gfx` gives a {@link BoundGraphics} object with a canvas already on it.
+ * In standard usage `like.gfx` gives a {@link Graphics} object with a canvas already on it.
  * So, you can for example call `like.gfx.rectangle('fill', 'green', [10, 10, 30, 30])`
  * 
  * ## State Isolation

@@ -47,7 +47,7 @@ import type { Like } from './like';
  * like.pushScene(new MagicalGrowingRectangle(), false);
  * ```
  * 
- * To get back to global callbacks, just use {@link index.Like | Like.popScene}
+ * To get back to global callbacks, just use {@link Like.popScene | like.popScene}
  *
  * ## Scene Lifecycle
  * 
