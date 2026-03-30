@@ -18,12 +18,7 @@ import type { Like } from './like';
  * 
  * ## The scene stack
  * 
- * There is a stack of scenes for state management.
- * 
- * You might assume that the purpose of a scene stack is
- * visual. Actually, the example `composing scenes` below is a
- * cleaner pattern to achieve that. You can still use {@link Like.getScene}
- * if you really want to propogate events to the parent scene.
+ * There is a stack of scenes for state management and/or overlays.
  * 
  * Use {@link Like.pushScene} and {@link Like.popScene} to manage the stack.
  * 
@@ -49,7 +44,7 @@ import type { Like } from './like';
  *   }
  * }
  * 
- * like.pushScene(new MagicalGrowingRectangle());
+ * like.pushScene(new MagicalGrowingRectangle(), false);
  * ```
  * 
  * To get back to global callbacks, just use {@link Like.popScene}
@@ -91,11 +86,43 @@ import type { Like } from './like';
  *   ...
  * }
  * 
- * like.pushScene(new UI(new Game()))
+ * like.pushScene(new UI(new Game()), false)
  * ```
  * 
  * Composing scenes lets you filter events, layer game elements,
  * and more. Don't sleep on it.
+ * 
+ * The main advance of composing scenes versus the stack-overlay
+ * technique is that the parent scene knows about its child.
+ * Because there's a **known interface**, the two scenes
+ * can communicate.
+ * 
+ * This makes it perfect for reusable UI,
+ * level editors, debug viewers, and more.
+ * 
+ * ## Overlay scenes
+ * 
+ * You might assume that the purpose of a scene stack is
+ * visual: first push the BG, then the FG, etc.
+ * 
+ * Actually, composing scenes (above) is a
+ * better pattern for that, since it's both explicit
+ * _and_ the parent can have a known interface on its child.
+ * Here, the **upper** scene only knows that the
+ * **lower** scene _is_ a scene.
+ * 
+ * That's the tradeoff. Overlay scenes are good for things
+ * like pause screens or gamepad overlays. Anything where
+ * the upper doesn't care _what_ the lower is, and where
+ * the upper scene should be easily addable/removable.
+ * 
+ * Using `like.getScene(-2)`, the overlay scene can see
+ * the lower scene and choose how to propagate events.
+ * 
+ * The only technical difference between overlay and
+ * opaque is whether or not the scene we've pushed
+ * on top of stays loaded.
+ * 
  */
 
 export type Scene = {
