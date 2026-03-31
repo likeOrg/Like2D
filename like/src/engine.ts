@@ -8,7 +8,7 @@ import { Graphics } from './graphics/graphics';
 import type { LikeEvent, EventType, EventMap, Dispatcher, LikeCanvasElement } from './events';
 import type { Like } from './like';
 import { Canvas } from './graphics/canvas';
-import { Scene, sceneDispatch } from './scene';
+import { Scene, sceneDispatch, SceneFactory } from './scene';
 
 /** @private */
 export type EngineDispatcher = Dispatcher<EventType>;
@@ -19,6 +19,12 @@ export type EngineProps<T extends keyof EventMap> = {
   dispatch: Dispatcher<T>,
 }
 
+/** For robust lifecycle, scenes now use  */
+type SceneEntry = {
+  instance: Scene,
+  factory: SceneFactory,
+};
+
 /** @private */
 export class Engine {
   /** The canvas on which we bind all events. Not always the same canvas
@@ -27,7 +33,7 @@ export class Engine {
   private isRunning = false;
   private lastTime = 0;
   private abort = new AbortController();
-  private sceneStack: Scene[] = [];
+  private sceneStack: SceneEntry[] = [];
 
   /**
    * The Like interface providing access to all engine subsystems.
@@ -67,24 +73,24 @@ export class Engine {
       dispose: this.dispose.bind(this),
 
       getScene: (pos = -1): Scene | undefined => {
-        return this.sceneStack.at(pos);
+        return this.sceneStack.at(pos)?.instance;
       },
 
-      pushScene: (scene: Scene, _overlay: boolean) => {
-        this.sceneStack.push(scene);
-        this.refreshScene();
+      pushScene: (scene: Scene | SceneFactory, _overlay: boolean) => {
+        this.sceneStack.push(this.loadScene(scene));
+        this.updateHandleEvent();
       },
 
       popScene: (): Scene | undefined => {
-        const s = this.sceneStack.pop();
-        this.refreshScene();
-        return s;
+        const top = this.sceneStack.pop();
+        this.updateHandleEvent();
+        return top?.instance;
       },
 
-      setScene: (scene: Scene) => {
+      setScene: (scene: Scene | SceneFactory) => {
         const idx = Math.max(0, this.sceneStack.length - 1);
-        this.sceneStack[idx] = scene;
-        this.refreshScene();
+        this.sceneStack[idx] = this.loadScene(scene);
+        this.updateHandleEvent();
       },
 
       callOwnHandlers: (event: LikeEvent) => {
@@ -98,13 +104,24 @@ export class Engine {
     this.canvas.addEventListener('focus', () => this.dispatch('focus', ['canvas']));
   }
 
-  private refreshScene() {
+  /** A helper for allowing us to continue using the old pattern. */
+  private loadScene(s: Scene | SceneFactory): SceneEntry {
+    return (typeof s == 'function')
+      ? { factory: s, instance: s(this.like) }
+      : {
+        factory: (_like: Like) => {
+          if (this.isRunning) this.dispatch('load', []);
+          return s;
+        },
+        instance: s,
+      };
+  }
+
+  private updateHandleEvent() {
     const topScene = this.sceneStack.at(-1);
     if (topScene) {
-      this.like.handleEvent = (event) => sceneDispatch(topScene, this.like, event);
-      if (this.isRunning) {
-        this.dispatch("load", []);
-      }
+      this.like.handleEvent = (event) =>
+        sceneDispatch(topScene.instance, this.like, event);
     } else {
       this.like.handleEvent = undefined;
     }

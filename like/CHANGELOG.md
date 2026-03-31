@@ -1,5 +1,93 @@
 # Changelog
 
+## [2.13.0] - 2026-03-31
+
+### Breaking Changes
+
+#### Scene factory pattern
+
+The scene lifecycle of constructor-load-destructor is _tired_.
+
+Using resources shouldn't force us to choose between null-checking every single resource before use, versus assuming they're non-null and crashing out.
+
+It shouldn't involve the boilerplate of doing deallocations that the garbage
+collector should be doing.
+
+Therefore, LÏKE has decided to use a factory pattern for scenes.
+
+What was once idiomatically:
+```typescript
+class MyScene extends Scene {
+  someImage?: ImageHandle;
+  
+  constructor(private path: string) {}
+  
+  load(like) {
+    this.someImage = like.gfx.newImage(this.path);
+  }
+  
+  draw(like) {
+    like.gfx.draw(this.someImage);
+  }
+  
+  actionpressed(like, action) { ... }
+};
+```
+is now:
+```typescript
+const createMyScene: SceneFactory = (path: string) => (like: Like) => {
+
+  const someImage = like.gfx.newImage(path);
+
+  return {
+    draw() {
+      like.gfx.draw(someImage);
+    }
+    
+    actionPressed(action) { ... }
+  }
+}
+```
+or even more boldly:
+```typescript
+const createMyScene: SceneFactory = (path: string) => (like: Like) => ({
+    someImage: like.gfx.newImage(path);
+    draw() {
+      like.gfx.draw(this.someImage);
+    }
+    actionPressed(action) { ... }
+})
+```
+
+It's also simpler when adopting scenes for the first time. When converting from a callback to a scene pattern, we no longer have to add `like` as the first argument of every callback. Instead, we can use this pattern:
+```javascript
+// before...
+like = createLike(document.body);
+
+like.update = function (dt) {
+  foo();
+}
+// or
+like.draw = () => { bar(); }
+
+// after
+like = createLike(document.body);
+
+const createScene = (like) => {
+  const myScene = {}
+  myScene.update = function (dt) {
+    foo();
+  }
+  myScene.draw = () => { bar(); }
+  return myScene;
+}
+
+like.setScene(createScene)
+```
+For the vast majority of cases, this is as simple as `s/^like\./myScene./` plus some wrapping.
+
+Because the LÏKE userbase is nonexistant at the moment, I am implementing this change _without backwards compat_. If you're crying out in pain right now, let me know and I'll consider writing a wrapper around old-style scenes.
+
 ## [2.12.0] - 2026-03-30
 
 ### Breaking Changes

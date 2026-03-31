@@ -139,6 +139,8 @@ export type Scene = {
   handleEvent?(like: Like, event: LikeEvent): void;
 };
 
+export type SceneFactory = (like: Like) => Scene;
+
 /**
  * Used to call a scene's own handlers like `update` or `draw`,
  * typically at the end of handleEvent
