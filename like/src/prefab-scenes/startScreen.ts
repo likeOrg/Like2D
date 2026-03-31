@@ -93,6 +93,7 @@ export class StartScreen implements Scene {
   ) { }
 
   load(like: Like): void {
+    like.mouse.setMode({lock: false, scrollBlock: false});
     this.logo = like.gfx.newImage(LOGO);
   }
 

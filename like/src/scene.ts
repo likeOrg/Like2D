@@ -57,6 +57,12 @@ import type { Like } from './like';
  * 2. Scene's `load` callback fires immediately
  * 3. `update` and `draw` begin on next frame
  * 4. Scene receives input events as they occur
+ * 
+ * However, make sure to configure your scene in the `load` function using {@link Mouse.setMode} and {@link LikeCanvas.setMode}.
+ * 
+ * Consider your action bindings and gamepad -- have they been set up yet?
+ * 
+ * And of course, consider firing {@link Audio.stopAll}.
  *
  * ## Composing scenes
  * 
