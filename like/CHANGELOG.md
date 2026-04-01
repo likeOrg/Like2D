@@ -117,6 +117,10 @@ For the vast majority of cases, this is as simple as `s/^like\./myScene./` plus 
 
 We are implementing this change _without backwards compat_. If you're crying out in pain right now, let me know and I'll consider writing a wrapper around old-style scenes.
 
+### Additions
+ - `like.quit` / `sceneInstance.quit` callback added for cleanup
+ - `sceneInstance.load` called every time a scene enters the stack top
+
 ## [2.12.0] - 2026-03-30
 
 ### Breaking Changes

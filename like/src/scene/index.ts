@@ -233,10 +233,33 @@ export type SceneEx<S extends SceneInstance> =
  *
  * See {@link Scene} for usage.
  */
-export type SceneInstance = LikeHandlers;
+export type SceneInstance = LikeHandlers & {
+  /**
+   * Called when a scene is started or resumed (pop after a push w/o unload).
+   * Prefer to initialize in the scene constructor.
+   *
+   * Use case: This secene does a push without unload because we want to preserve
+   * its state, but we unload a few large assets before doing the push. When
+   * upper scene is popped, `load` fires so we can get those assets back.
+   *
+   * (Same signature as the one in {@link LikeHandlers}, just redeclared for docs)
+   */
+  load?: () => void;
+
+  /**
+   * Called when a scene is pushed with unload, or popped off.
+   *
+   * Use case: We want to clear out any native event handlers or global resource
+   * allocations (LÏKE has neither, but maybe you do?) in case another scene
+   * kicks this one off the stack.
+   *
+   * (Same signature as the one in {@link LikeHandlers}, just redeclared for docs)
+   */
+  quit?: () => void;
+};
 
 type SceneEntry = {
-  instance: SceneInstance,
+  instance: SceneInstance | undefined,
   factory: Scene,
 };
 
@@ -286,12 +309,19 @@ export class SceneManager {
    * Set the current scene at the top of the scene stack.
    * If the stack is empty, push it onto the stack.
    *
-   * Equivalent to `popScene` + `pushScene`.
+   * The calling scene will always have `dispose` called.
    *
    * Set cannot clear the current scene; for that use {@link pop}.
    */
   set(scene: Scene) {
     const idx = Math.max(0, this.scenes.length - 1);
+    const top = this.scenes.at(-1);
+    if (top) {
+      likeDispatch(top.instance!, {
+        type: 'dispose', args: [], timestamp: this.like.timer.getTime()
+      });
+    }
+
     this.scenes[idx] = { instance: scene(this.like, this), factory: scene };
   }
 
@@ -318,7 +348,16 @@ export class SceneManager {
    * See {@link Scene} for more detail -- while stacking is good for certain
    * things, you're likely looking for Scene Composition.
    */
-  push(scene: Scene, _unload: boolean): void {
+  push(scene: Scene, unload: boolean): void {
+    if (unload) {
+      const top = this.scenes.at(-1);
+      if (top) {
+        likeDispatch(top.instance!, {
+          type: 'dispose', args: [], timestamp: this.like.timer.getTime()
+        });
+        top.instance = undefined;
+      }
+    }
     this.scenes.push({ instance: scene(this.like, this), factory: scene });
   }
 
@@ -335,8 +374,17 @@ export class SceneManager {
    * ```
    */
   pop(): Scene | undefined {
-    const top = this.scenes.pop();
-    return top?.factory;
+    const oldTop = this.scenes.pop();
+    const top = this.scenes.at(-1);
+    if (top) {
+      if (!top.instance) {
+        top.instance = top.factory(this.like, this);
+      }
+      likeDispatch(top.instance, {
+        type: 'load', args: [], timestamp: this.like.timer.getTime()
+      });
+    }
+    return oldTop?.factory;
   }
 
 

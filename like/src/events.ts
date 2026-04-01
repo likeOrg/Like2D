@@ -11,6 +11,15 @@ export type LikeEventHandlers = {
   /** Game initialization. Called once before the first frame. */
   load: () => void;
 
+  /**
+   * Game deinit. Called when like is disposed.
+   *
+   * Use case: you're using native event handlers or global resource
+   * allocations that need to be cleared out to avoid memory leaks,
+   * regardless of what called like.dispose().
+   */
+  quit: () => void;
+
   /** Frame update. dt is delta time in seconds (time since last frame). */
   update: (dt: number) => void;
 

@@ -114,6 +114,7 @@ export class Engine {
    * Clean up all resources and stop the engine.
    */
   dispose(): void {
+    this.dispatch('quit', []);
     this.isRunning = false;
     this.abort.abort();
   }
