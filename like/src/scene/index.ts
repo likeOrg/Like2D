@@ -1,74 +1,27 @@
 /**
- *  @module scene
- */
-
-import { likeDispatch } from '../engine';
-import { LikeEvent } from '../events';
-import type { LikeEventHandlers, Like, } from '../like';
-
-/**
- * A scene instance is just an object with event handlers. It's kind of like
- * the `like` object but without the modules -- just the event handling
- * callbacks.
+ * Scenes are a modular component of LÏKE based on setting `like.handleEvent`.
+ * The scene system is simple and powerful, once understood.
  *
- * ## Creating scenes
+ * For devs using the built-in callback pattern, they're an easy way
+ * to stack functionality on to the current project such as
+ * gamepad mapping or debug overlays.
  *
- * Scenes are created via a factory function that receives the `like` object
- * and returns a scene instance with event handlers.
+ * For multi-scene games, they codify a common state-management pattern based
+ * on switching between (or nesting) event handler callbacks. It's
+ * a lot better than switch-casing on each handler, or manually setting/clearing
+ * handler functions on each transition.
  *
- * ```typescript
- * const myScene = (options: { speed: number }): Scene =>
- *   (like: Like, scenes: SceneManager) => {
- *     // Resources loaded here are available via closure
- *     const playerImage = like.gfx.newImage('player.png');
- *     let x = 0, y = 0;
- *
- *     return {
- *       update(dt) {
- *         x += options.speed * dt;
- *       },
- *       draw() {
- *         like.gfx.draw(playerImage, [x, y]);
- *       }
- *     };
- *   };
- *
- * const sceneMan = new SceneManager(like);
- * sceneMan.push(myScene({ speed: 100 }))
- * ```
- *
- * Note that the SceneManager sets {@link Like.handleEvent | like.handleEvent}.
- * To get rid of scene functionality entirely, simply set it back to default.
- * ```typescript
- * like.handleEvent = like.callOwnHandlers;
- * ```
- *
- * ## Converting from Callbacks
- *
- * When converting from global callbacks to a scene:
- *
- * ```typescript
- * // Before (callbacks)
- * like.update = function(dt) { player.update(dt); }
- * like.draw = () => { player.draw(like.gfx); }
- *
- * // After (scene)
- * like.setScene((like) => {
- *   const scene = {}
- *     like.update function (dt) => { player.update(dt); },
- *     like.draw = () => { player.draw(like.gfx); }
- *   };
- *   return scene;
- * });
- * ```
+ * Using scenes for your game also replaces the need to pass around `like`
+ * or `sceneManager` wherever it is used.
  *
  * ## The Scene Stack
  *
  * There is a stack of scenes for state management and/or overlays.
  *
- * Use {@link LikeBase.pushScene | pushScene} and {@link LikeBase.popScene | Like.popScene} to manage the stack.
+ * For graph-based scene management, just use {@link SceneManager.set} which
+ * switches out the stack top.
  *
- * {@link LikeBase.setScene | setScene} Sets the top of the stack only, replacing the current scene if any.
+ * For a stack, use {@link SceneManager.push} and {@link SceneManager.pop}.
  *
  * ## Composing scenes
  *
@@ -76,7 +29,11 @@ import type { LikeEventHandlers, Like, } from '../like';
  * So, you could layer them like this, for example:
  *
  * ```typescript
- * const createUI = (game: Scene): SceneFactory => (like) => ({
+ * interface UiButtonHandler extends SceneInstance {
+ *   handleButton(name: string) => void;
+ * }
+ *
+ * const createUI = (game: UiButtonHandler): Scene => (like) => ({
  *   handleEvent(event) {
  *     // Block mouse events in order to create a top bar.
  *     const mouseY = like.mouse.getPosition()[1];
@@ -91,9 +48,9 @@ import type { LikeEventHandlers, Like, } from '../like';
  *   }
  * });
  *
- * const createGame = (): SceneFactory => (like) => ({ ... });
+ * const createGame = (): Scene => (like, scene) => ({ ... });
  *
- * like.pushScene(createUI(createGame()));
+ * like.pushScene(createUI(createGame);
  * ```
  *
  * The main advance of composing scenes versus the stack-overlay
@@ -127,22 +84,150 @@ import type { LikeEventHandlers, Like, } from '../like';
  * opaque is whether or not the scene we've pushed
  * on top of stays loaded.
  *
- * @interface
  *
+ * Get started: {@link SceneManager}
+ *
+ * Make your own scene: {@link SceneInstance}
+ *
+ * Check out built-in utility scenes:
+ *  - {@link scene/prefab/mapGamepad}
+ *  - {@link scene/prefab/startScreen}
+ *
+ * @module scene
  */
-export type SceneInstance = LikeEventHandlers;
+
+import { likeDispatch } from '../engine';
+import { LikeEvent } from '../events';
+import type { Like, LikeHandlers, } from '../like';
 
 /**
- * Just called "Scene" for simplicity's sake,
- * this is actually a generator for a {@link SceneInstance}.
+ * ## Creating your own scenes
+ *
+ * Scenes are a factory function that receives `Like` and `SceneManager`
+ * and returns a {@link LikeHandlers | scene instance with event handlers}.
+ *
+ * ## Examples
+ *
+ * Minimal usage:
+ * ```typescript
+ * const gameOver: Scene = (like, scenes) => ({
+ *     titleCard: like.gfx.newImage(path);
+ *     spawnTime: like.timer.getTime();
+ *     draw() {
+ *       // draw 'game over' over the parent scene
+ *       like.gfx.draw(this.titleCard);
+ *       scenes.get(-2)?.draw();
+ *     }
+ *     update() {
+ *       // back to title screen after 3 seconds
+         // (assuming title screen is using callback pattern)
+ *       if (like.timer.getTime() > spawnTime + 3) {
+ *         while(scenes.pop());
+ *       }
+ *     }
+ * })
+ * ```
+ *
+ * For configurable scenes, it is reccommended to use a function
+ * that returns a Scene.
+ * ```typescript
+ * const myScene = (options: { speed: number }): Scene =>
+ *   (like: Like, scenes: SceneManager) => {
+ *
+ *     const playerImage = like.gfx.newImage('player.png');
+ *     let x = 0, y = 0;
+ *
+ *     return {
+ *       update(dt) {
+ *         x += options.speed * dt;
+ *       },
+ *       draw() {
+ *         like.gfx.draw(playerImage, [x, y]);
+ *       }
+ *       mousepressed() {
+ *         // exit this scene when user clicks
+ *         scene.pop();
+ *       }
+ *     };
+ *   };
+ * ```
+ *
+ * Of course, a class pattern is also possible.
+ * ```typescript
+ * class ThingDoer extends SceneInstance {
+ *   constructor(like, scenes) {...}
+ *   ...
+ * }
+ *
+ * const thingDoerScene: Scene =
+ *   (like, scenes) => new ThingDoer(like, scenes);
+ * ```
+ * Or a configurable class:
+ * ```typescript
+ * class ThingDoer extends SceneInstance {
+ *   constructor(like, scenes, options) {...}
+ *   ...
+ * }
+ *
+ * const thingDoerScene = (options): Scene =>
+ *   (like, scenes) => new ThingDoer(like, scenes, options);
+ * ```
+ *
+ * ## Converting from Callbacks
+ *
+ * When converting from global callbacks to a scene:
+ *
+ * ```typescript
+ * // Before (callbacks)
+ * like.update = function(dt) { player.update(dt); }
+ * like.draw = () => { player.draw(like.gfx); }
+ *
+ * // After (scene)
+ * scenes.set((like, scenes) => {
+ *   const scene: SceneInstance = {}
+ *   scene.update = function (dt) { player.update(dt); },
+ *   scene.draw = () => { player.draw(like.gfx); }
+ *   return scene;
+ * });
+ * ```
+ *
  */
 export type Scene = (like: Like, scenes: SceneManager) => SceneInstance;
+
+/**
+ * A scene instance is just an object with event handlers. It's
+ * the `like` object but without the modules -- just the event handling
+ * callbacks.
+ *
+ * See {@link Scene} for usage.
+ */
+export type SceneInstance = LikeHandlers;
 
 type SceneEntry = {
   instance: SceneInstance,
   factory: Scene,
 };
 
+/**
+ * Scenemanager is the entry point for the LÏKE scene system.
+ * Without it, there are no scene functions; it's entirely modular.
+ *
+ * Usage:
+ * ```typescript
+ * const like = createLike(document.body);
+ * const sceneMan = new SceneManager(like);
+ * sceneMan.push(myScene)
+ * ```
+ *
+ * To learn how to manage scenes, see {@link scene | module documentation}
+ *
+ * Note that the SceneManager sets {@link LikeHandlers.handleEvent | like.handleEvent}.
+ * To get rid of scene functionality entirely, simply set it back to default.
+ * ```typescript
+ * like.handleEvent = like.callOwnHandlers;
+ * ```
+ * Otherwise, the `SceneManager` stays allocated even if the scene stack was cleared.
+ */
 export class SceneManager {
   private scenes: SceneEntry[] = [];
 
@@ -166,10 +251,7 @@ export class SceneManager {
    *
    * Equivalent to `popScene` + `pushScene`.
    *
-   * Use {@link index.Like | popScene} to clear away the current scene,
-   * and to possibly revert to callback mode.
-   *
-   * The scene is created via a factory function. See {@link pushScene} for details.
+   * Set cannot clear the current scene; for that use {@link pop}.
    */
   set(scene: Scene) {
     const idx = Math.max(0, this.scenes.length - 1);
@@ -179,27 +261,27 @@ export class SceneManager {
   /**
    * Push a scene to the scene stack and run it.
    *
-   * If a scene calls `pushScene(nextScene, true)`, it will be unloaded
-   * and re-constructed upon the parent scene calling `like.popScene'.
+   * @param scene A function that creates and returns a scene instance, which is just event handlers.
+   * @param _unload
+   *
+   * If a scene calls `scenes.push(nextScene, true)`, it will be unloaded
+   * and re-constructed upon the parent scene calling `scenes.pop()`.
    * Good for resource-intensive
    * scenes or ones that rely heavily on their lifecycle. If you do want
    * the lower scene to know what happened in the upper, (i.e. overworld
    * updating with a battle), consider using scene composition or
    * using localStorage to track persistent game state.
    *
-   * If this scene calls `like.pushScene(nextScene, false)`, it will stay loaded:
+   * If this scene calls `scenes.push(nextScene, false)`, it will stay loaded:
    * this means when we pop its parent, it will simply continue running. Assets
    * will stay loaded in.
    *
-   * Further, with unload=false the upper scene now has the ability to reference
-   * the instance that called `pushScene` and call down to it in a generic way
-   * via `like.getScene(-2)`
+   * Further, with unload enabled the upper scene now has the ability to reference
+   * the instance that called `scene.push` and call down to it in a generic way
+   * via `scene.get(-2)`
    *
-   * See {@link Scene} for more detail -- while stacking is good for certain
+   * See {@link SceneInstance} for more detail -- while stacking is good for certain
    * things, you're likely looking for Scene Composition.
-   *
-   * @param scene A function that creates and returns a scene instance, which is just event handlers.
-   * @param unload Set to true, and the current scene (before pushing) will unload.
    */
   push(scene: Scene, _unload: boolean): void {
     this.scenes.push({ instance: scene(this.like, this), factory: scene });
@@ -223,7 +305,7 @@ export class SceneManager {
   }
 
 
-  handleEvent(event: LikeEvent) {
+  private handleEvent(event: LikeEvent) {
     const top = this.scenes.at(-1)?.instance;
     if (top) {
       likeDispatch(top, event);

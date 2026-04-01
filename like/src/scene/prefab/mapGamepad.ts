@@ -1,3 +1,21 @@
+/**
+ * An automagical gamepad mapper.
+ *
+ * ```ts
+ * like.gamepadconnected = (index) =>
+ *   scenes.push(mapGamepad({ buttons: buttonSetGBA, sticks: 0 }), index)
+ * ```
+ *
+ * Add this to your codebase and activating a gamepad causes a button mapping screen to pop up.
+ * It will request to map any buttons not already covered by the automapping database.
+ *
+ * If you're wondering what `scenes` refers to, check out {@link SceneManager} to
+ * get started.
+ *
+ * Note: many browsers only fire gamepadconnected on first button press, so always writing "P2: press any button" is a fine idea.
+ * @module scene/prefab/mapGamepad
+ */
+
 import type { Scene, SceneManager } from "../";
 import type { Like } from "../..";
 import type { Color, PrintProps } from "../../graphics";
@@ -97,19 +115,7 @@ export type MapMode = {
   stickCount: number;
 };
 
-/**
- * An automagical gamepad mapper.
- * 
- * ```ts
- * like.gamepadconnected = (index) =>
- *   like.pushScene(createMapGamepad({ buttons: buttonSetGBA, sticks: 0 }), index)
- * ```
- * 
- * Add this to your codebase and activating a gamepad causes a button mapping screen to pop up.
- * It will request to map any buttons not already covered by the automapping database.
- * 
- * Note: many browsers do this on first button press, so always writing "P2: press any button" is a fine idea.
- */
+/**  The gamepad mapping scene factory. Call this and pass it into {@link SceneManager.push} */
 export const mapGamepad = (
   mapMode: MapMode,
   targetPad: number,

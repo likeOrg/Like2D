@@ -6,7 +6,9 @@
     "../like/src/audio/index.ts",
     "../like/src/timer/index.ts",
     "../like/src/math/index.ts",
-    "../like/src/prefab-scenes/index.ts"
+    "../like/src/scene/index.ts",
+    "../like/src/scene/prefab/mapGamepad.ts",
+    "../like/src/scene/prefab/startScreen.ts"
   ],
   "useTsLinkResolution": true,
   "projectDocuments": ["../like/README.md"],

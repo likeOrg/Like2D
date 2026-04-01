@@ -5,17 +5,17 @@ import { Keyboard } from './input/keyboard';
 import { Mouse } from './input/mouse';
 import { Gamepad } from './input/gamepad';
 import { Graphics } from './graphics/graphics';
-import type { LikeEvent, EventType, EventMap, Dispatcher, LikeCanvasElement } from './events';
-import { type Like, LikeEventHandlers } from './like';
+import type { LikeEvent, LikeEventHandlers, Dispatcher, LikeCanvasElement } from './events';
+import { LikeHandlers, type Like } from './like';
 import { Canvas } from './graphics/canvas';
 
 /** @private */
-export type EngineDispatcher = Dispatcher<EventType>;
+export type EngineDispatcher = Dispatcher<keyof LikeEventHandlers>;
 /** @private */
-export type EngineProps<T extends keyof EventMap> = {
+export type EngineProps<K extends keyof LikeEventHandlers> = {
   canvas: LikeCanvasElement,
   abort: AbortSignal,
-  dispatch: Dispatcher<T>,
+  dispatch: Dispatcher<K>,
 }
 
 /** @private */
@@ -38,7 +38,7 @@ export class Engine {
 
     this.container.appendChild(this.canvas);
 
-    const props: EngineProps<keyof EventMap> = {
+    const props: EngineProps<keyof LikeEventHandlers> = {
       canvas: this.canvas,
       dispatch: this.dispatch.bind(this),
       abort: this.abort.signal,
@@ -63,7 +63,6 @@ export class Engine {
       canvas,
       start: this.start.bind(this),
       dispose: this.dispose.bind(this),
-      handleEvent: (ev) => callOwnHandlers(this.like, ev),
       callOwnHandlers: (ev) => callOwnHandlers(this.like, ev),
     };
 
@@ -72,7 +71,10 @@ export class Engine {
     this.canvas.addEventListener('focus', () => this.dispatch('focus', ['canvas']));
   }
 
-  private dispatch<K extends EventType>(type: K, args: EventMap[K]): void {
+  private dispatch<K extends keyof LikeEventHandlers>(
+    type: K,
+    args: Parameters<LikeEventHandlers[K]>): void
+  {
     const event = { type, args, timestamp: this.like.timer.getTime() } as LikeEvent;
     likeDispatch(this.like, event);
   }
@@ -117,7 +119,7 @@ export class Engine {
   }
 }
 
-export function likeDispatch(obj: LikeEventHandlers, event: LikeEvent) {
+export function likeDispatch(obj: LikeHandlers, event: LikeEvent) {
   if (obj.handleEvent) {
     obj.handleEvent(event);
   } else {
@@ -126,11 +128,12 @@ export function likeDispatch(obj: LikeEventHandlers, event: LikeEvent) {
 }
 
 /**
- * Allows us to call event handlers on any object with them.
- * Typically used at the end of a custom {@link Like.handleEvent | like.handleEvent}
- * in order to propogate an event normally after processing it.
+ * Call event handlers from an event. For example, an event with `.type = update, .args = [dt]`
+ * translates to calling `obj.draw(dt)`.
+ *
+ * Typically used at the end of a custom {@link LikeHandlers.handleEvent | handleEvent}.
  */
-export function callOwnHandlers(obj: LikeEventHandlers, event: LikeEvent) {
+export function callOwnHandlers(obj: LikeHandlers, event: LikeEvent) {
   if (event.type in obj)
     (obj as any)[event.type](...event.args)
 }

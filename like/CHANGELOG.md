@@ -1,8 +1,37 @@
 # Changelog
 
-## [2.13.0] - 2026-03-31
+## [2.13.0] - 2026-04-01
 
 ### Breaking Changes
+
+#### Scene split out
+
+Scenes were always intended to be an _adapter_. A modular piece that gets plugged
+into a simpler system.
+
+At first, they were integrated into a monolith. Then, they were split out as we
+narrowed into `handleEvent`. Then, they were integrated back into the engine
+with the stack system. Finally, they split out again into an adapter.
+
+That's where we are now.
+
+Before:
+```typescript
+const like = createLike(document.body);
+like.start();
+like.pushScene(blah);
+```
+
+After:
+```typescript
+const like = createLike(document.body);
+const sceneMan = new SceneManager(like);
+like.start();
+sceneMan.push(blah);
+```
+
+All of the `like.*` callbacks related to scene management have been split into
+the manager.
 
 #### Scene factory pattern
 
@@ -35,7 +64,7 @@ class MyScene extends Scene {
 ```
 is now:
 ```typescript
-const createMyScene: SceneFactory = (path: string) => (like: Like) => {
+const myScene = (path: string): Scene => (like: Like) => {
 
   const someImage = like.gfx.newImage(path);
 
@@ -48,9 +77,9 @@ const createMyScene: SceneFactory = (path: string) => (like: Like) => {
   }
 }
 ```
-or even more boldly:
+or:
 ```typescript
-const createMyScene: SceneFactory = (path: string) => (like: Like) => ({
+const myScene = (path: string): Scene => (like: Like) => ({
     someImage: like.gfx.newImage(path);
     draw() {
       like.gfx.draw(this.someImage);
@@ -59,7 +88,7 @@ const createMyScene: SceneFactory = (path: string) => (like: Like) => ({
 })
 ```
 
-It's also simpler when adopting scenes for the first time. When converting from a callback to a scene pattern, we no longer have to add `like` as the first argument of every callback. Instead, we can use this pattern:
+It's also simpler when adopting scenes for the first time; when converting from a callback to a scene pattern, we no longer have to add `like` as the first argument of every callback. Instead, we can use this pattern:
 ```javascript
 // before...
 like = createLike(document.body);
@@ -86,7 +115,7 @@ like.setScene(createScene)
 ```
 For the vast majority of cases, this is as simple as `s/^like\./myScene./` plus some wrapping.
 
-Because the LÏKE userbase is nonexistant at the moment, I am implementing this change _without backwards compat_. If you're crying out in pain right now, let me know and I'll consider writing a wrapper around old-style scenes.
+We are implementing this change _without backwards compat_. If you're crying out in pain right now, let me know and I'll consider writing a wrapper around old-style scenes.
 
 ## [2.12.0] - 2026-03-30
 

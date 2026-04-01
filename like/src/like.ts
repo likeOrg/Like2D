@@ -1,25 +1,48 @@
-import type { Audio } from './audio/index';
-import type { Timer } from './timer/index';
-import type { Input } from './input/index';
+import type { Audio } from './audio/';
+import type { Timer } from './timer/';
+import type { Input } from './input/';
 import type { Keyboard } from './input/keyboard';
 import type { Mouse } from './input/mouse';
 import type { Gamepad } from './input/gamepad';
 import type { Canvas } from './graphics/canvas';
-import type { Graphics } from './graphics/index';
-import { EventMap, EventType, LikeEvent } from './events';
+import type { Graphics } from './graphics/';
+import { LikeEvent, LikeEventHandlers } from './events';
 
 /** @private */
 export type TopLevelEventHandler = (event: LikeEvent) => void;
 
-type EventHandler<K extends EventType> = (...args: EventMap[K]) => void;
-
-/** @private */
-export type LikeEventHandlers = {
-  [K in EventType]?: EventHandler<K>;
-} & { handleEvent?: TopLevelEventHandler };
+/**
+ * Every possible event handler callback is in this interface.
+ *
+ * The engine will call these functions when the corresponding
+ * events fire unless {@link handleEvent} is customized, for example
+ * when the scene system is in use.
+ *
+ * @interface
+ */
+export type LikeHandlers = Partial<LikeEventHandlers> & {
+  /**
+   * LIKE's runtime is concentrated into handleEvent.
+   *
+   * This function recieves all events.
+   * {@link callOwnHandlers} is the default behavior.
+   *
+   * Otherwise, a custom handler will totally override
+   * event handler callbacks like `like.draw`,
+   * replacing it with a system of your choice.
+   *
+   * For example, the scene architecture is built around
+   * setting this function. Setting to a custom
+   * function will disable the scene system.
+   *
+   * Setting `handleEvent` to `undefined` will revert
+   * to default behavior.
+   */
+   handleEvent?: TopLevelEventHandler
+};
 
 /** 
- * The main modules and builtins of `like`, aside from {@link EventMap | optional callbacks}.
+ * The main modules and builtins of `like`.
  * @interface
  */
 export type LikeBase = {
@@ -58,21 +81,6 @@ export type LikeBase = {
   dispose(): void;
 
   /**
-   * LIKE's runtime is built around calling handleEvent.
-   * 
-   * This function recieves all events. If set to undefined,
-    * {@link index.Like | Like.callOwnHandlers} is the default behavior.
-   * 
-   * Otherwise, you can really customize LIKE by setting this
-   * to a custom handler.
-   * 
-   * For example, the scene architecture is built around
-   * setting this function. Setting it to a custom
-   * function will disable the scene system.
-   */
-  handleEvent: TopLevelEventHandler;
-
-  /**
    * Used as the default `like.handleEvent`, simply dispatches
    * an event into LIKE callbacks.
    * @param event 
@@ -84,7 +92,5 @@ export type LikeBase = {
  * The main Like instance.
  * Use this object much how you would the `love` object in Love2D.
  * This is the interface returned by {@link createLike}.
- * 
- * Check out all the {@link EventMap | callbacks}.
  */
-export type Like = LikeEventHandlers & LikeBase;
+export type Like = LikeHandlers & LikeBase;
