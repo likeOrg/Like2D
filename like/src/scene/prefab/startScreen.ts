@@ -33,7 +33,7 @@
  * Pass a custom draw function to replace the default logo:
  *
  * ```typescript
- * const startup = createStartScreen((like) => {
+ * const startup = startScreen((like) => {
  *   like.gfx.clear([0, 0, 0, 1]);
  *   like.gfx.print([1, 1, 1], 'Click to Start', [100, 100]);
  * });

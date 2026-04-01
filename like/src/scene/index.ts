@@ -11,83 +11,14 @@
  * a lot better than switch-casing on each handler, or manually setting/clearing
  * handler functions on each transition.
  *
- * Using scenes for your game also replaces the need to pass around `like`
+ * Using scenes for your game also replaces the need to pass around global `like`
  * or `sceneManager` wherever it is used.
  *
- * ## The Scene Stack
- *
- * There is a stack of scenes for state management and/or overlays.
- *
- * For graph-based scene management, just use {@link SceneManager.set} which
- * switches out the stack top.
- *
- * For a stack, use {@link SceneManager.push} and {@link SceneManager.pop}.
- *
- * ## Composing scenes
- *
- * Just like the `like` object, scenes have handleEvent on them.
- * So, you could layer them like this, for example:
- *
- * ```typescript
- * interface UiButtonHandler extends SceneInstance {
- *   handleButton(name: string) => void;
- * }
- *
- * const createUI = (game: UiButtonHandler): Scene => (like) => ({
- *   handleEvent(event) {
- *     // Block mouse events in order to create a top bar.
- *     const mouseY = like.mouse.getPosition()[1];
- *     if (!event.type.startsWith('mouse') || mouseY > 100) {
- *       sceneDispatch(game, event);
- *     }
- *     // Then, call my own callbacks.
- *     callSceneHandlers(this, like, event);
- *   },
- *   draw() {
- *     // Draw UI on top
- *   }
- * });
- *
- * const createGame = (): Scene => (like, scene) => ({ ... });
- *
- * like.pushScene(createUI(createGame);
- * ```
- *
- * The main advance of composing scenes versus the stack-overlay
- * technique is that the parent scene knows about its child.
- * Because there's a **known interface**, the two scenes
- * can communicate.
- *
- * This makes it perfect for reusable UI,
- * level editors, debug viewers, and more.
- *
- * ## Overlay scenes
- *
- * You might assume that the purpose of a scene stack is
- * visual: first push the BG, then the FG, etc.
- *
- * Actually, composing scenes (above) is a
- * better pattern for that, since it's both explicit
- * _and_ the parent can have a known interface on its child.
- * Here, the **upper** scene only knows that the
- * **lower** scene _is_ a scene.
- *
- * That's the tradeoff. Overlay scenes are good for things
- * like pause screens or gamepad overlays. Anything where
- * the upper doesn't care _what_ the lower is, and where
- * the upper scene should be easily addable/removable.
- *
- * Using `like.getScene(-2)`, the overlay scene can see
- * the lower scene and choose how to propagate events.
- *
- * The only technical difference between overlay and
- * opaque is whether or not the scene we've pushed
- * on top of stays loaded.
- *
+ * ## Jump in
  *
  * Get started: {@link SceneManager}
  *
- * Make your own scene: {@link SceneInstance}
+ * Make your own scene: {@link Scene}
  *
  * Check out built-in utility scenes:
  *  - {@link scene/prefab/mapGamepad}
@@ -190,9 +121,110 @@ import type { Like, LikeHandlers, } from '../like';
  *   return scene;
  * });
  * ```
+ * ## Composing scenes
  *
+ * Just like the `like` object, scenes have handleEvent on them.
+ * So, you could layer them like this, for example:
+ *
+ * ```typescript
+ * // Composing scenes lets us know about the children.
+ * // This allows communication, for example:
+ * type UISceneInstance = SceneInstance & {
+ *   // Sending events to child scene
+ *   buttonClicked(name: string) => void;
+ *   // Getting info from child scene
+ *   getStatus() => string;
+ * };
+ * type UIScene = SceneEx<UISceneInstance>;
+ *
+ * const uiScene = (game: UiScene): Scene => (like, scenes) => ({
+ *   childScene: game(like, scene),
+ *   handleEvent(event) {
+ *     // Block mouse events in order to create a top bar.
+ *     // Otherwise, propogate them.
+ *     const mouseY = like.mouse.getPosition()[1];
+ *     if (!event.type.startsWith('mouse') || mouseY > 100) {
+ *       // Use likeDispatch so that nested handleEvent can fire,
+ *       // if relevant.
+ *       likeDispatch(this.childScene, event);
+ *       if (buttonPressed(event, pos)) {
+ *         childScene.buttonClicked('statusbar')
+ *       }
+ *     }
+ *     // Then, call my own callbacks.
+ *     // Using likeDispatch here will result in an infinite loop.
+ *     callOwnHandlers(this, event);
+ *   },
+ *   draw() {
+ *     drawStatus(like, childScene.getStatus());
+ *   }
+ * });
+ *
+ * const gameScene = (level: number): UIScene =>
+ *   (like, scene) => ({
+ *     update() { ... },
+ *     draw() { ... },
+ *     // mandatory UI methods from interface
+ *     buttonClicked(name) {
+ *       doSomething(),
+ *     },
+ *     getStatus() {
+ *       return 'all good!';
+ *     }
+ *   });
+ *
+ * like.pushScene(uiScene(gameScene);
+ * ```
+ *
+ * The main advance of composing scenes versus the stack-overlay
+ * technique is that the parent scene knows about its child.
+ * Because there's a **known interface**, the two scenes
+ * can communicate.
+ *
+ * This makes it perfect for reusable UI,
+ * level editors, debug viewers, and more.
+ *
+ * ## Overlay scenes
+ *
+ * You might assume that the purpose of a scene stack is
+ * visual: first push the BG, then the FG, etc.
+ *
+ * Actually, composing scenes (above) is a
+ * better pattern for that, since it's both explicit
+ * _and_ the parent can have a known interface on its child.
+ * Here, the **upper** scene only knows that the
+ * **lower** scene _is_ a scene.
+ *
+ * That's the tradeoff. Overlay scenes are good for things
+ * like pause screens or gamepad overlays. Anything where
+ * the upper doesn't care _what_ the lower is, and where
+ * the upper scene should be easily addable/removable.
+ *
+ * Using `like.getScene(-2)`, the overlay scene can see
+ * the lower scene and choose how to propagate events.
+ *
+ * The only technical difference between overlay and
+ * opaque is whether or not the scene we've pushed
+ * on top of stays loaded.
  */
 export type Scene = (like: Like, scenes: SceneManager) => SceneInstance;
+
+/**
+ * A helper for extending Scenes as to have known interfaces beyond
+ * the generic ones. For example:
+ *
+ * ```ts
+ * type UISceneInstance = SceneInstance & {
+ *   buttonClicked(name: string) => void;
+ * };
+ * type UIScene = SceneEx<UISceneInstance>;
+ * ```
+ *
+ * Now, a parent composing scene can take in UIScene rather than Scene,
+ * and it has no need to cast anything.
+ */
+export type SceneEx<S extends SceneInstance> =
+  (like: Like, scenes: SceneManager) => S
 
 /**
  * A scene instance is just an object with event handlers. It's
@@ -218,13 +250,18 @@ type SceneEntry = {
  * const sceneMan = new SceneManager(like);
  * sceneMan.push(myScene)
  * ```
+ * For arbitrary scene management (non stack based),
+ * just use {@link SceneManager.set} which switches out the stack top.
  *
- * To learn how to manage scenes, see {@link scene | module documentation}
+ * For stack-based, use {@link SceneManager.push} and {@link SceneManager.pop}.
+ * Note that for stack-based games, it is wise to put the first initialization in as
+ * a callback-based system rather than going straight to scene. This allows
+ * for easy resets / game overs.
  *
  * Note that the SceneManager sets {@link LikeHandlers.handleEvent | like.handleEvent}.
  * To get rid of scene functionality entirely, simply set it back to default.
  * ```typescript
- * like.handleEvent = like.callOwnHandlers;
+ * like.handleEvent = undefined;
  * ```
  * Otherwise, the `SceneManager` stays allocated even if the scene stack was cleared.
  */
@@ -268,19 +305,17 @@ export class SceneManager {
    * and re-constructed upon the parent scene calling `scenes.pop()`.
    * Good for resource-intensive
    * scenes or ones that rely heavily on their lifecycle. If you do want
-   * the lower scene to know what happened in the upper, (i.e. overworld
+   * the lower scene to know what happened in the upper while unloaded, (i.e. overworld
    * updating with a battle), consider using scene composition or
    * using localStorage to track persistent game state.
    *
    * If this scene calls `scenes.push(nextScene, false)`, it will stay loaded:
    * this means when we pop its parent, it will simply continue running. Assets
-   * will stay loaded in.
-   *
-   * Further, with unload enabled the upper scene now has the ability to reference
+   * will stay loaded in. Further, with unload disabled the upper scene now has the ability to reference
    * the instance that called `scene.push` and call down to it in a generic way
    * via `scene.get(-2)`
    *
-   * See {@link SceneInstance} for more detail -- while stacking is good for certain
+   * See {@link Scene} for more detail -- while stacking is good for certain
    * things, you're likely looking for Scene Composition.
    */
   push(scene: Scene, _unload: boolean): void {

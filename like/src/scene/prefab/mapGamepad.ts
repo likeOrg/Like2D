@@ -45,10 +45,15 @@ const mapOrder: LikeButton[] = [
   "RightStick",
 ];
 
+/** All the buttons on an NES */
 export const buttonSetNES = new Set<LikeButton>(mapOrder.slice(0, 8));
+/** All the buttons on a GBA -- Like an NES but with L+R */
 export const buttonSetGBA = new Set<LikeButton>(mapOrder.slice(0, 10));
+/** All the buttons on a SNES */
 export const buttonSetSNES = new Set<LikeButton>(mapOrder.slice(0, 12));
+/** All the buttons on a PS1 -- Like a SNES but with L2+R2 */
 export const buttonSetPS1 = new Set<LikeButton>(mapOrder.slice(0, 14));
+/** All the buttons -- including the stick buttons. */
 export const buttonSetAll = new Set<LikeButton>(mapOrder);
 
 const drawCircButt = (pos: Vector2, size: number) => (like: Like, color: Color) =>
@@ -110,6 +115,17 @@ const buttonProps: Record<
   Down: { draw: drawDpadPart(Math.PI / 2) },
 };
 
+/** What gamepad buttons or sticks are we using?
+ *
+ *  Set buttons to one of:
+ *   - {@link buttonSetNES}
+ *   - {@link buttonSetGBA}
+ *   - {@link buttonSetSNES}
+ *   - {@link buttonSetPS1}
+ *   - {@link buttonSetAll}
+ *   - Custom: `new Set<LikeButton>(...)`
+ *
+ */
 export type MapMode = {
   buttons: Set<LikeButton>;
   stickCount: number;
