@@ -13,9 +13,9 @@
 import { Engine } from './engine';
 import type { Like } from './like';
 
-export type { Like, LikeBase, TopLevelEventHandler, Callbacks, Callback } from './like';
-export type { LikeEvent, EventType, EventMap, LikeCanvasElement, Dispatcher, LikeCanvasEventMap, LikeKeyboardEvent } from './events';
-export type { Scene } from './scene';
+export type { Like, LikeBase, TopLevelEventHandler, LikeEventHandlers } from './like';
+export type { LikeEvent, EventType, EventMap, LikeCanvasElement } from './events';
+export type { SceneInstance, Scene } from './scene';
 export type { EngineProps } from './engine';
 
 /**

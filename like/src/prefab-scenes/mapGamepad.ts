@@ -1,8 +1,8 @@
+import type { Scene } from "../scene";
 import type { Like } from "..";
 import type { Color, PrintProps } from "../graphics";
 import { type LikeButton, defaultMapping, GamepadMapping } from "../input";
 import { Vector2 } from "../math/vector2";
-import { Scene } from "../scene";
 
 const mapOrder: LikeButton[] = [
   "BRight",
@@ -102,7 +102,7 @@ export type MapMode = {
  * 
  * ```ts
  * like.gamepadconnected = (index) =>
- *   like.pushScene(new MapGamepad({buttons: buttonSetGBA, sticks: 0}), index)
+ *   like.pushScene(createMapGamepad({ buttons: buttonSetGBA, sticks: 0 }), index)
  * ```
  * 
  * Add this to your codebase and activating a gamepad causes a button mapping screen to pop up.
@@ -110,104 +110,98 @@ export type MapMode = {
  * 
  * Note: many browsers do this on first button press, so always writing "P2: press any button" is a fine idea.
  */
-export class MapGamepad implements Scene {
-  private currentlyUnmapped: LikeButton[] = [];
-  private mapping!: GamepadMapping;
-  private held?: LikeButton;
-  private alreadyMapped = new Set<Number>();
-  private frameWait = 0;
+export const mapGamepad = (
+  mapMode: MapMode,
+  targetPad: number,
+): Scene => (like: Like) => {
+  const currentlyUnmapped: LikeButton[] = [];
+  const mapping: GamepadMapping = like.gamepad.getMapping(targetPad) ?? defaultMapping(2);
+  const alreadyMapped = new Set<number>();
+  let held: LikeButton | undefined;
+  let frameWait = 10;
 
-  constructor(
-    private mapMode: MapMode,
-    private targetPad: number,
-  ) { }
+  const alreadyMappedValues = new Set(Object.values(mapping.buttons));
 
-  load(like: Like): void {
-    this.frameWait = 10;
-    this.mapping = like.gamepad.getMapping(this.targetPad) ?? defaultMapping(2);
+  for (const btn of mapOrder.reverse()) {
+    if (mapMode.buttons.has(btn) && !alreadyMappedValues.has(btn)) {
+      currentlyUnmapped.push(btn);
+    }
+  }
 
-    const alreadyMapped = new Set(Object.values(this.mapping.buttons));
+  like.canvas.setMode([320, 240]);
 
-    for (const btn of mapOrder.reverse()) {
-      if (this.mapMode.buttons.has(btn) && !alreadyMapped.has(btn)) {
-        this.currentlyUnmapped.push(btn);
+  return {
+    update() {
+      frameWait--;
+    },
+
+    draw() {
+      const centerText: PrintProps = {
+          font: "1px sans-serif",
+          align: "center",
+          width: 16,
       }
-    }
-    like.canvas.setMode([320, 240]);
-  }
+      const active = currentlyUnmapped.at(-1);
+      like.gfx.clear();
+      like.gfx.scale(20);
+      like.gfx.translate([0, 1]);
+      like.gfx.print(
+        "white",
+        `Map gamepad ${targetPad}`,
+        [8, 0.0],
+        centerText,
+      );
+      for (const prop of mapMode.buttons.keys()) {
+        const color =
+          held == prop
+            ? "green"
+            : active == prop
+              ? "red"
+              : mapMode.buttons.has(prop)
+                ? "gray"
+                : "black";
+        buttonProps[prop].draw(like, color);
+      }
+      like.gfx.print(
+        "white",
+        active
+          ? `Press ${like.gamepad.fullButtonName(active)}!`
+          : "Press any button to resume.",
+        [2, 10],
+        { font: "1px sans-serif" },
+      );
+    },
 
-  update(): void {
-    this.frameWait--;
-  }
+    gamepadpressed(
+      source: number,
+      _name: LikeButton,
+      num: number,
+    ) {
+      if (source !== targetPad || held || frameWait > 0) return;
+      const active = currentlyUnmapped.pop();
+      if (active && !alreadyMapped.has(num)) {
+        alreadyMapped.add(num);
+        mapping.buttons[num] = active;
+        held = active;
+      } else if (!active) {
+        like.gamepad.setMapping(targetPad, mapping);
+        setTimeout(() => like.popScene(), 100);
+      }
+    },
 
-  draw(like: Like): void {
-    const centerText: PrintProps = {
-        font: "1px sans-serif",
-        align: "center",
-        width: 16,
-    }
-    const active = this.currentlyUnmapped.at(-1);
-    like.gfx.clear();
-    like.gfx.scale(20);
-    like.gfx.translate([0, 1]);
-    like.gfx.print(
-      "white",
-      `Map gamepad ${this.targetPad}`,
-      [8, 0.0],
-      centerText,
-    );
-    for (const prop of this.mapMode.buttons.keys()) {
-      const color =
-        this.held == prop
-          ? "green"
-          : active == prop
-            ? "red"
-            : this.mapMode.buttons.has(prop)
-              ? "gray"
-              : "black";
-      buttonProps[prop].draw(like, color);
-    }
-    like.gfx.print(
-      "white",
-      active
-        ? `Press ${like.gamepad.fullButtonName(active)}!`
-        : "Press any button to resume.",
-      [2, 10],
-      { font: "1px sans-serif" },
-    );
-  }
+    gamepadreleased(
+      source: number,
+      _name: LikeButton,
+      num: number,
+    ) {
+      if (source !== targetPad) return;
+      if (held == mapping.buttons[num]) {
+        held = undefined;
+      }
+    },
 
-  gamepadpressed(
-    like: Like,
-    source: number,
-    _name: LikeButton,
-    num: number,
-  ): void {
-    if (source !== this.targetPad || this.held || this.frameWait > 0) return;
-    const active = this.currentlyUnmapped.pop();
-    if (active && !this.alreadyMapped.has(num)) {
-      this.alreadyMapped.add(num);
-      this.mapping.buttons[num] = active;
-      this.held = active;
-    } else if (!active) {
-      like.gamepad.setMapping(this.targetPad, this.mapping);
-      setTimeout(() => like.popScene(), 100);
+    mousepressed() {
+      like.popScene();
     }
-  }
-
-  gamepadreleased(
-    _like: Like,
-    source: number,
-    _name: LikeButton,
-    num: number,
-  ): void {
-    if (source !== this.targetPad) return;
-    if (this.held == this.mapping.buttons[num]) {
-      this.held = undefined;
-    }
-  }
-
-  mousepressed(like: Like): void {
-    like.popScene();
-  }
-}
+  };
+};

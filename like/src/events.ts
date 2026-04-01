@@ -27,7 +27,7 @@ export interface LikeCanvasElement extends HTMLCanvasElement {
 }
 
 /**
- * It's a list of every possible event in like2d!
+ *
  * 
  * Not just that, but these events translate directly into `like` callbacks.
  * 

@@ -1,8 +1,6 @@
-
-import { type Scene } from '../scene';
-import type { ImageHandle } from '../graphics/index';
+import type { Scene } from '../scene';
+import type { Like } from '../like';
 import { Vec2 } from '../math/vector2';
-import { Like } from '..';
 
 const LOGO = 
   'data:image/svg+xml;base64,' +
@@ -49,8 +47,8 @@ const LOGO =
  * ## Usage
  *
  * ```typescript
- * import { createLike, StartScreen } from 'like';
- * import { GameScene } from './game';
+ * import { createLike, createStartScreen } from 'like';
+ * import { createGameScene } from './game';
  *
  * const container = document.getElementById("myGame");
  * const like = createLike(container);
@@ -60,64 +58,53 @@ const LOGO =
  * like.draw = function () { ... }
  *
  * // Set up the start screen
- * like.pushScene(new StartScreen())
+ * like.pushScene(createStartScreen())
  * like.start();
  * ```
  * 
  * Alternatively, copy-paste this code into your own project and modify it freely.
- * Update imports:
  * 
- * ```ts
- * import { type Scene } from 'like/scene';
- * import type { ImageHandle } from 'like/graphics';
- * import { Vec2 } from 'like/math';
- * import { Like } from 'like';
- * ```
- *
  * ## Custom Rendering
  *
  * Pass a custom draw function to replace the default logo:
  *
  * ```typescript
- * const startup = new StartupScene(gameScene, (like) => {
+ * const startup = createStartScreen((like) => {
  *   like.gfx.clear([0, 0, 0, 1]);
  *   like.gfx.print([1, 1, 1], 'Click to Start', [100, 100]);
  * });
  * ```
  */
-export class StartScreen implements Scene {
-  private logo!: ImageHandle;
+export const startScreen = (
+  onDraw?: (like: Like) => void
+): Scene => (like) => {
+  const logo = like.gfx.newImage(LOGO);
 
-  constructor(
-    private onDraw?: (like: Like) => void
-  ) { }
+  like.mouse.setMode({ lock: false, scrollBlock: false });
 
-  load(like: Like): void {
-    like.mouse.setMode({lock: false, scrollBlock: false});
-    this.logo = like.gfx.newImage(LOGO);
-  }
+  return {
+    draw() {
+      if (onDraw) {
+        onDraw(like);
+      } else if (logo.isReady()) {
+        like.gfx.clear([0.5, 0, 0.5, 1]);
+        const winSize = like.canvas.getSize();
+        const scale = (winSize[0] * 0.5) / logo.size[0];
+        like.gfx.draw(logo, Vec2.div(winSize, 2), {
+          scale,
+          origin: Vec2.div(logo.size, 2),
+        });
+        like.gfx.print(
+          [1, 1, 0, 0.5 + 0.5 * Math.sin(like.timer.getTime() * 3)],
+          "▶️ click to start ◀️",
+          Vec2.mul(winSize, [0.5, 0.8]),
+          { align: "center", font: "25px sans" },
+        );
+      }
+    },
 
-  draw(like: Like): void {
-    if (this.onDraw) {
-      this.onDraw(like);
-    } else if (this.logo.isReady()) {
-      like.gfx.clear([0.5, 0, 0.5, 1]);
-      const winSize = like.canvas.getSize();
-      const scale = (winSize[0] * 0.5) / this.logo.size[0];
-      like.gfx.draw(this.logo, Vec2.div(winSize, 2), {
-        scale,
-        origin: Vec2.div(this.logo.size, 2),
-      });
-      like.gfx.print(
-        [1, 1, 0, 0.5 + 0.5 * Math.sin(like.timer.getTime() * 3)],
-        "▶️ click to start ◀️",
-        Vec2.mul(winSize, [0.5, 0.8]),
-        { align: "center", font: "25px sans" },
-      );
+    mousepressed() {
+      like.popScene();
     }
-  }
-
-  mousepressed(like: Like): void {
-    like.popScene();
-  }
-}
+  };
+};

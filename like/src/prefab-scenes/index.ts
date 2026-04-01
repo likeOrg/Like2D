@@ -6,5 +6,12 @@
  * @module prefab-scenes
  */
 
-export { StartScreen } from "./startScreen";
-export { MapGamepad, buttonSetAll, buttonSetNES, buttonSetPS1, buttonSetSNES, type MapMode } from "./mapGamepad";
+export { startScreen } from "./startScreen";
+export {
+  mapGamepad,
+  buttonSetAll,
+  buttonSetNES,
+  buttonSetPS1,
+  buttonSetSNES,
+  type MapMode,
+} from "./mapGamepad";

@@ -1,22 +1,55 @@
-import type { LikeEvent, EventMap } from './events';
-import type { Like } from './like';
+import type { LikeEventHandlers, Like, } from './like';
 
 /**
- * An interface for creating scenes.
+ * A scene is just an object with event handlers.
  * 
- * ## Why Scenes?
+ * ## Factory Pattern
  * 
- * For any game with more than one scene, we have to either:
- *  - switch-case on game state in every single callback
- *  - rebind all of the callbacks ourselves
- *  - wrap handleEvent (hint: that's what this does)
+ * Scenes are created via a factory function that receives the `like` object
+ * and returns a scene with event handlers. This eliminates the need to pass
+ * `like` as the first argument to every handler, and allows proper resource
+ * lifecycle management through closures.
  * 
- * Also, no need to pass around a `like` object.
- * Here, `like` instead piggybacks on a closure that follows around
- * your running scene and shows up as an additional first argument
- * to every callback.
+ * ```typescript
+ * const createMyScene = (options: { speed: number }): SceneFactory => 
+ *   (like: Like) => {
+ *     // Resources loaded here are available via closure
+ *     const playerImage = like.gfx.newImage('player.png');
+ *     let x = 0, y = 0;
+ *     
+ *     return {
+ *       update(dt) {
+ *         x += options.speed * dt;
+ *       },
+ *       draw() {
+ *         like.gfx.draw(playerImage, [x, y]);
+ *       }
+ *     };
+ *   };
  * 
- * ## The scene stack
+ * like.pushScene(createMyScene({ speed: 100 }));
+ * ```
+ * 
+ * ## Converting from Callbacks
+ * 
+ * When converting from global callbacks to a scene:
+ * 
+ * ```typescript
+ * // Before (callbacks)
+ * like.update = function(dt) { player.update(dt); }
+ * like.draw = () => { player.draw(like.gfx); }
+ * 
+ * // After (scene)
+ * like.setScene((like) => {
+ *   const scene = {}
+ *     like.update function (dt) => { player.update(dt); },
+ *     like.draw = () => { player.draw(like.gfx); }
+ *   };
+ *   return scene;
+ * });
+ * ```
+ * 
+ * ## The Scene Stack
  * 
  * There is a stack of scenes for state management and/or overlays.
  * 
@@ -24,79 +57,31 @@ import type { Like } from './like';
  * 
  * {@link LikeBase.setScene | setScene} Sets the top of the stack only, replacing the current scene if any.
  * 
- * ## Quick Start
- *
- * Have a scene handle all the callbacks, disabling global
- * callbacks.
- * ```typescript
- * // set up a scene
- * class MagicalGrowingRectangle implements Scene {
- *   rectangleSize = 10;
- *   constructor() {}
- * 
- *   keypressed(_like: Like) {
- *     this.rectangleSize += 10;
- *   }
- * 
- *   draw(like: Like) {
- *     like.gfx.rectangle('fill', 'green',
- *       [10, 10, this.rectangleSize, this.rectangleSize])
- *   }
- * }
- * 
- * like.pushScene(new MagicalGrowingRectangle(), false);
- * ```
- * 
- * To get back to global callbacks, just use {@link Like.popScene | like.popScene}
- *
- * ## Scene Lifecycle
- * 
- * Works a lot like global callbacks.
- *
- * 1. `like.setScene(scene)` or `like.pushScene(scene)` is called
- * 2. Scene's `load` callback fires immediately
- * 3. `update` and `draw` begin on next frame
- * 4. Scene receives input events as they occur
- * 
- * However, make sure to configure your scene in the `load` function using {@link Mouse.setMode} and {@link LikeCanvas.setMode}.
- * 
- * Consider your action bindings and gamepad -- have they been set up yet?
- * 
- * And of course, consider firing {@link Audio.stopAll}.
- *
  * ## Composing scenes
  * 
- * Thought you'd never ask.
  * Just like the `like` object, scenes have handleEvent on them.
  * So, you could layer them like this, for example:
  * 
  * ```typescript
- * class UI implements Scene {
- *   constructor(public game: Scene) {}
- * 
- *   handleEvent(like: Like, event: LikeEvent) {
+ * const createUI = (game: Scene): SceneFactory => (like) => ({
+ *   handleEvent(event) {
  *     // Block mouse events in order to create a top bar. 
  *     const mouseY = like.mouse.getPosition()[1];
  *     if (!event.type.startsWith('mouse') || mouseY > 100) {
- *       sceneDispatch(this.game, like, event);
+ *       sceneDispatch(game, event);
  *     } 
- * 
  *     // Then, call my own callbacks.
- *     // By calling it here, the UI draws on top.
  *     callSceneHandlers(this, like, event);
+ *   },
+ *   draw() {
+ *     // Draw UI on top
  *   }
- *   ...
- * }
+ * });
  * 
- * class Game implements Scene {
- *   ...
- * }
+ * const createGame = (): SceneFactory => (like) => ({ ... });
  * 
- * like.pushScene(new UI(new Game()), false)
+ * like.pushScene(createUI(createGame()));
  * ```
- * 
- * Composing scenes lets you filter events, layer game elements,
- * and more. Don't sleep on it.
  * 
  * The main advance of composing scenes versus the stack-overlay
  * technique is that the parent scene knows about its child.
@@ -133,34 +118,6 @@ import type { Like } from './like';
  * 
  */
 
-export type Scene = {
-  [K in keyof EventMap]?: (like: Like, ...args: EventMap[K]) => void;
-} & {
-  handleEvent?(like: Like, event: LikeEvent): void;
-};
+export type Scene = (like: Like) => SceneInstance;
 
-export type SceneFactory = (like: Like) => Scene;
-
-/**
- * Used to call a scene's own handlers like `update` or `draw`,
- * typically at the end of handleEvent
- * after modifying the event stream or composing sub-scenes.
- */
-export const callSceneHandlers = (scene: Scene, like: Like, event: LikeEvent) => {
-  if (event.type in scene) {
-    (scene as any)[event.type](like, ...event.args);
-  }
-}
-
-/**
- * Used to call sub scenes while respecting potential `handleEvent` within them.
- * The main scene is similar to a sub-scene of the root (like) object in this
- * regard.
- */
-export const sceneDispatch = (scene: Scene, like: Like, event: LikeEvent) => {
-    if (scene.handleEvent) {
-      scene.handleEvent(like, event);
-    } else {
-      callSceneHandlers(scene, like, event);
-    }
-}
+export type SceneInstance = LikeEventHandlers;
