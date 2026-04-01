@@ -1,6 +1,6 @@
-import type { Scene } from '../scene';
-import type { Like } from '../like';
-import { Vec2 } from '../math/vector2';
+import type { Scene } from '..';
+import type { Like } from '../..';
+import { Vec2 } from '../../math/vector2';
 
 const LOGO = 
   'data:image/svg+xml;base64,' +
@@ -77,7 +77,7 @@ const LOGO =
  */
 export const startScreen = (
   onDraw?: (like: Like) => void
-): Scene => (like) => {
+): Scene => (like, scenes) => {
   const logo = like.gfx.newImage(LOGO);
 
   like.mouse.setMode({ lock: false, scrollBlock: false });
@@ -104,7 +104,7 @@ export const startScreen = (
     },
 
     mousepressed() {
-      like.popScene();
+      scenes.pop();
     }
   };
 };

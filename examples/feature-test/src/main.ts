@@ -3,8 +3,9 @@ import { ImageHandle } from "like/graphics";
 import { AudioSource } from "like/audio";
 import { CanvasSize } from "like/graphics";
 import { Vec2 } from "like/math";
-import { Scene } from "like/scene";
-import { mapGamepad, startScreen, buttonSetPS1 } from "like/prefab-scenes";
+import { Scene, SceneManager } from "like/scene";
+import { startScreen } from "like/scene/prefab/startScreen";
+import { mapGamepad, buttonSetPS1 } from "like/scene/prefab/mapGamepad";
 
 let pepperImage: ImageHandle;
 let audioSource: AudioSource | null = null;
@@ -22,10 +23,7 @@ const scales: CanvasSize[] = [
 ];
 let scaleIndex = 0;
 
-const container = document.getElementById('game-container')!;
-const like = createLike(container);
-
-const demoScene: Scene = (like: Like) => {
+const demoScene: Scene = (like: Like, scenes: SceneManager) => {
   like.canvas.setMode(scales[0]);
   pepperImage = like.gfx.newImage('pepper.png');
   audioSource = like.audio.newSource('./test.ogg');
@@ -89,7 +87,7 @@ const demoScene: Scene = (like: Like) => {
     gamepadpressed: (_ignore, ...args) => console.log(args),
 
     gamepadconnected: (index) => {
-      like.pushScene(mapGamepad({ buttons: buttonSetPS1, stickCount: 2 }, index), true);
+      scenes.push(mapGamepad({ buttons: buttonSetPS1, stickCount: 2 }, index), true);
     },
 
     draw() {
@@ -169,7 +167,10 @@ document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
   like.canvas.setFullscreen(true);
 });
 
-like.pushScene(demoScene, false);
-like.pushScene(startScreen(), false);
+const container = document.getElementById('game-container')!;
+const like = createLike(container);
+const sceneMan = new SceneManager(like);
+sceneMan.push(demoScene, false);
+sceneMan.push(startScreen(), false);
 
 await like.start();

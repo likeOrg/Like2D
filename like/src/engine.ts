@@ -8,7 +8,6 @@ import { Graphics } from './graphics/graphics';
 import type { LikeEvent, EventType, EventMap, Dispatcher, LikeCanvasElement } from './events';
 import { type Like, LikeEventHandlers } from './like';
 import { Canvas } from './graphics/canvas';
-import { Scene, SceneInstance } from './scene';
 
 /** @private */
 export type EngineDispatcher = Dispatcher<EventType>;
@@ -19,12 +18,6 @@ export type EngineProps<T extends keyof EventMap> = {
   dispatch: Dispatcher<T>,
 }
 
-/** For robust lifecycle, scenes now use  */
-type SceneEntry = {
-  instance: SceneInstance,
-  factory: Scene,
-};
-
 /** @private */
 export class Engine {
   /** The canvas on which we bind all events. Not always the same canvas
@@ -33,7 +26,6 @@ export class Engine {
   private isRunning = false;
   private lastTime = 0;
   private abort = new AbortController();
-  private sceneStack: SceneEntry[] = [];
 
   /**
    * The Like interface providing access to all engine subsystems.
@@ -71,29 +63,8 @@ export class Engine {
       canvas,
       start: this.start.bind(this),
       dispose: this.dispose.bind(this),
-
-      getScene: (pos = -1): SceneInstance | undefined => {
-        return this.sceneStack.at(pos)?.instance;
-      },
-
-      pushScene: (scene: Scene, _overlay: boolean) => {
-        this.sceneStack.push({instance: scene(this.like), factory: scene});
-        this.updateHandleEvent();
-      },
-
-      popScene: (): Scene | undefined => {
-        const top = this.sceneStack.pop();
-        this.updateHandleEvent();
-        return top?.factory;
-      },
-
-      setScene: (scene: Scene) => {
-        const idx = Math.max(0, this.sceneStack.length - 1);
-        this.sceneStack[idx] = { instance: scene(this.like), factory: scene };
-        this.updateHandleEvent();
-      },
-
-      callOwnHandlers: (event: LikeEvent) => callOwnHandlers(this.like, event),
+      handleEvent: (ev) => callOwnHandlers(this.like, ev),
+      callOwnHandlers: (ev) => callOwnHandlers(this.like, ev),
     };
 
     window.addEventListener('focus', () => this.dispatch('focus', ['tab']));
@@ -101,20 +72,9 @@ export class Engine {
     this.canvas.addEventListener('focus', () => this.dispatch('focus', ['canvas']));
   }
 
-  private updateHandleEvent() {
-    const topScene = this.sceneStack.at(-1);
-    if (topScene) {
-      this.like.handleEvent =
-        (event: LikeEvent) => dispatch(topScene.instance, event);
-    } else {
-      this.like.handleEvent =
-        (event: LikeEvent) => dispatch(this.like, event);
-    }
-  }
-
   private dispatch<K extends EventType>(type: K, args: EventMap[K]): void {
     const event = { type, args, timestamp: this.like.timer.getTime() } as LikeEvent;
-    dispatch(this.like, event);
+    likeDispatch(this.like, event);
   }
 
   /**
@@ -157,7 +117,7 @@ export class Engine {
   }
 }
 
-export function dispatch(obj: LikeEventHandlers, event: LikeEvent) {
+export function likeDispatch(obj: LikeEventHandlers, event: LikeEvent) {
   if (obj.handleEvent) {
     obj.handleEvent(event);
   } else {
@@ -165,6 +125,11 @@ export function dispatch(obj: LikeEventHandlers, event: LikeEvent) {
   }
 }
 
+/**
+ * Allows us to call event handlers on any object with them.
+ * Typically used at the end of a custom {@link Like.handleEvent | like.handleEvent}
+ * in order to propogate an event normally after processing it.
+ */
 export function callOwnHandlers(obj: LikeEventHandlers, event: LikeEvent) {
   if (event.type in obj)
     (obj as any)[event.type](...event.args)

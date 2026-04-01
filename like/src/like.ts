@@ -7,7 +7,6 @@ import type { Gamepad } from './input/gamepad';
 import type { Canvas } from './graphics/canvas';
 import type { Graphics } from './graphics/index';
 import { EventMap, EventType, LikeEvent } from './events';
-import { Scene, SceneInstance } from './scene';
 
 /** @private */
 export type TopLevelEventHandler = (event: LikeEvent) => void;
@@ -58,68 +57,6 @@ export type LikeBase = {
    */
   dispose(): void;
 
-  /** 
-   * Push a scene to the scene stack and run it.
-   *
-   * If a scene calls `pushScene(nextScene, true)`, it will be unloaded
-   * and re-constructed upon the parent scene calling `like.popScene'.
-   * Good for resource-intensive
-   * scenes or ones that rely heavily on their lifecycle. If you do want
-   * the lower scene to know what happened in the upper, (i.e. overworld
-   * updating with a battle), consider using scene composition or
-   * using localStorage to track persistent game state.
-   *
-   * If this scene calls `like.pushScene(nextScene, false)`, it will stay loaded:
-   * this means when we pop its parent, it will simply continue running. Assets
-   * will stay loaded in.
-   *
-   * Further, with unload=false the upper scene now has the ability to reference
-   * the instance that called `pushScene` and call down to it in a generic way
-   * via `like.getScene(-2)`
-   *
-   * See {@link Scene} for more detail -- while stacking is good for certain
-   * things, you're likely looking for Scene Composition.
-   *
-   * @param scene A function that creates and returns a scene instance, which is just event handlers.
-   * @param unload Set to true, and the current scene (before pushing) will unload.
-   */
-  pushScene(scene: Scene, unload: boolean): void
-
-  /**
-   * Pop the current scene off the stack.
-   *
-   * If the lower scene had called `pushScene` with the second arg (unload)
-   * set to true, it will be re-loaded. Otherwise it will continue where it
-   * left off.
-   * 
-   * To clear the stack, just run:
-   * ```ts
-   * while (like.popScene());
-   * ```
-   */
-  popScene(): Scene | undefined,
-
-  /**
-   * Set the current scene at the top of the scene stack.
-   * If the stack is empty, push it onto the stack.
-   * 
-   * Equivalent to `popScene` + `pushScene`.
-   * 
-   * Use {@link index.Like | popScene} to clear away the current scene,
-   * and to possibly revert to callback mode.
-   * 
-   * The scene is created via a factory function. See {@link pushScene} for details.
-   */
-  setScene(scene: Scene): void;
-
-  /**
-   * Get the current scene, or a specific index.
-   * 
-   * Uses `Array.at` under the hood, so -1 is the
-   * top scene, -2 is the parent scene, etc.
-   */
-  getScene(index?: number): SceneInstance | undefined;
-
   /**
    * LIKE's runtime is built around calling handleEvent.
    * 
@@ -133,7 +70,7 @@ export type LikeBase = {
    * setting this function. Setting it to a custom
    * function will disable the scene system.
    */
-  handleEvent?: TopLevelEventHandler;
+  handleEvent: TopLevelEventHandler;
 
   /**
    * Used as the default `like.handleEvent`, simply dispatches

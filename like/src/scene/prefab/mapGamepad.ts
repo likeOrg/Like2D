@@ -1,8 +1,8 @@
-import type { Scene } from "../scene";
-import type { Like } from "..";
-import type { Color, PrintProps } from "../graphics";
-import { type LikeButton, defaultMapping, GamepadMapping } from "../input";
-import { Vector2 } from "../math/vector2";
+import type { Scene, SceneManager } from "../";
+import type { Like } from "../..";
+import type { Color, PrintProps } from "../../graphics";
+import { type LikeButton, defaultMapping, GamepadMapping } from "../../input";
+import { Vector2 } from "../../math/vector2";
 
 const mapOrder: LikeButton[] = [
   "BRight",
@@ -113,7 +113,7 @@ export type MapMode = {
 export const mapGamepad = (
   mapMode: MapMode,
   targetPad: number,
-): Scene => (like: Like) => {
+): Scene => (like: Like, scenes: SceneManager) => {
   const currentlyUnmapped: LikeButton[] = [];
   const mapping: GamepadMapping = like.gamepad.getMapping(targetPad) ?? defaultMapping(2);
   const alreadyMapped = new Set<number>();
@@ -185,7 +185,7 @@ export const mapGamepad = (
         held = active;
       } else if (!active) {
         like.gamepad.setMapping(targetPad, mapping);
-        setTimeout(() => like.popScene(), 100);
+        setTimeout(() => scenes.pop(), 100);
       }
     },
 
@@ -201,7 +201,7 @@ export const mapGamepad = (
     },
 
     mousepressed() {
-      like.popScene();
+      scenes.pop();
     }
   };
 };
