@@ -38,7 +38,8 @@ export type DrawMode = "fill" | "line";
  * - Alpha defaults to 1 if omitted
  * - CSS color strings also accepted: `"red"`, `"#ff0000"`, `"rgb(255,0,0)"`
  */
-export type Color = [number, number, number, number?] | string;
+export type ColorNum = [number, number, number, number?];
+export type Color = ColorNum | string;
 
 export type TransformProps = {
   angle?: number;
