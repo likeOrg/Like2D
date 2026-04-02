@@ -13,9 +13,13 @@ import { Scene, SceneInstance } from "..";
 import { callOwnHandlers, likeDispatch, LikeEvent } from "../..";
 import { ColorNum } from "../../graphics";
 
-export function fadeTransition(nextF: Scene, baseColor: ColorNum = [0,0,0], duration = 1): Scene {
+export function fadeTransition(
+  nextF: Scene,
+  baseColor: ColorNum = [0,0,0],
+  duration = 1
+): Scene {
   return (like, scenes) => {
-    const prev = scenes.get(-1);
+    const prev = scenes.get(-2);
     const next = scenes.instantiate(nextF);
 
     baseColor = baseColor.slice(0, 3) as any;
@@ -23,8 +27,8 @@ export function fadeTransition(nextF: Scene, baseColor: ColorNum = [0,0,0], dura
     const fade: SceneInstance = {}
 
     let instanceTime = 0;
+
     fade.load = () => {
-      console.log("fading loaded");
       instanceTime = like.timer.getTime();
     }
 

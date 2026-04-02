@@ -379,7 +379,9 @@ export class SceneManager {
         top.instance = undefined;
       }
     }
-    this.scenes.push({ instance: scene(this.like, this), factory: scene });
+    const entry: SceneEntry = { instance: undefined, factory: scene };
+    this.scenes.push(entry);
+    entry.instance = this.instantiate(scene);
   }
 
   /**
