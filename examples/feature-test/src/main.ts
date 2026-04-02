@@ -6,6 +6,7 @@ import { Vec2 } from "like/math";
 import { Scene, SceneManager } from "like/scene";
 import { startScreen } from "like/scene/prefab/startScreen";
 import { mapGamepad, buttonSetPS1 } from "like/scene/prefab/mapGamepad";
+import { fadeTransition } from "like/scene/prefab/fadeTransition"
 
 let pepperImage: ImageHandle;
 let audioSource: AudioSource | null = null;
@@ -170,7 +171,7 @@ document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
 const container = document.getElementById('game-container')!;
 const like = createLike(container);
 const sceneMan = new SceneManager(like);
-sceneMan.push(demoScene, false);
+sceneMan.push(fadeTransition(demoScene, [0, 0, 0]), false);
 sceneMan.push(startScreen(), false);
 
 await like.start();
