@@ -11,7 +11,7 @@
     "../like/src/scene/prefab/startScreen.ts"
   ],
   "useTsLinkResolution": true,
-  "projectDocuments": ["../like/README.md"],
+  "projectDocuments": ["../like/README.md", "../like/CHANGELOG.md"],
   "tsconfig": "../like/tsconfig.json",
   "out": "./public/api",
   "excludeExternals": true,
