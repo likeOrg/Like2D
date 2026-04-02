@@ -131,34 +131,39 @@ import type { Like, LikeHandlers, } from '../like';
  * // This allows communication, for example:
  * type UISceneInstance = SceneInstance & {
  *   // Sending events to child scene
- *   buttonClicked(name: string) => void;
+ *   buttonClicked(name: string): void;
  *   // Getting info from child scene
- *   getStatus() => string;
+ *   getStatus(): string;
  * };
  * type UIScene = SceneEx<UISceneInstance>;
  *
- * const uiScene = (game: UiScene): Scene => (like, scenes) => ({
- *   childScene: game(like, scene),
- *   handleEvent(event) {
- *     // Block mouse events in order to create a top bar.
- *     // Otherwise, propogate them.
- *     const mouseY = like.mouse.getPosition()[1];
- *     if (!event.type.startsWith('mouse') || mouseY > 100) {
- *       // Use likeDispatch so that nested handleEvent can fire,
- *       // if relevant.
- *       likeDispatch(this.childScene, event);
- *       if (buttonPressed(event, pos)) {
- *         childScene.buttonClicked('statusbar')
+ * const uiScene = (game: UIScene): Scene =>
+ *   (like, scenes) => {
+ *     const childScene = scenes.instantiate(game);
+ *     return {
+ *       handleEvent(event) {
+ *           // Block mouse events in order to create a top bar.
+ *           // Otherwise, propogate them.
+ *           const mouseY = like.mouse.getPosition()[1];
+ *           if (!event.type.startsWith('mouse') || mouseY > 100) {
+ *               // Use likeDispatch so that nested handleEvent can fire,
+ *               // if relevant.
+ *               likeDispatch(childScene, event);
+ *           }
+ *           // Then, call my own callbacks.
+ *           // Using likeDispatch here will result in an infinite loop.
+ *           callOwnHandlers(this, event);
+ *       },
+ *       mousepressed(pos) {
+ *           if (buttonClicked(pos)) {
+ *               childScene.buttonClicked('statusbar')
+ *           }
+ *       },
+ *       draw() {
+ *           drawStatus(like, childScene.getStatus());
  *       }
- *     }
- *     // Then, call my own callbacks.
- *     // Using likeDispatch here will result in an infinite loop.
- *     callOwnHandlers(this, event);
- *   },
- *   draw() {
- *     drawStatus(like, childScene.getStatus());
+ *     };
  *   }
- * });
  *
  * const gameScene = (level: number): UIScene =>
  *   (like, scene) => ({
@@ -223,8 +228,8 @@ export type Scene = (like: Like, scenes: SceneManager) => SceneInstance;
  * Now, a parent composing scene can take in UIScene rather than Scene,
  * and it has no need to cast anything.
  */
-export type SceneEx<S extends SceneInstance> =
-  (like: Like, scenes: SceneManager) => S
+export type SceneEx<S> =
+  (like: Like, scenes: SceneManager) => S & SceneInstance
 
 /**
  * A scene instance is just an object with event handlers. It's
@@ -262,6 +267,9 @@ type SceneEntry = {
   instance: SceneInstance | undefined,
   factory: Scene,
 };
+
+/** Goofy ahh Typescript thingy to avoid excess generics */
+type InstantiateReturn<F> = F extends SceneEx<infer S> ? S & SceneInstance : never;
 
 /**
  * Scenemanager is the entry point for the LÏKE scene system.
@@ -312,17 +320,30 @@ export class SceneManager {
    * The calling scene will always have `dispose` called.
    *
    * Set cannot clear the current scene; for that use {@link pop}.
+   *
+   * @param scene is a Scene (factory pattern).
+   * @param instance is an optional instance of said factory.
    */
-  set(scene: Scene) {
+  set(scene: Scene, instance = this.instantiate(scene)) {
     const idx = Math.max(0, this.scenes.length - 1);
     const top = this.scenes.at(-1);
     if (top) {
       likeDispatch(top.instance!, {
-        type: 'dispose', args: [], timestamp: this.like.timer.getTime()
+        type: 'quit', args: [], timestamp: this.like.timer.getTime()
       });
     }
 
-    this.scenes[idx] = { instance: scene(this.like, this), factory: scene };
+    this.scenes[idx] = { instance, factory: scene };
+  }
+
+  /**
+   * Make a scene into an instance and dispatch `load` into it.
+   * Good for composition.
+   */
+  instantiate<T extends SceneEx<SceneInstance>>(scene: T): InstantiateReturn<T> {
+    const inst = scene(this.like, this);
+    likeDispatch(inst, { type: 'load', args: [], timestamp: this.like.timer.getTime() });
+    return inst as InstantiateReturn<T>;
   }
 
   /**
@@ -353,7 +374,7 @@ export class SceneManager {
       const top = this.scenes.at(-1);
       if (top) {
         likeDispatch(top.instance!, {
-          type: 'dispose', args: [], timestamp: this.like.timer.getTime()
+          type: 'quit', args: [], timestamp: this.like.timer.getTime()
         });
         top.instance = undefined;
       }
