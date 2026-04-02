@@ -16,10 +16,10 @@ const player = {
 };
 
 const scales: CanvasSize[] = [
+  'native',
   [320, 320],
   [800, 300],
   [240, 320],
-  'native'
 ];
 let scaleIndex = 0;
 

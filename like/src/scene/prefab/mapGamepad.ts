@@ -17,7 +17,7 @@
  */
 
 import type { Scene, SceneManager } from "../";
-import type { Like } from "../..";
+import { callOwnHandlers, likeDispatch, type Like } from "../..";
 import type { Color, PrintProps } from "../../graphics";
 import { type LikeButton, defaultMapping, GamepadMapping } from "../../input";
 import { Vector2 } from "../../math/vector2";
@@ -150,9 +150,20 @@ export const mapGamepad = (
     }
   }
 
-  like.canvas.setMode([320, 240]);
-
   return {
+    handleEvent(ev) {
+      if (ev.type == 'draw') {
+        const parent = scenes.get(-2);
+        if (parent) {
+          likeDispatch(parent, ev);
+          like.gfx.clear([0,0,0,0.5]);
+        } else {
+          like.gfx.clear();
+        }
+      }
+      callOwnHandlers(this, ev);
+    },
+
     update() {
       frameWait--;
     },
@@ -164,8 +175,8 @@ export const mapGamepad = (
           width: 16,
       }
       const active = currentlyUnmapped.at(-1);
-      like.gfx.clear();
-      like.gfx.scale(20);
+      const csize = like.canvas.getSize();
+      like.gfx.scale(csize[0] / 16);
       like.gfx.translate([0, 1]);
       like.gfx.print(
         "white",
@@ -173,15 +184,25 @@ export const mapGamepad = (
         [8, 0.0],
         centerText,
       );
+      // draw shadows
+      like.gfx.withTransform(() => {
+        like.gfx.translate([0.1,0.1]);
+        for (const prop of mapMode.buttons.keys()) {
+          buttonProps[prop].draw(like, 'black');
+        }
+      });
+
       for (const prop of mapMode.buttons.keys()) {
-        const color =
+        const color: Color =
           held == prop
             ? "green"
             : active == prop
               ? "red"
               : mapMode.buttons.has(prop)
-                ? "gray"
-                : "black";
+                ? "white"
+                : [0, 0, 0, 0];
+
+        // draw shadows
         buttonProps[prop].draw(like, color);
       }
       like.gfx.print(
