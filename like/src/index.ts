@@ -15,7 +15,7 @@ import type { Like } from './like';
 
 export type { Like, LikeHandlers, LikeBase, TopLevelEventHandler } from './like';
 export type { LikeEvent, LikeCanvasElement } from './events';
-export { callOwnHandlers } from './engine';
+export { callOwnHandlers, likeDispatch } from './engine';
 
 /**
  * Create a new Like2D game instance attached to a DOM container.
