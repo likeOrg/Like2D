@@ -13,6 +13,9 @@ import { Scene, SceneInstance } from "..";
 import { callOwnHandlers, likeDispatch, LikeEvent } from "../..";
 import { ColorNum } from "../../graphics";
 
+/**
+ *  Push this and get faded.
+ */
 export function fadeTransition(
   nextF: Scene,
   baseColor: ColorNum = [0,0,0],
