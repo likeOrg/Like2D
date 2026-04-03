@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LÏKE Game Framework</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Hero Section -->
+    <header class="hero-section">
+        <div class="container">
+            <div class="header-content">
+                <div class="hero-card">
+                    <div class="header-text">
+                        <h1>Want to make a 2D browser game?<span class="highlight"><br/> Just LÏKE, do it!</span></h1>
+                        <p class="subtitle">
+                            LÏKE is a framework similar to LÖVE or Raylib, but built for web canvas.
+                        </p>
+                    </div>
+                </div>
+                <div class="logo-container">
+                    <img src="./logo.svg" alt="Like2D">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">Zero boilerplate, maximum freedom.</h2>
+            <p class="section-subtitle">Focus on what matters.</p>
+            
+            <div class="features-wrapper">
+                <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚲</div>
+                    <h3 class="feature-title">Simple Bindings</h3>
+                    <p class="feature-desc">No need to fuss with clunky web APIs. Get things on screen in an instant.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">Good Practices</h3>
+                    <p class="feature-desc">By using low-state abstractions, LÏKE is easier to reason about than vanilla.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏗️</div>
+                    <h3 class="feature-title">Build how you want to</h3>
+                    <p class="feature-desc">LÏKE is a framework, not an engine. It's good for any realtime 2D canvas app, not just games.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💛</div>
+                    <h3 class="feature-title">Open source and compact</h3>
+                    <p class="feature-desc">LÏKE is MIT, so you're free to modify it as you see fit. The code is kept as simple and clean as possible.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">♠️</div>
+                    <h3 class="feature-title">Why the spade?</h3>
+                    <p class="feature-desc">I'm digging in the dirt of Web APIs so you don't have to. LÏKE is your flower bed.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">😮</div>
+                    <h3 class="feature-title">Oh, you caught me early.</h3>
+                    <p class="feature-desc">LÏKE is in 2.x.x, which for us means heavy development and API breakage. Watch this space.</p>
+                </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Example Section -->
+    <section class="code-section">
+        <div class="container">
+            <h2 class="section-title">Easy to start</h2>
+            <p class="section-subtitle">Familiar binds for many, but modernized.</p>
+            <div class="code-container">
+                <div class="code-header">
+                    <div class="code-dot red"></div>
+                    <div class="code-dot yellow"></div>
+                    <div class="code-dot green"></div>
+                    <span class="code-title">main.ts</span>
+                </div>
+                <div class="code-content">
+                    <pre><code><span class="keyword">import</span> { createLike } <span class="keyword">from</span> <span class="string">"like2d"</span>;
+
+<span class="keyword">const</span> like = <span class="function">createLike</span>(document.body);
+
+like.load = () => {
+  like.canvas.<span class="function">setMode</span>([800, 600]);
+  like.input.<span class="function">setAction</span>(<span class="string">"jump"</span>, [<span class="string">"Space"</span>, <span class="string">"BBottom"</span>]);
+};
+
+like.update = (dt) => {
+  <span class="keyword">if</span> (like.input.<span class="function">justPressed</span>(<span class="string">"jump"</span>)) {
+    console.<span class="function">log</span>(<span class="string">"Jump!"</span>);
+  }
+};
+
+like.draw = () => {
+  like.gfx.<span class="function">clear</span>([0.1, 0.1, 0.1, 1]);
+  like.gfx.<span class="function">circle</span>(<span class="string">"fill"</span>, <span class="string">"dodgerblue"</span>, [400, 300], 50);
+  like.gfx.<span class="function">print</span>(<span class="string">"white"</span>, <span class="string">"Hello Like2D!"</span>, [20, 20]);
+};
+
+<span class="keyword">await</span> like.<span class="function">start</span>();</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="cta-title">Ready to start?</h2>
+            <p class="cta-subtitle">Wow, you knew about LÏKE before it was cool.</p>
+            
+            <div class="cta-buttons">
+                <a href="./api/documents/README.html" class="btn btn-primary">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    View API Docs
+                </a>
+                <a href="https://github.com/likeOrg/Like2D" class="btn btn-secondary" target="_blank" rel="noopener">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                    </svg>
+                    GitHub
+                </a>
+                <a href="https://www.npmjs.com/package/like2d" class="btn btn-secondary" target="_blank" rel="noopener">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                        <line x1="12" y1="22.08" x2="12" y2="12"/>
+                    </svg>
+                    NPM
+                </a>
+                <a href="https://jsr.io/@like2d/like" class="btn btn-secondary" target="_blank" rel="noopener">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    JSR
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <p class="footer-legal">Like2D is released under the MIT License. Built for game developers.</p>
+    </footer>
+</body>
+</html>

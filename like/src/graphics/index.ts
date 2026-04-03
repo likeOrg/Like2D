@@ -12,6 +12,7 @@ export type {
 
 export type {
   Color,
+  ColorNum,
   DrawMode,
   ShapeProps,
   DrawProps,

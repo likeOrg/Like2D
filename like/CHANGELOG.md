@@ -1,5 +1,123 @@
 # Changelog
 
+## [2.13.0] - 2026-04-02
+
+### Breaking Changes
+
+#### Scene split out
+
+Scenes were always intended to be an _adapter_. A modular piece that gets plugged
+into a simpler system.
+
+At first, they were integrated into a monolith. Then, they were split out as we
+narrowed into `handleEvent`. Then, they were integrated back into the engine
+with the stack system. Finally, they split out again into an adapter.
+
+That's where we are now.
+
+Before:
+```typescript
+const like = createLike(document.body);
+like.start();
+like.pushScene(blah);
+```
+
+After:
+```typescript
+const like = createLike(document.body);
+const sceneMan = new SceneManager(like);
+like.start();
+sceneMan.push(blah);
+```
+
+All of the `like.*` callbacks related to scene management have been split into
+the manager in `like/scene`.
+
+Also, prefab scenes now live in `like/scene/prefab/*`.
+
+#### Scene lifecycle
+
+The scene lifecycle of constructor-load-destructor is _tired_.
+
+Using resources shouldn't force us to choose between null-checking every single resource before use, versus assuming they're non-null and crashing out.
+
+It shouldn't involve the boilerplate of doing deallocations that the garbage
+collector should be doing.
+
+Therefore, LÏKE has decided to use a factory pattern for scenes.
+
+What was once idiomatically:
+```typescript
+class MyScene extends Scene {
+  someImage?: ImageHandle;
+  
+  constructor(private path: string) {}
+  
+  load(like) {
+    this.someImage = like.gfx.newImage(this.path);
+  }
+  
+  draw(like) {
+    like.gfx.draw(this.someImage);
+  }
+  
+  actionpressed(like, action) { ... }
+};
+```
+is now:
+```typescript
+const myScene = (path: string): Scene => (like: Like) => {
+
+  const someImage = like.gfx.newImage(path);
+
+  return {
+    draw() {
+      like.gfx.draw(someImage);
+    }
+    
+    actionPressed(action) { ... }
+  }
+}
+```
+
+It's also simpler when adopting scenes for the first time; when converting from a callback to a scene pattern, we no longer have to add `like` as the first argument of every callback. Instead, we can use this pattern:
+```javascript
+// before...
+like = createLike(document.body);
+
+like.update = function (dt) {
+  foo();
+}
+// or
+like.draw = () => { bar(); }
+
+// after
+like = createLike(document.body);
+
+const createScene = (like) => {
+  const myScene = {}
+  myScene.update = function (dt) {
+    foo();
+  }
+  myScene.draw = () => { bar(); }
+  return myScene;
+}
+
+like.setScene(createScene)
+```
+For the vast majority of cases, this is as simple as `s/^like\./myScene./` plus some wrapping.
+
+Scene lifecycle functions have also been fleshed out in terms of sane functionality.
+See [the fresh docs](https://likeorg.github.io/Like2D/api/types/scene.Scene.html) for details.
+
+We are implementing this change _without backwards compat_. If you're crying out in pain right now, let me know and I'll consider writing a wrapper around old-style scenes.
+
+### Additions
+ - `like.quit` / `sceneInstance.quit` callback added for cleanup
+ - `sceneInstance.load` called every time a scene enters the stack top
+ - `like/scene/prefab/fadeTransition` added: easy fading between scenes
+ - `scene.instance` and `scene.deinstance`
+
 ## [2.12.0] - 2026-03-30
 
 ### Breaking Changes

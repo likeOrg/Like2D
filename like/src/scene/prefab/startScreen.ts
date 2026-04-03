@@ -1,8 +1,48 @@
-
-import { type Scene } from '../scene';
-import type { ImageHandle } from '../graphics/index';
-import { Vec2 } from '../math/vector2';
-import { Like } from '..';
+/**
+ * ## Why
+ *
+ *  1. Because the LIKE logo looks awesome.
+ *  2. Autoplay restriction; modern browers don't let you play audio until the page is clicked.
+ *  3. You have to click on the game in order to send inputs, anyway.
+ *  4. It's polite.
+ *
+ * ## Usage
+ *
+ * ```typescript
+ * import { createLike, createStartScreen } from 'like';
+ * import { createGameScene } from './game';
+ *
+ * // init LIKE with scenes
+ * const container = document.getElementById("myGame");
+ * const like = createLike(container);
+ * const sceneMan = new SceneManager(like);
+ *
+ * // these callbacks will be ignored until the scene is clicked
+ * like.update = function () { ... }
+ * like.draw = function () { ... }
+ *
+ * // Set up the start screen
+ * like.start();
+ * sceneMan.push(startScreen())
+ * ```
+ *
+ * Alternatively, copy-paste this code into your own project and modify it freely.
+ *
+ * ## Custom Rendering
+ *
+ * Pass a custom draw function to replace the default logo:
+ *
+ * ```typescript
+ * const startup = startScreen((like) => {
+ *   like.gfx.clear([0, 0, 0, 1]);
+ *   like.gfx.print([1, 1, 1], 'Click to Start', [100, 100]);
+ * });
+ * ```
+ * @module scene/prefab/startScreen
+ */
+import type { Scene } from '..';
+import type { Like } from '../..';
+import { Vec2 } from '../../math/vector2';
 
 const LOGO = 
   'data:image/svg+xml;base64,' +
@@ -38,85 +78,37 @@ const LOGO =
   'MTIyIiByeD0iNi4wMjIxIiByeT0iNi4xMTgyIi8+CiAgPGVsbGlwc2UgY3g9IjE0Ny40OSIgY3k9' +
   'IjE2LjEyMiIgcng9IjYuMDIyMSIgcnk9IjYuMTE4MiIvPgogPC9nPgo8L3N2Zz4K';
 
-/**
- * ## Why
- * 
- *  1. Because the LIKE logo looks awesome.
- *  2. Autoplay restriction, doesn't let you play audio until the page is clicked.
- *  3. You have to click on the game in order to send inputs, anyway. 
- *  4. It's polite.
- * 
- * ## Usage
- *
- * ```typescript
- * import { createLike, StartScreen } from 'like';
- * import { GameScene } from './game';
- *
- * const container = document.getElementById("myGame");
- * const like = createLike(container);
- * 
- * // these callbacks will be ignored until the scene is clicked
- * like.update = function () { ... }
- * like.draw = function () { ... }
- *
- * // Set up the start screen
- * like.pushScene(new StartScreen())
- * like.start();
- * ```
- * 
- * Alternatively, copy-paste this code into your own project and modify it freely.
- * Update imports:
- * 
- * ```ts
- * import { type Scene } from 'like/scene';
- * import type { ImageHandle } from 'like/graphics';
- * import { Vec2 } from 'like/math';
- * import { Like } from 'like';
- * ```
- *
- * ## Custom Rendering
- *
- * Pass a custom draw function to replace the default logo:
- *
- * ```typescript
- * const startup = new StartupScene(gameScene, (like) => {
- *   like.gfx.clear([0, 0, 0, 1]);
- *   like.gfx.print([1, 1, 1], 'Click to Start', [100, 100]);
- * });
- * ```
- */
-export class StartScreen implements Scene {
-  private logo!: ImageHandle;
+/** The start screen scene factory. Call this and pass it into {@link scene.SceneManager.push} */
+export const startScreen = (
+  onDraw?: (like: Like) => void
+): Scene => (like, scenes) => {
+  const logo = like.gfx.newImage(LOGO);
 
-  constructor(
-    private onDraw?: (like: Like) => void
-  ) { }
+  like.mouse.setMode({ lock: false, scrollBlock: false });
 
-  load(like: Like): void {
-    this.logo = like.gfx.newImage(LOGO);
-  }
+  return {
+    draw() {
+      if (onDraw) {
+        onDraw(like);
+      } else if (logo.isReady()) {
+        like.gfx.clear([0.5, 0, 0.5, 1]);
+        const winSize = like.canvas.getSize();
+        const scale = (winSize[0] * 0.5) / logo.size[0];
+        like.gfx.draw(logo, Vec2.div(winSize, 2), {
+          scale,
+          origin: Vec2.div(logo.size, 2),
+        });
+        like.gfx.print(
+          [1, 1, 0, 0.5 + 0.5 * Math.sin(like.timer.getTime() * 3)],
+          "▶️ click to start ◀️",
+          Vec2.mul(winSize, [0.5, 0.8]),
+          { align: "center", font: "25px sans" },
+        );
+      }
+    },
 
-  draw(like: Like): void {
-    if (this.onDraw) {
-      this.onDraw(like);
-    } else if (this.logo.isReady()) {
-      like.gfx.clear([0.5, 0, 0.5, 1]);
-      const winSize = like.canvas.getSize();
-      const scale = (winSize[0] * 0.5) / this.logo.size[0];
-      like.gfx.draw(this.logo, Vec2.div(winSize, 2), {
-        scale,
-        origin: Vec2.div(this.logo.size, 2),
-      });
-      like.gfx.print(
-        [1, 1, 0, 0.5 + 0.5 * Math.sin(like.timer.getTime() * 3)],
-        "▶️ click to start ◀️",
-        Vec2.mul(winSize, [0.5, 0.8]),
-        { align: "center", font: "25px sans" },
-      );
+    mousepressed() {
+      scenes.pop();
     }
-  }
-
-  mousepressed(like: Like): void {
-    like.popScene();
-  }
-}
+  };
+};

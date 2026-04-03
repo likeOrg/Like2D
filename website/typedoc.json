@@ -6,12 +6,14 @@
     "../like/src/audio/index.ts",
     "../like/src/timer/index.ts",
     "../like/src/math/index.ts",
-    "../like/src/prefab-scenes/index.ts"
+    "../like/src/scene/index.ts",
+    "../like/src/scene/prefab/mapGamepad.ts",
+    "../like/src/scene/prefab/startScreen.ts"
   ],
   "useTsLinkResolution": true,
-  "projectDocuments": ["../like/README.md"],
+  "projectDocuments": ["../like/README.md", "../like/CHANGELOG.md"],
   "tsconfig": "../like/tsconfig.json",
-  "out": "./dist/api",
+  "out": "./public/api",
   "excludeExternals": true,
   "excludePrivate": true,
   "excludeProtected": true,

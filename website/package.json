@@ -5,15 +5,15 @@
   "type": "module",
   "scripts": {
     "build": "typedoc --options typedoc.json",
-    "preview": "npx serve dist",
-    "dev": "concurrently \"npm run build:watch\" \"npm run serve:watch\"",
+    "preview": "npx serve public",
+    "dev": "npm run build && concurrently \"npm run build:watch\" \"npm run serve:watch\"",
     "build:watch": "typedoc --options typedoc.json --watch",
-    "serve:watch": "browser-sync dist --watch --port 3000",
+    "serve:watch": "browser-sync public --watch --port 3000",
     "docs:generate": "typedoc --options typedoc.json",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "lint": "echo 'No linting configured'",
-    "deploy": "pnpm build && cp index.html dist/ && gh-pages -d dist"
+    "deploy": "pnpm build && gh-pages -d public"
   },
   "devDependencies": {
     "browser-sync": "^3.0.4",

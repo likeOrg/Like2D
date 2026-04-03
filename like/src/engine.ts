@@ -5,18 +5,17 @@ import { Keyboard } from './input/keyboard';
 import { Mouse } from './input/mouse';
 import { Gamepad } from './input/gamepad';
 import { Graphics } from './graphics/graphics';
-import type { LikeEvent, EventType, EventMap, Dispatcher, LikeCanvasElement } from './events';
-import type { Like } from './like';
+import type { LikeEvent, LikeEventHandlers, Dispatcher, LikeCanvasElement } from './events';
+import { LikeHandlers, type Like } from './like';
 import { Canvas } from './graphics/canvas';
-import { Scene, sceneDispatch } from './scene';
 
 /** @private */
-export type EngineDispatcher = Dispatcher<EventType>;
+export type EngineDispatcher = Dispatcher<keyof LikeEventHandlers>;
 /** @private */
-export type EngineProps<T extends keyof EventMap> = {
+export type EngineProps<K extends keyof LikeEventHandlers> = {
   canvas: LikeCanvasElement,
   abort: AbortSignal,
-  dispatch: Dispatcher<T>,
+  dispatch: Dispatcher<K>,
 }
 
 /** @private */
@@ -27,7 +26,6 @@ export class Engine {
   private isRunning = false;
   private lastTime = 0;
   private abort = new AbortController();
-  private sceneStack: Scene[] = [];
 
   /**
    * The Like interface providing access to all engine subsystems.
@@ -40,7 +38,7 @@ export class Engine {
 
     this.container.appendChild(this.canvas);
 
-    const props: EngineProps<keyof EventMap> = {
+    const props: EngineProps<keyof LikeEventHandlers> = {
       canvas: this.canvas,
       dispatch: this.dispatch.bind(this),
       abort: this.abort.signal,
@@ -65,32 +63,7 @@ export class Engine {
       canvas,
       start: this.start.bind(this),
       dispose: this.dispose.bind(this),
-
-      getScene: (pos = -1): Scene | undefined => {
-        return this.sceneStack.at(pos);
-      },
-
-      pushScene: (scene: Scene, _overlay: boolean) => {
-        this.sceneStack.push(scene);
-        this.refreshScene();
-      },
-
-      popScene: (): Scene | undefined => {
-        const s = this.sceneStack.pop();
-        this.refreshScene();
-        return s;
-      },
-
-      setScene: (scene: Scene) => {
-        const idx = Math.max(0, this.sceneStack.length - 1);
-        this.sceneStack[idx] = scene;
-        this.refreshScene();
-      },
-
-      callOwnHandlers: (event: LikeEvent) => {
-        if (event.type in this.like)
-          (this.like as any)[event.type](...event.args)
-      }
+      callOwnHandlers: (ev) => callOwnHandlers(this.like, ev),
     };
 
     window.addEventListener('focus', () => this.dispatch('focus', ['tab']));
@@ -98,25 +71,12 @@ export class Engine {
     this.canvas.addEventListener('focus', () => this.dispatch('focus', ['canvas']));
   }
 
-  private refreshScene() {
-    const topScene = this.sceneStack.at(-1);
-    if (topScene) {
-      this.like.handleEvent = (event) => sceneDispatch(topScene, this.like, event);
-      if (this.isRunning) {
-        this.dispatch("load", []);
-      }
-    } else {
-      this.like.handleEvent = undefined;
-    }
-  }
-
-  private dispatch<K extends EventType>(type: K, args: EventMap[K]): void {
+  private dispatch<K extends keyof LikeEventHandlers>(
+    type: K,
+    args: Parameters<LikeEventHandlers[K]>): void
+  {
     const event = { type, args, timestamp: this.like.timer.getTime() } as LikeEvent;
-    if (this.like.handleEvent) {
-      this.like.handleEvent(event);
-    } else {
-      this.like.callOwnHandlers(event);
-    }
+    likeDispatch(this.like, event);
   }
 
   /**
@@ -154,7 +114,27 @@ export class Engine {
    * Clean up all resources and stop the engine.
    */
   dispose(): void {
+    this.dispatch('quit', []);
     this.isRunning = false;
     this.abort.abort();
   }
+}
+
+export function likeDispatch(obj: LikeHandlers, event: LikeEvent) {
+  if (obj.handleEvent) {
+    obj.handleEvent(event);
+  } else {
+    callOwnHandlers(obj, event);
+  }
+}
+
+/**
+ * Call event handlers from an event. For example, an event with `.type = update, .args = [dt]`
+ * translates to calling `obj.draw(dt)`.
+ *
+ * Typically used at the end of a custom {@link LikeHandlers.handleEvent | handleEvent}.
+ */
+export function callOwnHandlers(obj: LikeHandlers, event: LikeEvent) {
+  if (event.type in obj)
+    (obj as any)[event.type](...event.args)
 }
