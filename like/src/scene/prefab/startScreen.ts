@@ -78,7 +78,7 @@ const LOGO =
   'MTIyIiByeD0iNi4wMjIxIiByeT0iNi4xMTgyIi8+CiAgPGVsbGlwc2UgY3g9IjE0Ny40OSIgY3k9' +
   'IjE2LjEyMiIgcng9IjYuMDIyMSIgcnk9IjYuMTE4MiIvPgogPC9nPgo8L3N2Zz4K';
 
-/** The start screen scene factory. Call this and pass it into {@link SceneManager.push} */
+/** The start screen scene factory. Call this and pass it into {@link scene.SceneManager.push} */
 export const startScreen = (
   onDraw?: (like: Like) => void
 ): Scene => (like, scenes) => {

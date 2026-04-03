@@ -99,7 +99,11 @@ export type Dispatcher<K extends keyof LikeEventHandlers> = (
  * {@link LikeHandlers} has the full list.
  */
 export type LikeEvent = {
-  [K in keyof LikeEventHandlers]: { type: K; args: Parameters<LikeEventHandlers[K]>; timestamp: number }
+  [K in keyof LikeEventHandlers]: {
+    type: K;
+    args: Parameters<LikeEventHandlers[K]>;
+    timestamp: number
+  }
 }[keyof LikeEventHandlers];
 
 /** @private */

@@ -268,8 +268,8 @@ type SceneEntry = {
   factory: Scene,
 };
 
-/** Goofy ahh Typescript thingy to avoid excess generics */
-type InstantiateReturn<F> = F extends SceneEx<infer S> ? S & SceneInstance : never;
+/** Goofy ahh Typescript thingy to avoid excess generics @private */
+export type InstantiateReturn<F> = F extends SceneEx<infer S> ? S & SceneInstance : never;
 
 /**
  * Scenemanager is the entry point for the LÏKE scene system.

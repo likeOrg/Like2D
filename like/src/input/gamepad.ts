@@ -14,9 +14,9 @@ export type GamepadTarget = number | "any";
  * 
  * If you're planning on supporting gamepads, please include a
  * way to generate {@link GamepadMapping} and set it with {@link Gamepad.setMapping}.
- * Perhaps trigger it on {@link index.EventMap.gamepadconnected | gamepadconnected} events.
+ * Perhaps trigger it on {@link index.LikeHandlers.gamepadconnected | gamepadconnected} events.
  * 
- * If you don't want to make your own, take a look at {@link prefab-scenes.MapGamepad}
+ * If you don't want to make your own, take a look at {@link scene/prefab/mapGamepad}
  * 
  * ## When to use gamepad remapping
  * 

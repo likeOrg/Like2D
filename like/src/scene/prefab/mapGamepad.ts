@@ -3,7 +3,7 @@
  *
  * ```ts
  * like.gamepadconnected = (index) =>
- *   scenes.push(mapGamepad({ buttons: buttonSetGBA, sticks: 0 }), index)
+ *   scenes.push(mapGamepad({ buttons: buttonSetGBA, sticks: 0 }, 0), false)
  * ```
  *
  * Add this to your codebase and activating a gamepad causes a button mapping screen to pop up.
