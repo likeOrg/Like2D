@@ -124,7 +124,7 @@ import type { Like, LikeHandlers, } from '../like';
  * ## Composing scenes
  *
  * A `parent` scene contains a `child` scene, calls it, and
- * lifecycle via {@link SceneManager.instance} and {@link SceneManager.deinstance}.
+ * lifecycle via {@link SceneManager.instantiate} and {@link SceneManager.deinstance}.
  *
  * Just like the `like` object, scenes have handleEvent on them.
  * So, you could layer them like this, for example:
