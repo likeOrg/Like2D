@@ -40,8 +40,8 @@ importers:
   examples/starter:
     dependencies:
       like2d:
-        specifier: ^2.11.1
-        version: 2.11.1
+        specifier: ^2.13.0
+        version: 2.13.0
     devDependencies:
       typescript:
         specifier: ^5.9.3
@@ -852,8 +852,8 @@ packages:
   jsonfile@6.2.0:
     resolution: {integrity: sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg==}
 
-  like2d@2.11.1:
-    resolution: {integrity: sha512-0FpVJ85CCI8K0Z7In/iagD5y9mx7lmd4mscHSXMJPAGprzFUxCjSEBnxJEJ0/24ImtrI+j/P37kt75Fo+wgCoQ==}
+  like2d@2.13.0:
+    resolution: {integrity: sha512-At6AA4d8qO3HcGHovA4hFCq4ziUGaEkQY3AxtMOeUkmM6ParyzxPspo/Go1qcVxFRMHmiDoyiNNUYlRA5DNGjQ==}
 
   limiter@1.1.5:
     resolution: {integrity: sha512-FWWMIEOxz3GwUI4Ts/IvgVy6LPvoMPgjMdQ185nN6psJyBJ4yOpzqm695/h5umdLJg2vW3GR5iG11MAkR2AzJA==}
@@ -2081,7 +2081,7 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  like2d@2.11.1: {}
+  like2d@2.13.0: {}
 
   limiter@1.1.5: {}
 

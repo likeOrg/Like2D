@@ -29,7 +29,7 @@ like.update = (dt: number) => {
     nextDropTime = time + Math.random() / 2 + 0.2;
   }
   for (const {birth} of drops) 
-    if (time - birth - dt > 2 != time - birth > 2) {
+    if (time - birth - dt > 2 != time - birth > 2 && like.canvas.hasFocus()) {
       dropp.audio.playbackRate = 2 ** ([0,4,7,11][Math.floor(Math.random()*4)] / 12);
       dropp.seek(0);
       dropp.play();
@@ -54,12 +54,12 @@ like.draw = () => {
     if (age > 1.8) {
       let opacity = 2 - age / 4;
       let color: Color = [1,1,1,opacity];
-      like.gfx.circle("line", color, pos, [(age - 1.8) * 20, (age - 1.8) * 10]);
+      like.gfx.circle("line", color, pos, (age - 1.8) * 10, { scale: [2,1] });
     }
     if (age < 2) {
-      let smush = (0.2 - Math.max(0, age - 1.8)) / 0.4;
+      let smush = (0.2 - Math.max(0, age - 1.8)) / 0.3;
       let wobble: Vector2 = [Math.sin(age*10), Math.cos(age*9)];
-      let scale = Vec2.add(Vec2.mul(wobble, 0.2), [0.5/(smush+0.5), smush]);
+      let scale = Vec2.add(Vec2.mul(wobble, 0.2), [0.7/(smush+0.5), smush]);
       like.gfx.draw(drop, pos, { origin: dropOrigin, scale });
     }
   }
