@@ -108,7 +108,7 @@ like.setScene(createScene)
 For the vast majority of cases, this is as simple as `s/^like\./myScene./` plus some wrapping.
 
 Scene lifecycle functions have also been fleshed out in terms of sane functionality.
-See [the fresh docs](https://likeorg.github.io/Like2D/api/types/scene.Scene.html) for details.
+See [the fresh docs](https://likeorg.github.io/Like2D/api/classes/scene.SceneManager.html) for details.
 
 We are implementing this change _without backwards compat_. If you're crying out in pain right now, let me know and I'll consider writing a wrapper around old-style scenes.
 

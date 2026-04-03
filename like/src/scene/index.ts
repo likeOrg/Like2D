@@ -45,7 +45,7 @@ import type { Like, LikeHandlers, } from '../like';
  *     titleCard: like.gfx.newImage(path);
  *     spawnTime: like.timer.getTime();
  *     draw() {
- *       // draw 'game over' over the parent scene
+ *       // draw 'game over' over the lower scene
  *       like.gfx.draw(this.titleCard);
  *       scenes.get(-2)?.draw();
  *     }
@@ -123,6 +123,9 @@ import type { Like, LikeHandlers, } from '../like';
  * ```
  * ## Composing scenes
  *
+ * A `parent` scene contains a `child` scene, calls it, and
+ * lifecycle via {@link SceneManager.instance} and {@link SceneManager.deinstance}.
+ *
  * Just like the `like` object, scenes have handleEvent on them.
  * So, you could layer them like this, for example:
  *
@@ -189,7 +192,11 @@ import type { Like, LikeHandlers, } from '../like';
  * This makes it perfect for reusable UI,
  * level editors, debug viewers, and more.
  *
- * ## Overlay scenes
+ * ## Scene stacking
+ *
+ * Higher on the stack is the `upper` scene, and lower on it
+ * is the `lower`. We use the term `overlay` to refer to an
+ * upper scene that passes `draw` events to a lower one.
  *
  * You might assume that the purpose of a scene stack is
  * visual: first push the BG, then the FG, etc.
@@ -307,7 +314,7 @@ export class SceneManager {
    * Get the current scene, or a specific index.
    *
    * Uses `Array.at` under the hood, so -1 is the
-   * top scene, -2 is the parent scene, etc.
+   * top scene, -2 is the lower scene, etc.
    *
    * During instantiation, the stack is not shifted
    * relative to during event/lifecycle functions.
@@ -345,7 +352,7 @@ export class SceneManager {
    * @param unload
    *
    * If a scene calls `scenes.push(nextScene, true)`, it will be unloaded
-   * and re-constructed upon the parent scene calling `scenes.pop()`.
+   * and re-constructed upon the upper scene calling `scenes.pop()`.
    * Good for resource-intensive
    * scenes or ones that rely heavily on their lifecycle. If you do want
    * the lower scene to know what happened in the upper while unloaded, (i.e. overworld
@@ -353,7 +360,7 @@ export class SceneManager {
    * using localStorage to track persistent game state.
    *
    * If a scene calls `scenes.push(nextScene, false)`, it will stay loaded:
-   * this means when we pop its parent, it will simply continue running, though
+   * this means when we pop the upper, it will simply continue running, though
    * `load` will be called. Assets will of course stay loaded in during that time.
    *
    * Further, with unload disabled the upper scene now has the ability to reference
@@ -408,7 +415,7 @@ export class SceneManager {
   }
 
   /**
-   * Unload a parent scene. Only use this if the lower scene requested to be
+   * Unload a lower scene. Only use this if the lower scene requested to be
    * unloaded, or if you're certain that you want to reload the lower
    * completely. Otherwise, this can easily lose state or break functions.
    */
