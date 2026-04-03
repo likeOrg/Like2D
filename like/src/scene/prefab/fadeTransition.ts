@@ -5,52 +5,65 @@
  *
  * Here's your remedy:
  * ```ts
- * scenes.push(fadeTransition(myNextScene), false)
+ * sceneMan.push(fadeTransition(myNextScene, enableUnload), false);
  * ```
  */
 
-import { Scene, SceneInstance } from "..";
-import { callOwnHandlers, likeDispatch, LikeEvent } from "../..";
+import { Scene } from "..";
+import { callOwnHandlers, likeDispatch } from "../..";
 import { ColorNum } from "../../graphics";
 
+export type FadeProps = Partial<{
+  color: ColorNum,
+  duration: number,
+}>;
+
 /**
- *  Push this and get faded.
+ *  The fade scene factory.
+ *
+ * @param nextF The next scene (not sceneInstance)
+ * @param unload Set this rather than unload in `sceneMan.push`, which will cause early unload.`
+ * @options color and duration.
  */
-export function fadeTransition(
+export const fadeTransition = (
   nextF: Scene,
-  baseColor: ColorNum = [0,0,0],
-  duration = 1
-): Scene {
-  return (like, scenes) => {
-    const prev = scenes.get(-2);
-    const next = scenes.instantiate(nextF);
+  unload: boolean,
+  options: FadeProps = {}
+): Scene => (like, scenes) => {
+  const baseColor = options.color ? options.color.slice(0,3) : [0,0,0];
+  const duration = options.duration ?? 1;
 
-    baseColor = baseColor.slice(0, 3) as any;
+  const prev = scenes.get(-2);
+  const next = scenes.instantiate(nextF); // load next scene early
 
-    const fade: SceneInstance = {}
+  let time = 0;
 
-    let instanceTime = 0;
+  return {
+    // stack: [prev: -3, next: -2, this: -1]
+    load() { time = 0; },
+    update(dt) { time += dt },
+    handleEvent(ev) {
+      let elapsed = time / duration * 2;
 
-    fade.load = () => {
-      instanceTime = like.timer.getTime();
-    }
-
-    fade.handleEvent = (ev: LikeEvent) => {
-      const elapsed = (like.timer.getTime() - instanceTime) / duration * 2;
       if (ev.type == 'draw') {
         if (elapsed < 1) {
           if (prev) likeDispatch(prev, ev);
           like.gfx.clear([...baseColor, elapsed] as any)
         } else if (elapsed < 2) {
-          likeDispatch(next, ev)
+          if (unload) {
+            // if we're unloading, unload the prev scene now.
+            scenes.deinstance(-2);
+            unload = false;
+          }
+          if (next) {
+            likeDispatch(next, ev)
+          }
           like.gfx.clear([...baseColor, 2 - elapsed] as any)
         } else {
           scenes.set(nextF, next);
         }
       }
-      callOwnHandlers(fade, ev);
-    };
-
-    return fade;
+      callOwnHandlers(this, ev);
+    }
   }
 }

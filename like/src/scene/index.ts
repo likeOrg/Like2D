@@ -308,6 +308,11 @@ export class SceneManager {
    *
    * Uses `Array.at` under the hood, so -1 is the
    * top scene, -2 is the parent scene, etc.
+   *
+   * During instantiation, the stack is not shifted
+   * relative to during event/lifecycle functions.
+   * The only difference is that during load,
+   * scene.get(-1) of course returns no value.
    */
   get(pos = -1): SceneInstance | undefined {
     return this.scenes.at(pos)?.instance;
@@ -317,28 +322,84 @@ export class SceneManager {
    * Set the current scene at the top of the scene stack.
    * If the stack is empty, push it onto the stack.
    *
-   * The calling scene will always have `dispose` called.
+   * The new scene is instantiated after the old one is
+   * quit and removed from the stack.
    *
    * Set cannot clear the current scene; for that use {@link pop}.
    *
    * @param scene is a Scene (factory pattern).
-   * @param instance is an optional instance of said factory.
+   * @param instance is an optional preloaded instance.
    */
-  set(scene: Scene, instance = this.instantiate(scene)) {
+  set(scene: Scene, instance?: SceneInstance) {
     const idx = Math.max(0, this.scenes.length - 1);
+    this.deinstance(-1);
+    this.scenes[idx] = { instance, factory: scene };
+    this.scenes[idx].instance = instance ?? this.instantiate(scene);
+  }
+
+  /**
+   * Push a scene to the scene stack and run it.
+   *
+   * @param scene A function that creates and returns a scene instance, which is just event handlers.
+   *
+   * @param unload
+   *
+   * If a scene calls `scenes.push(nextScene, true)`, it will be unloaded
+   * and re-constructed upon the parent scene calling `scenes.pop()`.
+   * Good for resource-intensive
+   * scenes or ones that rely heavily on their lifecycle. If you do want
+   * the lower scene to know what happened in the upper while unloaded, (i.e. overworld
+   * updating with a battle), consider using scene composition instead, or
+   * using localStorage to track persistent game state.
+   *
+   * If a scene calls `scenes.push(nextScene, false)`, it will stay loaded:
+   * this means when we pop its parent, it will simply continue running, though
+   * `load` will be called. Assets will of course stay loaded in during that time.
+   *
+   * Further, with unload disabled the upper scene now has the ability to reference
+   * the instance that called `scene.push` and call down to it in a generic way
+   * via `scene.get(-2)`
+   *
+   * See {@link Scene} for more detail -- while stacking is good for certain
+   * things, you're likely looking for Scene Composition.
+   *
+   */
+  push(scene: Scene, unload: boolean): void {
+    if (unload) {
+      this.deinstance(-1);
+    }
+    const entry: SceneEntry = { instance: undefined, factory: scene };
+    this.scenes.push(entry);
+    entry.instance = this.instantiate(entry.factory);
+  }
+
+  /**
+   * Pop the current scene off the stack, calling `quit` on it and
+   * dropping the instance reference.
+   *
+   * If the lower scene had called `pushScene` with the second arg (unload)
+   * set to true, it will be re-loaded. Otherwise it will continue where it
+   * left off. Either way its `load` fill fire.
+   *
+   * To clear the stack, just run:
+   * ```ts
+   * while (like.popScene());
+   * ```
+   */
+  pop(): Scene | undefined {
+    this.deinstance(-1);
+    const oldTop = this.scenes.pop();
     const top = this.scenes.at(-1);
     if (top) {
-      likeDispatch(top.instance!, {
-        type: 'quit', args: [], timestamp: this.like.timer.getTime()
-      });
+      if (!top.instance) {
+        top.instance = this.instantiate(top.factory);
+      }
     }
-
-    this.scenes[idx] = { instance, factory: scene };
+    return oldTop?.factory;
   }
 
   /**
    * Make a scene into an instance and dispatch `load` into it.
-   * Good for composition.
    */
   instantiate<T extends SceneEx<SceneInstance>>(scene: T): InstantiateReturn<T> {
     const inst = scene(this.like, this);
@@ -347,76 +408,38 @@ export class SceneManager {
   }
 
   /**
-   * Push a scene to the scene stack and run it.
-   *
-   * @param scene A function that creates and returns a scene instance, which is just event handlers.
-   * @param _unload
-   *
-   * If a scene calls `scenes.push(nextScene, true)`, it will be unloaded
-   * and re-constructed upon the parent scene calling `scenes.pop()`.
-   * Good for resource-intensive
-   * scenes or ones that rely heavily on their lifecycle. If you do want
-   * the lower scene to know what happened in the upper while unloaded, (i.e. overworld
-   * updating with a battle), consider using scene composition or
-   * using localStorage to track persistent game state.
-   *
-   * If this scene calls `scenes.push(nextScene, false)`, it will stay loaded:
-   * this means when we pop its parent, it will simply continue running. Assets
-   * will stay loaded in. Further, with unload disabled the upper scene now has the ability to reference
-   * the instance that called `scene.push` and call down to it in a generic way
-   * via `scene.get(-2)`
-   *
-   * See {@link Scene} for more detail -- while stacking is good for certain
-   * things, you're likely looking for Scene Composition.
+   * Unload a parent scene. Only use this if the lower scene requested to be
+   * unloaded, or if you're certain that you want to reload the lower
+   * completely. Otherwise, this can easily lose state or break functions.
    */
-  push(scene: Scene, unload: boolean): void {
-    if (unload) {
-      const top = this.scenes.at(-1);
-      if (top) {
-        likeDispatch(top.instance!, {
-          type: 'quit', args: [], timestamp: this.like.timer.getTime()
-        });
-        top.instance = undefined;
+  deinstance(pos: number) {
+    const scene = this.scenes.at(pos);
+    if (scene) {
+      if (scene.instance) {
+        likeDispatch(scene.instance, { type: 'quit', args: [], timestamp: this.like.timer.getTime() })
       }
+      scene.instance = undefined;
     }
-    const entry: SceneEntry = { instance: undefined, factory: scene };
-    this.scenes.push(entry);
-    entry.instance = this.instantiate(scene);
   }
 
-  /**
-   * Pop the current scene off the stack.
-   *
-   * If the lower scene had called `pushScene` with the second arg (unload)
-   * set to true, it will be re-loaded. Otherwise it will continue where it
-   * left off.
-   *
-   * To clear the stack, just run:
-   * ```ts
-   * while (like.popScene());
-   * ```
-   */
-  pop(): Scene | undefined {
-    const oldTop = this.scenes.pop();
+  debugDraw() {
+    const g = this.like.gfx;
+    for (const si in this.scenes) {
+      const i = Number(si);
+      g.print('white', `${si}: hasInstance: ${!!this.scenes[i].instance}`, [50, i*20+20]);
+    }
+  }
+
+  private handleEvent(event: LikeEvent) {
     const top = this.scenes.at(-1);
     if (top) {
       if (!top.instance) {
-        top.instance = top.factory(this.like, this);
+        throw new Error("expected top scene to be loaded");
       }
-      likeDispatch(top.instance, {
-        type: 'load', args: [], timestamp: this.like.timer.getTime()
-      });
-    }
-    return oldTop?.factory;
-  }
-
-
-  private handleEvent(event: LikeEvent) {
-    const top = this.scenes.at(-1)?.instance;
-    if (top) {
-      likeDispatch(top, event);
+      likeDispatch(top.instance, event);
     } else {
       this.like.callOwnHandlers(event);
     }
+    //if (event.type == 'draw') this.debugDraw();
   }
 }

@@ -31,9 +31,11 @@ sceneMan.push(blah);
 ```
 
 All of the `like.*` callbacks related to scene management have been split into
-the manager.
+the manager in `like/scene`.
 
-#### Scene factory pattern
+Also, prefab scenes now live in `like/scene/prefab/*`.
+
+#### Scene lifecycle
 
 The scene lifecycle of constructor-load-destructor is _tired_.
 
@@ -77,16 +79,6 @@ const myScene = (path: string): Scene => (like: Like) => {
   }
 }
 ```
-or:
-```typescript
-const myScene = (path: string): Scene => (like: Like) => ({
-    someImage: like.gfx.newImage(path);
-    draw() {
-      like.gfx.draw(this.someImage);
-    }
-    actionPressed(action) { ... }
-})
-```
 
 It's also simpler when adopting scenes for the first time; when converting from a callback to a scene pattern, we no longer have to add `like` as the first argument of every callback. Instead, we can use this pattern:
 ```javascript
@@ -115,11 +107,16 @@ like.setScene(createScene)
 ```
 For the vast majority of cases, this is as simple as `s/^like\./myScene./` plus some wrapping.
 
+Scene lifecycle functions have also been fleshed out in terms of sane functionality.
+See [the fresh docs](https://likeorg.github.io/Like2D/api/types/scene.Scene.html) for details.
+
 We are implementing this change _without backwards compat_. If you're crying out in pain right now, let me know and I'll consider writing a wrapper around old-style scenes.
 
 ### Additions
  - `like.quit` / `sceneInstance.quit` callback added for cleanup
  - `sceneInstance.load` called every time a scene enters the stack top
+ - `like/scene/prefab/fadeTransition` added: easy fading between scenes
+ - `scene.instance` and `scene.deinstance`
 
 ## [2.12.0] - 2026-03-30
 

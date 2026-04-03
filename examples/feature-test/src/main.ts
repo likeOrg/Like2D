@@ -42,6 +42,12 @@ const demoScene: Scene = (like: Like, scenes: SceneManager) => {
   like.gamepad.enableAutoLoadMapping(false);
 
   return {
+    load() {
+      console.log("loaded!");
+    },
+    quit() {
+      console.log("quitted!");
+    },
     update(dt: number) {
       let moveDelta: [number, number] = [0, 0];
       if (like.input.isDown('move_left')) moveDelta = Vec2.add(moveDelta, [-1, 0]);
@@ -171,7 +177,8 @@ document.getElementById('fullscreen-btn')?.addEventListener('click', () => {
 const container = document.getElementById('game-container')!;
 const like = createLike(container);
 const sceneMan = new SceneManager(like);
-sceneMan.push(fadeTransition(demoScene, [0, 0, 0]), false);
-sceneMan.push(startScreen(), false);
+
+sceneMan.push(fadeTransition(demoScene, true), false);
+sceneMan.push(startScreen(), true);
 
 await like.start();
