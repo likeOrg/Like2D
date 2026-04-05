@@ -213,7 +213,7 @@ export class SceneManager {
     const g = this.like.gfx;
     for (const si in this.scenes) {
       const i = Number(si);
-      g.print('white', `${si}: hasInstance: ${!!this.scenes[i].instance}`, [50, i*20+20]);
+      g.print('fill', 'white', `${si}: hasInstance: ${!!this.scenes[i].instance}`, [50, i*20+20]);
     }
   }
 

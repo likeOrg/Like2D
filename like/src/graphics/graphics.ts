@@ -61,7 +61,7 @@ export type DrawProps = ShapeProps & {
 export type PrintProps = {
   font?: string;
   align?: CanvasTextAlign,
-} & TransformProps;
+} & ShapeProps;
 
 function parseColor(color: Color): string {
   if (typeof color === "string") return color;
@@ -230,29 +230,38 @@ export class Graphics {
 
   /**
    * Draws text at a position.
-   * 
+   *
    * Align works browser-style: if you align center, your text draws
    * to the left and right of its position. If you align right, your position
    * becomes the upper-right corner of the text.
 
-   * @param color Fill color.
+   * @param mode Fill or line.
+   * @param color Fill or stroke color.
    * @param text Text string.
    * @param position Top-left position.
    * @param props {@link PrintProps} Optional font, text limit, or alignment.
    */
   print(
+    mode: DrawMode,
     color: Color,
     text: string,
     position: Vector2,
     props?: PrintProps,
   ): void {
     const { font = "16px sans-serif" } = props ?? {};
+    const c = applyColor(color);
     this.ctx.save();
     this.applyTransform(position, props);
     this.ctx.font = font;
-    this.ctx.fillStyle = parseColor(color);
     this.ctx.textAlign = props?.align ?? "left";
-    this.ctx.fillText(text, 0, 0);
+    if (mode === "fill") {
+      this.ctx.fillStyle = c;
+      this.ctx.fillText(text, 0, 0);
+    } else {
+      setStrokeProps(this.ctx, props);
+      this.ctx.strokeStyle = c;
+      this.ctx.strokeText(text, 0, 0);
+    }
     this.ctx.restore();
   }
 

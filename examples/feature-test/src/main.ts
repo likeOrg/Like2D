@@ -108,11 +108,11 @@ const demoScene: Scene = (like: Like, scenes: SceneManager) => {
       const center = Vec2.mul(canvasSize, 0.5);
       const [w, h] = canvasSize;
 
-      gfx.print('white', 'Like Demo', [20, 30], { font: '28px sans-serif' });
-      gfx.print('yellow', `Scaling: ${scales[scaleIndex]} (Z to cycle)`, [20, 60], { font: '14px sans-serif' });
+      gfx.print('line', 'white', 'Like Demo', [20, 30], { font: '28px sans-serif' });
+      gfx.print('fill', 'yellow', `Scaling: ${scales[scaleIndex]} (Z to cycle)`, [20, 60], { font: '14px sans-serif' });
 
-      gfx.print('lime', `FPS: ${timer.getFPS()}`, [w - 80, 30]);
-      gfx.print('lime', `${(timer.getDelta() * 1000).toFixed(1)}ms`, [w - 80, 48]);
+      gfx.print('line', 'lime', `FPS: ${timer.getFPS()}`, [w - 80, 30]);
+      gfx.print('fill', 'lime', `${(timer.getDelta() * 1000).toFixed(1)}ms`, [w - 80, 48]);
       if (timer.isSleeping()) gfx.print('red', 'SLEEPING', [w - 100, 66]);
 
       gfx.rectangle('fill', 'red', [50, 100, 100, 80]);
@@ -122,26 +122,26 @@ const demoScene: Scene = (like: Like, scenes: SceneManager) => {
       gfx.line('gray', [[200, 100], [350, 180]]);
 
       const mousePos = mouse.getPosition();
-      gfx.print('cyan', `Mouse: (${Math.round(mousePos[0])}, ${Math.round(mousePos[1])})`, [20, 180], { font: '16px sans-serif' });
+      gfx.print('line', 'cyan', `Mouse: (${Math.round(mousePos[0])}, ${Math.round(mousePos[1])})`, [20, 180], { font: '16px sans-serif' });
       gfx.circle('line', 'cyan', mousePos, 10);
 
       const [l, m, r] = [mouse.isDown('left') ? 'L' : '_', mouse.isDown('middle') ? 'M' : '_', mouse.isDown('right') ? 'R' : '_'];
-      gfx.print('yellow', `Buttons: [${l}] [${m}] [${r}]`, [20, 200], { font: '16px sans-serif' });
-      gfx.print(mouse.isPointerLocked() ? 'lime' : 'gray', `Pointer Lock: ${mouse.isPointerLocked() ? 'ON' : 'OFF'} (C to toggle)`, [20, 220], { font: '14px sans-serif' });
+      gfx.print('fill', 'yellow', `Buttons: [${l}] [${m}] [${r}]`, [20, 200], { font: '16px sans-serif' });
+      gfx.print('fill', mouse.isPointerLocked() ? 'lime' : 'gray', `Pointer Lock: ${mouse.isPointerLocked() ? 'ON' : 'OFF'} (C to toggle)`, [20, 220], { font: '14px sans-serif' });
 
-      gfx.print('springgreen', `Player: (${Math.round(player.pos[0])}, ${Math.round(player.pos[1])})`, [20, h - 30], { font: '16px sans-serif' });
+      gfx.print('fill', 'springgreen', `Player: (${Math.round(player.pos[0])}, ${Math.round(player.pos[1])})`, [20, h - 30], { font: '16px sans-serif' });
       gfx.circle('fill', 'springgreen', player.pos, 15);
       gfx.circle('line', 'lime', player.pos, 15);
 
       // Display gamepad sticks
       const sticks = gamepad.getSticks(0);
       if (sticks.length > 0) {
-        gfx.print('orange', 'Gamepad Axes:', [20, 260], { font: '16px sans-serif' });
+        gfx.print('fill', 'orange', 'Gamepad Axes:', [20, 260], { font: '16px sans-serif' });
         sticks.forEach((pos, i) => {
-          gfx.print('white', `  Stick ${i}: ${pos}`, [20, 280 + i * 18], { font: '14px sans-serif' });
+          gfx.print('line', 'white', `  Stick ${i}: ${pos}`, [20, 280 + i * 18], { font: '14px sans-serif' });
         });
       } else {
-        gfx.print('gray', 'No gamepad connected', [20, 260], { font: '14px sans-serif' });
+        gfx.print('line', 'gray', 'No gamepad connected', [20, 260], { font: '14px sans-serif' });
       }
 
 

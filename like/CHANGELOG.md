@@ -4,6 +4,10 @@
 
 ### Breaking Changes
  - Removed ad-hoc line wrapping functionality (text 'width')
+ - Add 'fill' | 'line' to first arg of print.
+ 
+### Additions
+ - Text can now be stroked
 
 ## [2.13.0] - 2026-04-02
 

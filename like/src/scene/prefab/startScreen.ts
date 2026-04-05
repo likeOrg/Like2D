@@ -58,6 +58,7 @@ export const startScreen = (
           origin: Vec2.div(logo.size, 2),
         });
         like.gfx.print(
+          'fill',
           [1, 1, 0, 0.5 + 0.5 * Math.sin(like.timer.getTime() * 3)],
           "▶️ click to start ◀️",
           Vec2.mul(winSize, [0.5, 0.8]),

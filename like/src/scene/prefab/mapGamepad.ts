@@ -178,6 +178,7 @@ export const mapGamepad = (
       like.gfx.scale(csize[0] / 16);
       like.gfx.translate([0, 1]);
       like.gfx.print(
+        'fill',
         "white",
         `Map gamepad ${targetPad}`,
         [8, 0.0],
@@ -205,6 +206,7 @@ export const mapGamepad = (
         buttonProps[prop].draw(like, color);
       }
       like.gfx.print(
+        'fill',
         "white",
         active
           ? `Press ${like.gamepad.fullButtonName(active)}!`
