@@ -11,6 +11,7 @@ V3 strips that down to a consistent and extensible baseline.
  - Scenes have now been moved to package @like2d/scene
  - Removed ad-hoc line wrapping functionality (text 'width' param)
    - Will be replaced with text metrics in 3.x
+ - Removed timer sleep function -- this can be middleware
  - Add 'fill' | 'line' to first arg of print.
  
 ### Additions

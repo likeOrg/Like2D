@@ -36,7 +36,6 @@ const demoScene: Scene = (like: Like, scenes: SceneManager) => {
   like.input.setAction('move_up', ['ArrowUp', 'KeyW', 'Up']);
   like.input.setAction('move_down', ['ArrowDown', 'KeyS', 'Down']);
   like.input.setAction('audio_play_pause', ['KeyP']);
-  like.input.setAction('sleep_timer', ['KeyL']);
   like.input.setAction('toggle_pointer_lock', ['KeyC']);
 
   like.gamepad.enableAutoLoadMapping(false);
@@ -82,9 +81,6 @@ const demoScene: Scene = (like: Like, scenes: SceneManager) => {
       if (action === 'audio_play_pause' && audioSource?.isReady()) {
         audioSource.isPlaying() ? audioSource.stop() : audioSource.play();
       }
-      if (action === 'sleep_timer') {
-        like.timer.sleep(2);
-      }
       if (action === 'toggle_pointer_lock') {
         const locked = like.mouse.isPointerLocked();
         like.mouse.lockPointer(!locked);
@@ -113,7 +109,6 @@ const demoScene: Scene = (like: Like, scenes: SceneManager) => {
 
       gfx.print('line', 'lime', `FPS: ${timer.getFPS()}`, [w - 80, 30]);
       gfx.print('fill', 'lime', `${(timer.getDelta() * 1000).toFixed(1)}ms`, [w - 80, 48]);
-      if (timer.isSleeping()) gfx.print('red', 'SLEEPING', [w - 100, 66]);
 
       gfx.rectangle('fill', 'red', [50, 100, 100, 80]);
       gfx.rectangle('line', 'lime', [50, 100, 100, 80]);

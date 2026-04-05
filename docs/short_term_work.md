@@ -8,8 +8,8 @@ FULL once-over of the API for breaking changes
  - [x] Add fill/line option to start of text print (for consistency)
  - [x] Split scenes into own package; keep in monorepo.
  - [ ] Document
- - [ ] Remove timer "sleep" functionality -- could be a middleware.
- - [ ] Document and provide example of middleware alternative
+ - [x] Remove timer "sleep" functionality -- could be a middleware.
+ - [x] Document and provide an example of middleware
  - [ ] Publish "redirect version" sending to new package
  - [ ] Rename NPM package to @like2d/like
  - [ ] Document this

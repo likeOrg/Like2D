@@ -93,12 +93,10 @@ export class Engine {
       const dt = (now - this.lastTime) / 1000;
       this.lastTime = now;
 
-      if (!this.like.timer.isSleeping()) {
-        this.canvas.dispatchEvent(
-          new CustomEvent("like:update", { detail: { dt } }),
-        );
-        this.dispatch('update', [dt]);
-      }
+      this.canvas.dispatchEvent(
+        new CustomEvent("like:update", { detail: { dt } }),
+      );
+      this.dispatch('update', [dt]);
 
       this.canvas.dispatchEvent(new CustomEvent<{}>("like:preDraw"));
       this.dispatch('draw', []);
