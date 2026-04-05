@@ -13,6 +13,7 @@ V3 strips that down to a consistent and extensible baseline.
    - Will be replaced with text metrics in 3.x
  - Removed timer sleep function -- this can be middleware
  - Add 'fill' | 'line' to first arg of print.
+ - Remove unused `timestamp` field from events.
  
 ### Additions
  - Text can now be stroked

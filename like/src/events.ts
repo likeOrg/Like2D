@@ -93,7 +93,7 @@ export type Dispatcher<K extends keyof LikeEventHandlers> = (
  *
  * Example:
  * ```ts
- * { type: 'mousemoved', args: [ [100, 250], [-5, -5] ], timestamp: 2.56 }
+ * { type: 'mousemoved', args: [ [100, 250], [-5, -5] ] }
  * ```
  *
  * {@link LikeHandlers} has the full list.
@@ -102,7 +102,6 @@ export type LikeEvent = {
   [K in keyof LikeEventHandlers]: {
     type: K;
     args: Parameters<LikeEventHandlers[K]>;
-    timestamp: number
   }
 }[keyof LikeEventHandlers];
 

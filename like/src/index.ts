@@ -1,14 +1,9 @@
 /**
  * A cozy web-native 2D game framework.
- * 
+ *
+ * {@include ../README.md}
+ * @module like
  */
-
-/**
- * Here are the top-level events, modules, and the scene system.
- * 
- * See {@link createLike} to get started.
- */
-
 
 import { Engine } from './engine';
 import type { Like } from './like';

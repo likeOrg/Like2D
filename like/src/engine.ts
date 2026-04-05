@@ -75,7 +75,7 @@ export class Engine {
     type: K,
     args: Parameters<LikeEventHandlers[K]>): void
   {
-    const event = { type, args, timestamp: this.like.timer.getTime() } as LikeEvent;
+    const event = { type, args } as LikeEvent;
     likeDispatch(this.like, event);
   }
 
