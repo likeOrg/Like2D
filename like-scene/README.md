@@ -31,8 +31,8 @@ deno add jsr:@like2d/scene
 
 Do this once to enable scenes:
 ```typescript
-import { createLike } from "like";
-import { SceneManager } from "like-scenes";
+import { createLike } from "@like2d/like";
+import { SceneManager } from "@like2d/scene";
 
 const like = createLike(document.body);
 const sceneMan = new SceneManager(like);

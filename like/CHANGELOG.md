@@ -8,7 +8,7 @@ V3 strips that down to a consistent and extensible baseline.
 
 ### Breaking Changes
  - like2d (NPM) has moved to @like2d/like
- - Scenes have now been moved to package @like2d/scene
+ - Scenes have now been moved to package @like2d/scene -- a separate pkg
  - Removed ad-hoc line wrapping functionality (text 'width' param)
    - Will be replaced with text metrics in 3.x
  - Removed timer sleep function -- this can be middleware
