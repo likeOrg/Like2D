@@ -1,3 +1,13 @@
+# Versioning
+Currently We're on "V2.x.x" and the minor versions are breaking.
+This is bad practice.
+
+The next version that _breaks_ the API will be 3.x
+
+Let's identify serious breaking changes that are likely to occur based on short and long term plans.
+
+Then, let's update our API and pull the band-aid off all at once.
+
 # ColorNum helpers
 Colors should have some helpers.
  - fromHSV

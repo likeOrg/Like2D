@@ -1,18 +1,12 @@
-Like2D is roughly using semver, but we never had a V0.
+### Current State
 
-### V1 - birth
-**TOTALLY UNSTABLE API**
-The place where we proved that Like2D was possible to build.
+LIKE's API is unstable because it is still developing.
 
-### V2 - growth
-**Gradual stabilization of API**
-The place where we solved our basic architecture and API.
-We build out something usable, but never too large to be flexible.
+The structure and features are mostly fleshed out at this point.
 
-### V3 - maturity
-**Relatively stable API**
+### Long term vision (summary)
 
-see docs/V3.md
+see `docs/long_term_work.md`
 
 Confident in our basis, we fill in the blind spots of this framework.
 
@@ -35,8 +29,7 @@ Look at V4. We don't want to fly too close to the sun.
 In other words, don't go too deeply into your local maximum.
 Because sometimes, there's another one nearby.
 
-### V4 -  stability
-**Stable API**
+### Extra long term vision
 
 Here we will consider crazy ideas such as:
  - software-rendered pixel graphics, likely running on Emscripten
