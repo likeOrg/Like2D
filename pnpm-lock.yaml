@@ -26,6 +26,9 @@ importers:
       like:
         specifier: file:../../like
         version: link:../../like
+      like-scenes:
+        specifier: file:../../like-scenes
+        version: file:like-scenes(like2d@file:like)
     devDependencies:
       '@types/node':
         specifier: ^22.13.10
@@ -51,6 +54,16 @@ importers:
         version: 7.3.1(@types/node@22.19.15)(yaml@2.8.2)
 
   like:
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  like-scenes:
+    dependencies:
+      like2d:
+        specifier: workspace:*
+        version: link:../like
     devDependencies:
       typescript:
         specifier: ^5.9.3
@@ -852,8 +865,16 @@ packages:
   jsonfile@6.2.0:
     resolution: {integrity: sha512-FGuPw30AdOIUTRMC2OMRtQV+jkVj2cfPqSeWXv1NEAJ1qZ5zb1X6z1mFhbfOB/iy3ssJCD+3KuZ8r8C3uVFlAg==}
 
+  like-scenes@file:like-scenes:
+    resolution: {directory: like-scenes, type: directory}
+    peerDependencies:
+      like2d: workspace:*
+
   like2d@2.13.0:
     resolution: {integrity: sha512-At6AA4d8qO3HcGHovA4hFCq4ziUGaEkQY3AxtMOeUkmM6ParyzxPspo/Go1qcVxFRMHmiDoyiNNUYlRA5DNGjQ==}
+
+  like2d@file:like:
+    resolution: {directory: like, type: directory}
 
   limiter@1.1.5:
     resolution: {integrity: sha512-FWWMIEOxz3GwUI4Ts/IvgVy6LPvoMPgjMdQ185nN6psJyBJ4yOpzqm695/h5umdLJg2vW3GR5iG11MAkR2AzJA==}
@@ -2081,7 +2102,13 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
+  like-scenes@file:like-scenes(like2d@file:like):
+    dependencies:
+      like2d: file:like
+
   like2d@2.13.0: {}
+
+  like2d@file:like: {}
 
   limiter@1.1.5: {}
 

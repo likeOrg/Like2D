@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "like": "file:../../like"
+    "like": "file:../../like",
+    "like-scenes": "file:../../like-scenes"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",

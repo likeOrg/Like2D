@@ -3,10 +3,10 @@ import { ImageHandle } from "like/graphics";
 import { AudioSource } from "like/audio";
 import { CanvasSize } from "like/graphics";
 import { Vec2 } from "like/math";
-import { Scene, SceneManager } from "like/scene";
-import { startScreen } from "like/scene/prefab/startScreen";
-import { mapGamepad, buttonSetPS1 } from "like/scene/prefab/mapGamepad";
-import { fadeTransition } from "like/scene/prefab/fadeTransition"
+import { Scene, SceneManager } from "like-scenes";
+import { startScreen } from "like-scenes/prefab/startScreen";
+import { mapGamepad, buttonSetPS1 } from "like-scenes/prefab/mapGamepad";
+import { fadeTransition } from "like-scenes/prefab/fadeTransition";
 
 let pepperImage: ImageHandle;
 let audioSource: AudioSource | null = null;
@@ -91,9 +91,9 @@ const demoScene: Scene = (like: Like, scenes: SceneManager) => {
       }
     },
 
-    gamepadpressed: (_ignore, ...args) => console.log(args),
+    gamepadpressed: (_source: number, ...args: unknown[]) => console.log(args),
 
-    gamepadconnected: (index) => {
+    gamepadconnected: (index: number) => {
       scenes.push(mapGamepad({ buttons: buttonSetPS1, stickCount: 2 }, index), true);
     },
 

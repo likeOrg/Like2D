@@ -29,14 +29,6 @@
     "./timer": {
       "import": "./dist/timer/index.js",
       "types": "./dist/timer/index.d.ts"
-    },
-    "./scene": {
-      "import": "./dist/scene/index.js",
-      "types": "./dist/scene/index.d.ts"
-    },
-    "./scene/prefab/*": {
-      "import": "./dist/scene/prefab/*.js",
-      "types": "./dist/scene/prefab/*.d.ts"
     }
   },
   "files": [

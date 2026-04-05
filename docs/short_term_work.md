@@ -6,6 +6,7 @@ FULL once-over of the API for breaking changes
 # Things that will break API in 3.x
  - [x] Remove ad-hoc line wrapping for text metrics
  - [x] Add fill/line option to start of text print (for consistency)
+ - [x] Split scenes into own package; keep in monorepo.
 
 ## JS code examples and starter
  - [ ] Code examples

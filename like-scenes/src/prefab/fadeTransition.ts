@@ -9,9 +9,9 @@
  * ```
  */
 
-import { Scene } from "..";
-import { callOwnHandlers, likeDispatch } from "../..";
-import { ColorNum } from "../../graphics";
+import type { Scene } from "..";
+import { callOwnHandlers, likeDispatch } from 'like2d';
+import type { ColorNum } from 'like2d/graphics';
 
 export type FadeProps = Partial<{
   color: ColorNum,

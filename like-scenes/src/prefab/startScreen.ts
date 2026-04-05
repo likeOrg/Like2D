@@ -1,7 +1,7 @@
 /** {@include startScreen.md} */
 import type { Scene } from '..';
-import type { Like } from '../..';
-import { Vec2 } from '../../math/vector2';
+import type { Like } from 'like2d';
+import { Vec2 } from 'like2d/math';
 
 const LOGO = 
   'data:image/svg+xml;base64,' +

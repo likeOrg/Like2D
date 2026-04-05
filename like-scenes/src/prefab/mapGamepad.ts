@@ -16,11 +16,12 @@
  * @module scene/prefab/mapGamepad
  */
 
-import type { Scene, SceneManager } from "../";
-import { callOwnHandlers, likeDispatch, type Like } from "../..";
-import type { Color, PrintProps } from "../../graphics";
-import { type LikeButton, defaultMapping, GamepadMapping } from "../../input";
-import { Vector2 } from "../../math/vector2";
+import type { Scene, SceneManager } from "..";
+import { likeDispatch, type Like, type LikeEvent } from 'like2d';
+import { callOwnHandlers } from 'like2d';
+import type { Color, PrintProps } from 'like2d/graphics';
+import { type LikeButton, defaultMapping, type GamepadMapping } from 'like2d/input';
+import { Vector2 } from 'like2d/math';
 
 const mapOrder: LikeButton[] = [
   "BRight",

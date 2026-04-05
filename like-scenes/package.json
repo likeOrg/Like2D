@@ -1,0 +1,44 @@
+{
+  "name": "like-scenes",
+  "version": "1.0.0",
+  "description": "Scene management system for Like2D",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./prefab/*": {
+      "import": "./dist/prefab/*.js",
+      "types": "./dist/prefab/*.d.ts"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "!dist/**/*.ts.map",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "like2d",
+    "game",
+    "scenes",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "like2d": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
