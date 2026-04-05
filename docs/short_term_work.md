@@ -7,6 +7,15 @@ FULL once-over of the API for breaking changes
  - [x] Remove ad-hoc line wrapping for text metrics
  - [x] Add fill/line option to start of text print (for consistency)
  - [x] Split scenes into own package; keep in monorepo.
+ - [ ] Document
+ - [ ] Remove timer "sleep" functionality -- could be a middleware.
+ - [ ] Document and provide example of middleware alternative
+ - [ ] Rename NPM package to @like2d/like
+ - [ ] Document
+ 
+# Package scenes
+ - [ ] npm @like2d/scene
+ - [ ] jsr @like2d/scene
 
 ## JS code examples and starter
  - [ ] Code examples
@@ -14,6 +23,7 @@ FULL once-over of the API for breaking changes
 
 ## ColorNum helpers
  - [ ] Add method to convert Color to ColorNum.
+ - [ ] Don't use ColorNum in any API
 
 ## Fix scene time for good!
  - [ ] Discourage use of like.timer.getTime(), encourage
