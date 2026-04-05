@@ -10,8 +10,9 @@ FULL once-over of the API for breaking changes
  - [ ] Document
  - [ ] Remove timer "sleep" functionality -- could be a middleware.
  - [ ] Document and provide example of middleware alternative
+ - [ ] Publish "redirect version" sending to new package
  - [ ] Rename NPM package to @like2d/like
- - [ ] Document
+ - [ ] Document this
  
 # Package scenes
  - [ ] npm @like2d/scene
