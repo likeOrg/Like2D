@@ -1,20 +1,29 @@
-I     Every law is imperfect. The law of the world is contradiction.
-II    The perfect code is no code. The perfect abstraction is no abstraction.
-III   Never optimize without benchmarking, unless it's plainly dog-slow.
-IV    Find a local maxima, don't let preexisting ideas blind you to it.
-V     Don't automate haircuts. If you're not sure, just hand me the scissors.
-VI    Only hand me the scissors if I ask for it, and make it clear you're doing so.
-VII   Maintainability isn't about extensible abstraction, it's about mental burden.
-VIII  Verbs are what's real, nouns are just self-referential verbs.
-IX    Store less state. A single source of truth is king. It's better to recalculate.
-X     Expressions > Statements.
-XI    Build in an opinionated way, no excessive config. It's open-source, anyway.
-XII   Write code that doesn't need comments. Names over numbers.
-XIII  Never comment the obvious unless dealing with users.
-XIV   Switching files is a mental burden. One file = one thought.
-XV    Perfect code has "good enough" functionality.
-XVI   Perfect functionality has nightmare code.
-XVII  The only thing worse than your code is someone else's code.
-XVIII Once it works, cut it down to just what's needed.
-XIX   The user isn't always right. A healthy debate solves many problems.
-XX    Satisfy both, but never snub the advanced user for the common user.
+LÏKE2D is mostly built on solving invisible problems. Unknown unknowns.
+
+It's a platform, first and foremost.
+This is especially true of early versions.
+
+Its goal is yes, make game development easier, but it doesn't
+attempt to solve most problems that could or should be solved
+in a diversity of ways. The rule is this:
+
+Imagine a highly competent game developer. What does he/she want?
+What do they not want?
+
+Examples:
+ - They want it to be easy to maintain a sharp native-res canvas
+ - They want it to be easy to get sharp pixel prescaling
+ - They don't want a pixelart game with linear scaling or mixels
+ - They want customizable inputs
+ - They don't want to hardcode keyboard bindings
+ - They want to implement many of their own systems
+ - They don't neccessarily want a predefined game object model.
+   - They want freedom to choose OOP, ECS, etc. or their own thing
+ 
+If our feature meets 99.5% of these wants, we force it on. Forking is always an option.
+
+If it meets 50%, we keep it IF it's easy to turn it off / choose.
+
+And if it meets less than 20%, we strip it away ESPECIALLY if
+it could have just been an external library.
+ 
