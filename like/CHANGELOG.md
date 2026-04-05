@@ -2,8 +2,15 @@
 
 ## [3.0.0] - UNRELEASED
 
+During V2, we experimented heavily with API and architecture.
+
+V3 strips that down to a consistent and extensible baseline.
+
 ### Breaking Changes
- - Removed ad-hoc line wrapping functionality (text 'width')
+ - like2d (NPM) has moved to @like2d/like
+ - Scenes have now been moved to package @like2d/scene
+ - Removed ad-hoc line wrapping functionality (text 'width' param)
+   - Will be replaced with text metrics in 3.x
  - Add 'fill' | 'line' to first arg of print.
  
 ### Additions
