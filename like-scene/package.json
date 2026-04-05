@@ -36,7 +36,7 @@
   "author": "",
   "license": "MIT",
   "peerDependencies": {
-    "like2d": "workspace:*"
+    "@like2d/like": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

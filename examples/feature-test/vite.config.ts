@@ -1,8 +1,4 @@
 import { defineConfig } from 'vite';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root: '.',
@@ -11,28 +7,12 @@ export default defineConfig({
     emptyOutDir: true,
   },
   publicDir: 'public',
-  resolve: {
-    alias: [
-      {
-        find: /^like$/,
-        replacement: path.resolve(__dirname, '../../like/src/index.ts')
-      },
-      {
-        find: /^like\/(.+)$/,
-        replacement: path.resolve(__dirname, '../../like/src/$1/index.ts')
-      },
-      {
-        find: /^like-scene\/(.+)$/,
-        replacement: path.resolve(__dirname, '../../like-scene/$1.ts')
-      },
-    ],
-  },
   server: {
     watch: {
-      ignored: ['!**/like/**']
+      ignored: ['!**/like/**', '!**/like-scene/**']
     }
   },
   optimizeDeps: {
-    exclude: ['like']
+    exclude: ['@like2d/like', '@like2d/scene']
   }
 });

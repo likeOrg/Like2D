@@ -1,5 +1,5 @@
 {
-  "name": "like2d",
+  "name": "@like2d/like",
   "version": "2.13.0",
   "description": "A web-native game framework inspired by Love2D",
   "type": "module",

@@ -10,8 +10,8 @@
  */
 
 import type { Scene } from "..";
-import { callOwnHandlers, likeDispatch } from 'like2d';
-import type { ColorNum } from 'like2d/graphics';
+import { callOwnHandlers, likeDispatch } from '@like2d/like';
+import type { ColorNum } from '@like2d/like/graphics';
 
 export type FadeProps = Partial<{
   color: ColorNum,

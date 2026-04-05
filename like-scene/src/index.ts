@@ -28,9 +28,9 @@
  * @module scene
  */
 
-import { likeDispatch } from 'like2d';
-import type { LikeEvent } from 'like2d';
-import type { Like, LikeHandlers } from 'like2d';
+import { likeDispatch } from '@like2d/like';
+import type { LikeEvent } from '@like2d/like';
+import type { Like, LikeHandlers } from '@like2d/like';
 
 /** {@include creating-scenes.md} */
 export type Scene = (like: Like, scenes: SceneManager) => SceneInstance;

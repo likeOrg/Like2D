@@ -1,5 +1,5 @@
 packages:
   - "like"
-  - "like-scenes"
+  - "like-scene"
   - "examples/*"
   - "website"

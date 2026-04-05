@@ -1,4 +1,4 @@
-# @like2d/like-scenes
+# @like2d/like-scene
 
 Scene management system for [LÏKE](https://jsr.io/@like2d/like).
 
@@ -21,12 +21,12 @@ or `sceneManager` wherever it is used.
 
 # Getting started
 
-Install like-scenes:
+Install like-scene:
 
 ``` bash
-npm install @like2d/scenes
+npm install @like2d/scene
 # or
-deno add jsr:@like2d/scenes
+deno add jsr:@like2d/scene
 ```
 
 Do this once to enable scenes:
@@ -114,8 +114,9 @@ to it. It can simply `pop` and return to the previous state.
 
 Notice how the function of the stack is _not primarily_ to visually overlay scenes, but to manage logical game state.
 
-Though with `sceneMan.get(-2)`, a scene can see lower scenes and even pass
-events to them by setting their own `handleEvent` callback.
+However, with `sceneMan.get(-2)`, a scene can see lower scenes and even pass
+events to them by setting their own `handleEvent` callback. This is a generic
+approach, and [composing scenes](#Composing scenes) is often preferred.
 
 If using stack, it is wise to push the title screen scene in the root `like.load`
 function so that we can clear the stack and return to it:
@@ -148,7 +149,7 @@ const sceneMan = new SceneManager(like, {nobind: true});
 like.handleEvent = sceneMan.handleEvent.bind(sceneMan);
 ```
 
-So if you want to layer top-level functionality onto the scene system, use `nobind: true`
+So if you want to layer middleware onto the scene system, use `nobind: true`
 and connect things as intended.
 
 ## Save/Load the entire stack
@@ -186,31 +187,33 @@ in `load`.
 # Creating your own scenes
 
 Scenes are a function that receives `Like` and `SceneManager`
-and returns a {@link SceneInstance | scene instance with event handlers}.
+and returns a `SceneInstance`, which is basically a table of the optional
+event handlers of `like`, sans modules.
 
-## Examples
+## Converting from Callbacks
 
-Minimal usage:
+When you first pick up the scene pattern, you might try this:
+
 ```typescript
-const gameOver: Scene = (like, scenes) => ({
-    titleCard: like.gfx.newImage(path);
-    spawnTime: like.timer.getTime();
-    draw() {
-      // draw 'game over' over the lower scene
-      like.gfx.draw(this.titleCard);
-      scenes.get(-2)?.draw();
-    }
-    update() {
-      // back to title screen after 3 seconds
-      if (like.timer.getTime() > spawnTime + 3) {
-        while(scenes.pop());
-      }
-    }
-})
+// Before (callbacks)
+like.update = function(dt) { player.update(dt); }
+like.draw = () => { player.draw(like.gfx); }
+
+// After (scene)
+scenes.set((like, scenes) => {
+  const scene: SceneInstance = {}
+  scene.update = function (dt) { player.update(dt); },
+  scene.draw = () => { player.draw(like.gfx); }
+  return scene;
+});
 ```
 
-For configurable scenes, it is reccommended to use a function
-that returns a Scene.
+## Closure-based scenes
+
+It is reccommended to use a function
+that returns a Scene, for configurability.
+
+Example:
 ```typescript
 const myScene = (options: { speed: number }): Scene =>
   (like: Like, scenes: SceneManager) => {
@@ -233,7 +236,10 @@ const myScene = (options: { speed: number }): Scene =>
   };
 ```
 
-Of course, a class pattern is also possible.
+## Class-based scenes
+
+Of course classes are also usable.
+
 ```typescript
 class ThingDoer extends SceneInstance {
   constructor(like, scenes) {...}
@@ -250,35 +256,20 @@ class ThingDoer extends SceneInstance {
   ...
 }
 
-const thingDoerScene = (options): Scene =>
+const thingDoerScene = (options): SceneEx<ThingDoer> =>
   (like, scenes) => new ThingDoer(like, scenes, options);
 ```
 
-## Converting from Callbacks
-
-When converting from global callbacks to a scene:
-
-```typescript
-// Before (callbacks)
-like.update = function(dt) { player.update(dt); }
-like.draw = () => { player.draw(like.gfx); }
-
-// After (scene)
-scenes.set((like, scenes) => {
-  const scene: SceneInstance = {}
-  scene.update = function (dt) { player.update(dt); },
-  scene.draw = () => { player.draw(like.gfx); }
-  return scene;
-});
-```
 ## Composing scenes
 
-A `parent` scene contains a `child` scene, calls it, and
-lifecycle via {@link SceneManager.instantiate} and dispatching
-the `quit` event if needed.
+This is the most powerful scene pattern, and highly
+reccommended.
 
 Just like the `like` object, scenes have handleEvent on them.
 So, you could layer them like this, for example:
+
+A `parent` scene contains a `child` scene, calls it, and handles
+lifecycle via `instantiate` / `deinstance`.
 
 ```typescript
 // Composing scenes lets us know about the children.
@@ -345,10 +336,6 @@ level editors, debug viewers, and more.
 
 ## Scene stacking
 
-Higher on the stack is the `upper` scene, and lower on it
-is the `lower`. We use the term `overlay` to refer to an
-upper scene that passes `draw` events to a lower one.
-
 You might assume that the purpose of a scene stack is
 visual: first push the BG, then the FG, etc.
 
@@ -366,9 +353,9 @@ the upper scene should be easily addable/removable.
 Using `like.getScene(-2)`, the overlay scene can see
 the lower scene and choose how to propagate events.
 
-The only technical difference between overlay and
-opaque is whether or not the scene we've pushed
-on top of stays loaded.
+Remember to call `like.push(someScene(), false)` in
+the lower scene in order to keep its instance alive
+for the uuper one.
 
 ## License
 

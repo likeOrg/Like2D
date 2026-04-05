@@ -17,11 +17,11 @@
  */
 
 import type { Scene, SceneManager } from "..";
-import { likeDispatch, type Like, type LikeEvent } from 'like2d';
-import { callOwnHandlers } from 'like2d';
-import type { Color, PrintProps } from 'like2d/graphics';
-import { type LikeButton, defaultMapping, type GamepadMapping } from 'like2d/input';
-import { Vector2 } from 'like2d/math';
+import { likeDispatch, type Like } from '@like2d/like';
+import { callOwnHandlers } from '@like2d/like';
+import type { Color, PrintProps } from '@like2d/like/graphics';
+import { type LikeButton, defaultMapping, type GamepadMapping } from '@like2d/like/input';
+import { Vector2 } from '@like2d/like/math';
 
 const mapOrder: LikeButton[] = [
   "BRight",
