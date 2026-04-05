@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.0.0] - UNRELEASED
+
+### Breaking Changes
+ - Removed ad-hoc line wrapping functionality (text 'width')
+
 ## [2.13.0] - 2026-04-02
 
 ### Breaking Changes

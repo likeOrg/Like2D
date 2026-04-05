@@ -60,7 +60,6 @@ export type DrawProps = ShapeProps & {
 
 export type PrintProps = {
   font?: string;
-  width?: number,
   align?: CanvasTextAlign,
 } & TransformProps;
 
@@ -82,32 +81,6 @@ function setStrokeProps(
   ctx.lineCap = props?.lineCap ?? "butt";
   ctx.lineJoin = props?.lineJoin ?? "miter";
   ctx.miterLimit = props?.miterLimit ?? 10;
-}
-
-function wrapText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-): string[] {
-  const words = text.split(" ");
-  const [first, ...rest] = words;
-  const lines: string[] = [];
-  let current = first ?? "";
-  rest.forEach((word) => {
-    if (ctx.measureText(current + " " + word).width < maxWidth) {
-      current += " " + word;
-    } else {
-      lines.push(current);
-      current = word;
-    }
-  });
-  lines.push(current);
-  return lines;
-}
-
-function getFontHeight(ctx: CanvasRenderingContext2D): number {
-  const match = ctx.font.match(/(\d+)px/);
-  return match ? parseInt(match[1]) : 16;
 }
 
 /**
@@ -258,14 +231,10 @@ export class Graphics {
   /**
    * Draws text at a position.
    * 
-   * Keep in mind: if you set `align` without `width` in your props,
-   * nothing will happen -- you'll get left-aligned text.
-   * 
    * Align works browser-style: if you align center, your text draws
    * to the left and right of its position. If you align right, your position
    * becomes the upper-right corner of the text.
-   * 
-   
+
    * @param color Fill color.
    * @param text Text string.
    * @param position Top-left position.
@@ -283,18 +252,7 @@ export class Graphics {
     this.ctx.font = font;
     this.ctx.fillStyle = parseColor(color);
     this.ctx.textAlign = props?.align ?? "left";
-    if (props && 'width' in props) {
-      const { width } = props;
-      const lines = wrapText(this.ctx, text, width as any);
-      const lineHeight = getFontHeight(this.ctx);
-      this.ctx.textBaseline = "top";
-      lines.forEach((line, i) => {
-        this.ctx.fillText(line, 0, i * lineHeight, width);
-      });
-      this.ctx.textBaseline = "alphabetic";
-    } else {
-      this.ctx.fillText(text, 0, 0);
-    }
+    this.ctx.fillText(text, 0, 0);
     this.ctx.restore();
   }
 

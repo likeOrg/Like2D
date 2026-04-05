@@ -172,7 +172,6 @@ export const mapGamepad = (
       const centerText: PrintProps = {
           font: "1px sans-serif",
           align: "center",
-          width: 16,
       }
       const active = currentlyUnmapped.at(-1);
       const csize = like.canvas.getSize();
