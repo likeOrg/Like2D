@@ -10,13 +10,6 @@ FULL once-over of the API for breaking changes
  - [x] Document
  - [x] Remove timer "sleep" functionality -- could be a middleware.
  - [x] Document and provide an example of middleware
- - [ ] Publish "redirect version" sending to new package
- - [ ] Rename NPM package to @like2d/like
- - [ ] Document this
- 
-# Package scenes
- - [ ] npm @like2d/scene
- - [ ] jsr @like2d/scene
 
 ## JS code examples and starter
  - [ ] Code examples
@@ -30,6 +23,12 @@ FULL once-over of the API for breaking changes
  - [ ] Copy+modify the gamepad mapping scene to make
        it possible to map actions.
  - [ ] When actions fire, they return a gamepad number if relevant.
+ 
+# Packages
+ - [ ] Publish "redirect version" of npm like2d sending to new package
+ - [ ] npm @like2d/like
+ - [ ] npm @like2d/scene
+ - [ ] jsr @like2d/scene
 
 # 3.x release tasks
 

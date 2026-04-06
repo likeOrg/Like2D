@@ -40,7 +40,17 @@ importers:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@22.19.15)(yaml@2.8.2)
 
-  examples/starter:
+  examples/starter-js:
+    dependencies:
+      like2d:
+        specifier: ^2.13.0
+        version: 2.13.0
+    devDependencies:
+      vite:
+        specifier: ^7.3.1
+        version: 7.3.1(@types/node@22.19.15)(yaml@2.8.2)
+
+  examples/starter-ts:
     dependencies:
       like2d:
         specifier: ^2.13.0
