@@ -3,7 +3,12 @@
   "version": "2.13.0",
   "description": "A web-native game framework inspired by Love2D",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./math": "./src/math/index.ts",
+    "./graphics": "./src/graphics/index.ts",
+    "./audio": "./src/audio/index.ts",
+    "./input": "./src/input/index.ts",
+    "./timer": "./src/timer/index.ts"
   },
   "publish": {
     "include": [

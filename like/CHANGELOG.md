@@ -4,7 +4,15 @@
 
 During V2, we experimented heavily with API and architecture.
 
-V3 strips that down to a consistent and extensible baseline.
+V3 is the end of that experiment. The goals are clear.
+
+However, it means one last large breakage.
+
+V3 has several versions planned that will not break API, only
+extend it.
+
+If you want to continue using V2.x, let me know and I will maintain
+a compat version.
 
 ### Breaking Changes
  - like2d (NPM) has moved to @like2d/like

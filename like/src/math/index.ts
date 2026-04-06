@@ -11,7 +11,7 @@
  * @module math 
  */
 
-export { type Vector2, Vec2, type Pair } from "./vector2";
+export { type Vector2, type Pair, Vec2 } from "./vector2";
 export { type Rectangle, Rect } from "./rect";
 
 /** True modulus, conspicuously missing from JS */

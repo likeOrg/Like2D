@@ -88,7 +88,7 @@ export const standardButtonMapping = (): ButtonMapping =>
   Object.fromEntries(buttonMap.map(({ like, num }) => [num, like]));
 const numToName = standardButtonMapping();
 /** @private */
-export const allButtons = new Set<string>(buttonMap.map(({ like }) => like));
+export const allButtons: Set<string> = new Set(buttonMap.map(({ like }) => like));
 export const fullButtonName = new Map(
   buttonMap.map(({ like, name }) => [like, name]),
 );
