@@ -43,7 +43,7 @@ npm run dev
 
 [Homepage](https://likeorg.github.io/Like2D/) 
 
-[Full Documentation](https://likeorg.github.io/Like2D/api/documents/README.html) 
+[Full Documentation](https://likeorg.github.io/Like2D/api) 
 
 [NPM](https://www.npmjs.com/package/like2d)
 
