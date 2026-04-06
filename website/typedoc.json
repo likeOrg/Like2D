@@ -5,13 +5,10 @@
     "../like/src/input/index.ts",
     "../like/src/audio/index.ts",
     "../like/src/timer/index.ts",
-    "../like/src/math/index.ts",
-    "../like/src/scene/index.ts",
-    "../like/src/scene/prefab/mapGamepad.ts",
-    "../like/src/scene/prefab/startScreen.ts"
+    "../like/src/math/index.ts"
   ],
   "useTsLinkResolution": true,
-  "projectDocuments": ["../like/README.md", "../like/CHANGELOG.md"],
+  "projectDocuments": ["../like/CHANGELOG.md"],
   "tsconfig": "../like/tsconfig.json",
   "out": "./public/api",
   "excludeExternals": true,
@@ -52,7 +49,7 @@
     "Variable",
     "Accessor"
   ],
-  "readme": "none",
+  "readme": "../like/README.md",
   "hideGenerator": true,
   "categorizeByGroup": true,
   "searchInComments": true,

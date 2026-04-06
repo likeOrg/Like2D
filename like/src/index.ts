@@ -1,7 +1,10 @@
 /**
- * A cozy web-native 2D game framework.
+ * The main LÏKE entry point and definitions.
  *
- * {@include ../README.md}
+ *  - {@link createLike | Instantiate LÏKE}
+ *  - {@link LikeBase | Browse the module table}
+ *  - {@link LikeHandlers | See all event types}
+ *
  * @module like
  */
 
