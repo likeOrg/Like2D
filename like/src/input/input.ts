@@ -1,7 +1,7 @@
 import type { Keyboard } from './keyboard';
 import type { Mouse, MouseButton } from './mouse';
 import { Gamepad, GamepadTarget } from './gamepad';
-import { allButtons, LikeButton } from './gamepad-mapping';
+import { allButtons } from './gamepad-mapping';
 import { Dispatcher, LikeActionEvent } from '../events';
 import { EngineProps } from '../engine';
 
@@ -13,6 +13,9 @@ export type InputBinding =
 
 /** {@include input.md} */
 export class Input {
+  /** Set of all standard gamepad button names */
+  static allButtons = allButtons;
+
   private currState = new Set<string>();
   private prevState = new Set<string>();
   private actionTable: Record<string, InputBinding[]> = {};

@@ -1,5 +1,4 @@
-import { createLike } from "like2d";
-import { Vec2 } from "like2d/math";
+import { createLike, Vec2 } from "https://esm.sh/like2d@^2.13.0";
 
 let drop;
 let dropp;

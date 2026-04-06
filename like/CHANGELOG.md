@@ -25,6 +25,8 @@ a compat version.
  
 ### Additions
  - Text can now be stroked
+ - For the sanity of JS users wanting to include just one url, math functions now export from root `like`
+ - For the same reason as above, culled defaultMapping (silly export) and buttonMap (meh export) and now export `like.input.allButtons`
  
 ### Fixes
  - JSR package finally working

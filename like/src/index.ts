@@ -11,9 +11,15 @@
 import { Engine } from './engine';
 import type { Like } from './like';
 
+// general
 export type { Like, LikeHandlers, LikeBase, TopLevelEventHandler } from './like';
 export type { LikeEvent, LikeCanvasElement } from './events';
 export { callOwnHandlers, likeDispatch } from './engine';
+
+// maths
+export { type Vector2, type Pair, Vec2 } from './math/vector2';
+export { type Rectangle, Rect } from './math/rect';
+export { mod } from './math';
 
 /**
  * Create a new Like2D game instance attached to a DOM container.

@@ -30,5 +30,3 @@ export type {
   InputType,
   InputBinding,
 } from "./input";
-
-export { defaultMapping, allButtons, buttonMap } from "./gamepad-mapping";

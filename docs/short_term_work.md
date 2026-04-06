@@ -10,6 +10,10 @@ FULL once-over of the API for breaking changes
  - [x] Document
  - [x] Remove timer "sleep" functionality -- could be a middleware.
  - [x] Document and provide an example of middleware
+ 
+## Don't export actual JS from submodules
+ - [x] Centralize it all. either reexport or put it in like.blah
+ - [x] Typescript nerds can have their separate modules
 
 ## JS code examples and starter
  - [ ] Code examples
