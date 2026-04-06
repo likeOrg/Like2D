@@ -1,5 +1,5 @@
 
-# 3.x release tasks
+# 3.0 release tasks
 
 FULL once-over of the API for breaking changes
 
@@ -7,7 +7,7 @@ FULL once-over of the API for breaking changes
  - [x] Remove ad-hoc line wrapping for text metrics
  - [x] Add fill/line option to start of text print (for consistency)
  - [x] Split scenes into own package; keep in monorepo.
- - [ ] Document
+ - [x] Document
  - [x] Remove timer "sleep" functionality -- could be a middleware.
  - [x] Document and provide an example of middleware
  - [ ] Publish "redirect version" sending to new package
@@ -26,19 +26,12 @@ FULL once-over of the API for breaking changes
  - [ ] Add method to convert Color to ColorNum.
  - [ ] Don't use ColorNum in any API
 
-## Fix scene time for good!
- - [ ] Discourage use of like.timer.getTime(), encourage
-       use of a time accumulating variable.
-
 ## Action mapping scene
  - [ ] Copy+modify the gamepad mapping scene to make
        it possible to map actions.
  - [ ] When actions fire, they return a gamepad number if relevant.
 
-## Mouse
- - [ ] Add getDelta, which returns the amount of movement since the last frame. NOT since the last time mousemoved was dispatched.
-
-# 3.1 release tasks
+# 3.x release tasks
 
 ## Sticks!
  - [ ] Figure out Firefox/Chrome deterministic behavior for d-pads and sticks.
@@ -46,6 +39,10 @@ FULL once-over of the API for breaking changes
  - [ ] Stick emulation from buttons.
  - [ ] Stick calibration / deadzones.
  - [ ] Add stick mapping to mapGamepad scene.
+
+## Mouse
+ - [ ] Add getDelta, which returns the amount of movement since the last frame. NOT since the last time mousemoved was dispatched.
+
 
 ## Audio
  - [ ] Polyphony? 
