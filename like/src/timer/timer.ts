@@ -37,7 +37,7 @@ export class Timer {
     return this.fps;
   }
 
-  /** Get the ingame time. */
+  /** Get in-engine global time. */
   getTime(): number {
     return this.totalTime;
   }
