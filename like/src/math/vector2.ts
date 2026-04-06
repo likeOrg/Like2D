@@ -27,7 +27,7 @@ function map2x1<I, O>(op: UnOp<I, O>): (a: Pair<I>) => Pair<O> {
 }
 
 type BinOp<I, O> = (a: I, b: I) => O;
-type V2BinOp = BinOp<Vector2, Vector2>;
+type V2BinOp = (a: Vector2, b: Vector2 | number) => Vector2;
 
 /** @see {@link Vec2.map2} */
 function map2x2<I, O>(
