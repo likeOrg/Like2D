@@ -10,7 +10,7 @@
  */
 
 import type { Scene } from "..";
-import { callOwnHandlers, likeDispatch } from '@like2d/like';
+import { callOwnHandlers, likeDispatch, LikeEvent } from '@like2d/like';
 import type { ColorNum } from '@like2d/like/graphics';
 
 export type FadeProps = Partial<{
@@ -41,8 +41,8 @@ export const fadeTransition = (
   return {
     // stack: [prev: -3, next: -2, this: -1]
     load() { time = 0; },
-    update(dt) { time += dt },
-    handleEvent(ev) {
+    update(dt: number) { time += dt },
+    handleEvent(ev: LikeEvent) {
       let elapsed = time / duration * 2;
 
       if (ev.type == 'draw') {

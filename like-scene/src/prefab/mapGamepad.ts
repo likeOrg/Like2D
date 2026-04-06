@@ -17,7 +17,7 @@
  */
 
 import type { Scene, SceneManager } from "..";
-import { likeDispatch, type Like } from '@like2d/like';
+import { likeDispatch, type Like, type LikeEvent } from '@like2d/like';
 import { callOwnHandlers } from '@like2d/like';
 import type { Color, PrintProps } from '@like2d/like/graphics';
 import { type LikeButton, defaultMapping, type GamepadMapping } from '@like2d/like/input';
@@ -152,7 +152,7 @@ export const mapGamepad = (
   }
 
   return {
-    handleEvent(ev) {
+    handleEvent(ev: LikeEvent) {
       if (ev.type == 'draw') {
         const parent = scenes.get(-2);
         if (parent) {
