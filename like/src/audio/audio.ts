@@ -19,13 +19,15 @@ type LoadState =
 /**
  * Handle to a loaded audio resource, which pretends to be synchronous.
  * Use `play()`, `stop()`, `pause()`, `resume()` for playback control.
- * Access the underlying HTMLAudioElement via `source.audio` for looping,
- * pitch, etc. Note: Use `source.setVolume()` instead of setting
- * `source.audio.volume` directly to ensure global volume scaling works correctly.
  */
 export class AudioSource {
   readonly path: string;
-  /** Underlying HTMLAudioElement. Modify directly for looping, pitch, etc. Use methods for playback control. Avoid setting volume directly. */
+  /**
+   * Underlying HTMLAudioElement.
+   *
+   * This is _highly_ unstable to use, since web audio API
+   * is coming soon.
+   */
   readonly audio: HTMLAudioElement;
   /** Avoid setting these directly. */
   readonly options: Required<AudioSourceOptions>;
@@ -154,6 +156,10 @@ export class AudioSource {
   getDuration(): number {
     if (this.loadState.loaded) return this.audio.duration;
     return 0;
+  }
+
+  setLooping(loop: boolean): void {
+    this.audio.loop = loop;
   }
 }
 
