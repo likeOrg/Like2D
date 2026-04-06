@@ -25,6 +25,9 @@ a compat version.
  
 ### Additions
  - Text can now be stroked
+ 
+### Fixes
+ - JSR package finally working
 
 ## [2.13.0] - 2026-04-02
 
