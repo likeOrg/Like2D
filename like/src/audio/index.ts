@@ -1,1 +1,1 @@
-export type { Audio, AudioSource, AudioSourceOptions} from "./audio"
+export type { Audio, Wave, ChannelState } from "./audio";

@@ -15,19 +15,14 @@ FULL once-over of the API for breaking changes
  - [x] Centralize it all. either reexport or put it in like.blah
  - [x] Typescript nerds can have their separate modules
 
-## JS code examples and starter
- - [ ] Code examples
- - [ ] Starter
+## JS starter
+ - [x] Starter
 
-## ColorNum helpers
- - [ ] Add method to convert Color to ColorNum.
- - [ ] Don't use ColorNum in any API
+## Audio
+ - [x] Switch to web audio API
+ - [ ] Test it
+ - [ ] Document it
 
-## Action mapping scene
- - [ ] Copy+modify the gamepad mapping scene to make
-       it possible to map actions.
- - [ ] When actions fire, they return a gamepad number if relevant.
- 
 # Packages
  - [ ] Publish "redirect version" of npm like2d sending to new package
  - [ ] npm @like2d/like
@@ -35,6 +30,16 @@ FULL once-over of the API for breaking changes
  - [ ] jsr @like2d/scene
 
 # 3.x release tasks
+
+
+## Action mapping scene
+ - [ ] Copy+modify the gamepad mapping scene to make
+       it possible to map actions.
+ - [ ] When actions fire, they return a gamepad number if relevant.
+
+## ColorNum helpers
+ - [ ] Add method to convert Color to ColorNum.
+ - [ ] Don't use ColorNum in any API
 
 ## Sticks!
  - [ ] Figure out Firefox/Chrome deterministic behavior for d-pads and sticks.
@@ -45,10 +50,6 @@ FULL once-over of the API for breaking changes
 
 ## Mouse
  - [ ] Add getDelta, which returns the amount of movement since the last frame. NOT since the last time mousemoved was dispatched.
-
-
-## Audio
- - [ ] Polyphony? 
 
 ## Logging
  - [ ] Put a warning ONLY the first time when audio is (or would be) blocked due to autoplay policy.

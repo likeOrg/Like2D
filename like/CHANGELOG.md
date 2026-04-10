@@ -6,13 +6,7 @@ During V2, we experimented heavily with API and architecture.
 
 V3 is the end of that experiment. The goals are clear.
 
-However, it means one last large breakage.
-
-V3 has several versions planned that will not break API, only
-extend it.
-
-If you want to continue using V2.x, let me know and I will maintain
-a compat version.
+The entire API has been redesigned in 3.x to provide a bedrock for future non-breaking V3 releases.
 
 ### Breaking Changes
  - like2d (NPM) has moved to @like2d/like
@@ -20,14 +14,20 @@ a compat version.
  - Removed ad-hoc line wrapping functionality (text 'width' param)
    - Will be replaced with text metrics in 3.x
  - Removed timer sleep function -- this can be middleware
- - Add 'fill' | 'line' to first arg of print.
- - Remove unused `timestamp` field from events.
+ - Add `'fill' | 'line'` to first arg of print.
+ - Remove `timestamp` field from events.
+ - Rename `ready()` to just `ready` on graphics image handle, added error field.
+ - Image handle size now returns `Vector2 | undefined`.
+
+#### Audio API Redesign
+ - The entire audio API has been redesigned to match the WebAudioAPI
+   backend (and sane/typical audio practices).
  
 ### Additions
  - Text can now be stroked
  - For the sanity of JS users wanting to include just one url, math functions now export from root `like`
  - For the same reason as above, culled defaultMapping (silly export) and buttonMap (meh export) and now export `like.input.allButtons`
- 
+
 ### Fixes
  - JSR package finally working
 
