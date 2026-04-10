@@ -1,7 +1,7 @@
 import type { Keyboard } from './keyboard';
 import type { Mouse, MouseButton } from './mouse';
 import { Gamepad, GamepadTarget } from './gamepad';
-import { allButtons } from './gamepad-mapping';
+import { allButtons, LikeButton } from './gamepad-mapping';
 import { Dispatcher, LikeActionEvent } from '../events';
 import { EngineProps } from '../engine';
 
