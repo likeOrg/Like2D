@@ -12,24 +12,23 @@ import { Vector2 } from "../math";
  */
 export class ImageHandle {
   readonly path: string;
-  private element: HTMLImageElement | null = null;
-  private loadPromise: Promise<void>;
+  readonly ready: Promise<void>;
+  private element: HTMLImageElement;
   private isLoaded = false;
 
   constructor(path: string) {
     this.path = path;
+    this.element = new Image();
 
-    this.loadPromise = new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        this.element = img;
+    this.ready = new Promise((resolve, reject) => {
+      this.element.onload = () => {
         this.isLoaded = true;
         resolve();
       };
-      img.onerror = () => {
+      this.element.onerror = () => {
         reject(new Error(`Failed to load image: ${path}`));
       };
-      img.src = path;
+      this.element.src = path;
     });
   }
 
@@ -37,12 +36,8 @@ export class ImageHandle {
     return this.isLoaded;
   }
 
-  ready(): Promise<void> {
-    return this.loadPromise;
-  }
-
-  get size(): Vector2 {
-    return [this.element?.width ?? 0, this.element?.height ?? 0];
+  get size(): Vector2 | undefined {
+    return this.isReady() ? [this.element.width, this.element.height] : undefined;
   }
 
   /**
@@ -51,7 +46,7 @@ export class ImageHandle {
    * Yes, you can get the underlying image.
    * No, it's not stable in the case we ever switch to webGL.
    */
-  getElement(): HTMLImageElement | null {
+  getElement(): HTMLImageElement {
     return this.element;
   }
 }
