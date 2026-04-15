@@ -20,8 +20,8 @@ import type { Scene, SceneManager } from "..";
 import { likeDispatch, type Like, type LikeEvent } from '@like2d/like';
 import { callOwnHandlers } from '@like2d/like';
 import type { Color, PrintProps } from '@like2d/like/graphics';
-import { type LikeButton, defaultMapping, type GamepadMapping } from '@like2d/like/input';
-import { Vector2 } from '@like2d/like/math';
+import { type LikeButton, type GamepadMapping } from '@like2d/like/input';
+import { Vector2 } from '@like2d/like';
 
 const mapOrder: LikeButton[] = [
   "BRight",
@@ -138,7 +138,7 @@ export const mapGamepad = (
   targetPad: number,
 ): Scene => (like: Like, scenes: SceneManager) => {
   const currentlyUnmapped: LikeButton[] = [];
-  const mapping: GamepadMapping = like.gamepad.getMapping(targetPad) ?? defaultMapping(2);
+  const mapping: GamepadMapping = like.gamepad.getMapping(targetPad) ?? { buttons: {}, sticks: [] };
   const alreadyMapped = new Set<number>();
   let held: LikeButton | undefined;
   let frameWait = 10;

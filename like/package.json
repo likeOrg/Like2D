@@ -12,6 +12,7 @@
       "types": "./dist/index.d.ts"
     },
     "./math": {
+      "import": "./dist/math/index.js",
       "types": "./dist/math/index.d.ts"
     },
     "./graphics": {

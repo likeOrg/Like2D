@@ -17,6 +17,7 @@ The entire API has been redesigned in 3.x to provide a bedrock for future non-br
  - Add `'fill' | 'line'` to first arg of print.
  - Remove `timestamp` field from events.
  - Rename `ready()` to just `ready` on graphics image handle, added error field.
+ - Canvas `getSize` now returns undefined if canvas isn't loaded.
  - Image handle size now returns `Vector2 | undefined`.
 
 #### Audio API Redesign

@@ -52,10 +52,10 @@ export const startScreen = (
       } else if (logo.isReady()) {
         like.gfx.clear([0.5, 0, 0.5, 1]);
         const winSize = like.canvas.getSize();
-        const scale = (winSize[0] * 0.5) / logo.size[0];
+        const scale = (winSize[0] * 0.5) / logo.size![0];
         like.gfx.draw(logo, Vec2.div(winSize, 2), {
           scale,
-          origin: Vec2.div(logo.size, 2),
+          origin: Vec2.div(logo.size!, 2),
         });
         like.gfx.print(
           'fill',
