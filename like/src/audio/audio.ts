@@ -3,7 +3,6 @@
  */
 export type ChannelState = {
   index: number,
-  playing: boolean,
   // affects speed and pitch both
   speed: number,
   // multiplied by global volume
@@ -60,6 +59,7 @@ type Channel = {
   lastUpdate: number,
   defer: boolean,
   sourceNode?: AudioBufferSourceNode,
+  buffer?: AudioBuffer,
   gainNode?: GainNode,
   path: string,
 }
@@ -117,24 +117,30 @@ export class Audio {
 
     const channel: Channel = {
       state: {
-        playing: true,
         speed: 1,
         seek: 0,
-        volume: 0,
+        volume: 1,
         index: this.channels.length,
         loop: false,
         ...options,
       },
       path: wave.path,
       defer: !wave.buffer,
-      lastUpdate: performance.now(),
+      lastUpdate: this.context.currentTime,
     }
-    this.channels.push(channel);
+    const index = channel.state.index;
+    this.stop(index);
+    this.channels[channel.state.index] = channel;
 
     if (buffer) {
       this.startPlayback(channel, buffer);
     } else {
-      wave.ready.then(() => this.startPlayback(channel, wave.buffer!))
+      wave.ready.then(() => {
+        const ch = this.channels[channel.state.index];
+        if (wave.buffer && ch === channel) {
+          this.startPlayback(ch, wave.buffer)
+        }
+      })
     }
     return channel.state.index;
   }
@@ -156,8 +162,9 @@ export class Audio {
     }
 
     // may be used for catch-up
-
-    channel.lastUpdate = performance.now();
+    const elapsed = this.elapsed(channel);
+    next.seek += elapsed;
+    channel.lastUpdate = this.context.currentTime;
 
     if (channel.sourceNode && channel.gainNode) {
       // OK, we're loaded!
@@ -169,51 +176,44 @@ export class Audio {
         // Time to play catch-up
         channel.defer = false;
         const duration = channel.sourceNode.buffer!.duration;
-        next.seek += this.elapsed(channel);
-        if (next.loop) next.seek %= duration;
-        if (next.seek > duration) {
+        next.seek += elapsed;
+        if (!state.loop && next.seek > duration) {
           // Oh, it ended already...
           delete this.channels[state.index];
           return;
         }
-        channel.sourceNode.start(0, next.seek)
-      } else if (!state.playing && next.playing) {
-        channel.sourceNode.start(0, next.seek);
-      } else if (state.playing && !next.playing) {
-        next.seek = this.elapsed(channel);
-        channel.sourceNode.stop(0);
       }
 
-      if (next.loop) {
-         channel.sourceNode.onended = null;
-      } else if (next.playing) {
-        channel.sourceNode.onended = () => {
-          delete this.channels[state.index];
-        };
+      if (channel.sourceNode) {
+        if (next.loop) {
+          channel.sourceNode.onended = null;
+        } else {
+          channel.sourceNode.onended = () => {
+            delete this.channels[state.index];
+          };
+        }
       }
-    } else {
-      // defer operations
-      next.seek += this.elapsed(channel);
     }
     channel.state = next;
   }
 
+  /** Get the time elapsed since the last time the state was updated. */
   private elapsed(ch: Channel) {
-    return ch.state.playing
-      ? (performance.now() - ch.lastUpdate) * ch.state.speed
-      : 0;
+      return (this.context.currentTime - ch.lastUpdate) * ch.state.speed
   }
 
   private startPlayback(channel: Channel, buf: AudioBuffer) {
+    channel.buffer = buf;
     channel.gainNode = this.context.createGain();
     channel.sourceNode = this.context.createBufferSource();
     channel.sourceNode.buffer = buf;
     channel.sourceNode.connect(channel.gainNode);
     channel.gainNode.connect(this.masterGain);
+    channel.sourceNode.start()
     this.update({ index: channel.state.index });
   }
 
-  /** Stop a playing channel immediately. */
+  /** Stop a playing channel and deallocate it. */
   stop(channel: number): void {
     const ch = this.channels[channel];
     if (ch?.sourceNode) {
@@ -240,18 +240,14 @@ export class Audio {
     return;
   }
 
-  isPlaying(channel: number): boolean {
-    return !!this.status(channel)?.playing;
-  }
-
   tell(channel: number): number | undefined {
     return this.status(channel)?.seek ?? undefined;
   }
 
   /** Stop all playing channels. */
   stopAll(): void {
-    this.channels.forEach(c => c && this.stop(c.state.index))
-    this.channels = [];
+    this.channels.forEach(c => c && this.stop(c.state.index));
+    this.channels = Array(1);
   }
 
   /** Stop all channels playing a specific wave. */
@@ -259,17 +255,8 @@ export class Audio {
     for (const ch of this.channels) {
       if (ch && ch.path == wave.path) {
         this.stop(ch.state.index);
-        delete this.channels[ch.state.index];
       }
     }
-  }
-
-  pauseAll(): void {
-    this.channels.forEach((ch) => {
-      if (ch) {
-        this.update({ index: ch.state.index, playing: false });
-      }
-    })
   }
 
   setGlobalVolume(volume: number): void {
@@ -282,7 +269,9 @@ export class Audio {
     return this.globalVolume;
   }
 
-  /** Get audio context (escape hatch). */
+  /** Get audio context (escape hatch).
+   *  Not guaranteed to work the same way in future versions.
+   */
   getContext(): AudioContext {
     return this.context;
   }

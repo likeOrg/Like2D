@@ -23,6 +23,9 @@ The entire API has been redesigned in 3.x to provide a bedrock for future non-br
 #### Audio API Redesign
  - The entire audio API has been redesigned to match the WebAudioAPI
    backend (and sane/typical audio practices).
+ - 'Pause' function has been removed — though it may be added back, the
+   new practice is to read the seek value, then call `play` with the old
+   seek value to simulate resuming.
  
 ### Additions
  - Text can now be stroked

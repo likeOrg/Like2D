@@ -1,15 +1,13 @@
-import { createLike, Like, } from "@like2d/like";
-import { ImageHandle } from "@like2d/like/graphics";
-import { AudioSource } from "@like2d/like/audio";
-import { CanvasSize } from "@like2d/like/graphics";
-import { Vec2 } from "@like2d/like/math";
-import { Scene, SceneManager } from "@like2d/scene";
+import { createLike, type Like, Vec2 } from "@like2d/like";
+import type { ImageHandle } from "@like2d/like/graphics";
+import type { CanvasSize } from "@like2d/like/graphics";
+
+import type { Scene } from "@like2d/scene";
+import { SceneManager } from "@like2d/scene";
 import { startScreen } from "@like2d/scene/prefab/startScreen";
 import { mapGamepad, buttonSetPS1 } from "@like2d/scene/prefab/mapGamepad";
 import { fadeTransition } from "@like2d/scene/prefab/fadeTransition";
 
-let pepperImage: ImageHandle;
-let audioSource: AudioSource | null = null;
 
 const player = {
   pos: [240, 160] as [number, number],
@@ -26,8 +24,9 @@ let scaleIndex = 0;
 
 const demoScene: Scene = (like: Like, scenes: SceneManager) => {
   like.canvas.setMode(scales[0]);
-  pepperImage = like.gfx.newImage('pepper.png');
-  audioSource = like.audio.newSource('./test.ogg');
+  const pepperImage = like.gfx.newImage('pepper.png');
+  const testWave = like.audio.loadWave('./test.ogg');
+let testChannel: number | null = null;
 
   like.input.setAction('jump', ['Space', 'ArrowUp', 'KeyW', 'BBottom']);
   like.input.setAction('fire', ['MouseLeft', 'RT']);
@@ -78,8 +77,14 @@ const demoScene: Scene = (like: Like, scenes: SceneManager) => {
       console.log('Action pressed:', action);
       if (action === 'jump') console.log('Jump!');
       if (action === 'fire') console.log('Fire!');
-      if (action === 'audio_play_pause' && audioSource?.isReady()) {
-        audioSource.isPlaying() ? audioSource.stop() : audioSource.play();
+      if (action === 'audio_play_pause') {
+        like.audio.play(testWave);
+        if (testChannel !== null && like.audio.isPlaying(testChannel)) {
+          like.audio.stop(testChannel);
+          testChannel = null;
+        } else {
+          testChannel = like.audio.play(testWave);
+        }
       }
       if (action === 'toggle_pointer_lock') {
         const locked = like.mouse.isPointerLocked();
