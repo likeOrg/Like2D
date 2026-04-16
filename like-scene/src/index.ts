@@ -28,7 +28,7 @@
  * @module scene
  */
 
-import { likeDispatch } from '@like2d/like';
+import { callOwnHandlers, likeDispatch } from '@like2d/like';
 import type { LikeEvent, Like, LikeHandlers } from '@like2d/like';
 
 /** {@include creating-scenes.md} */
@@ -224,7 +224,7 @@ export class SceneManager {
       }
       likeDispatch(top.instance, event);
     } else {
-      this.like.callOwnHandlers(event);
+      callOwnHandlers(this.like, event);
     }
     //if (event.type == 'draw') this.debugDraw();
   }

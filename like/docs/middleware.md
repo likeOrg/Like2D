@@ -40,7 +40,7 @@ like.handleEvent = function (event) {
             // this keeps frame rates even.
             currentFrameTime -= frameTime;
             // construct your own event
-            like.callOwnHandlers({
+            callOwnHandlers(like, {
                 type: 'update',
                 args: [framestep],
             })
@@ -52,7 +52,7 @@ like.handleEvent = function (event) {
             ++lagFrames;
         }
     } else {
-        like.callOwnHandlers(ev);
+        callOwnHandlers(like, ev);
     }
 }
 ```
