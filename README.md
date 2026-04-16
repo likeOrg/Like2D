@@ -45,7 +45,7 @@ npm run dev
 
 [Full Documentation](https://likeorg.github.io/Like2D/api) 
 
-[NPM](https://www.npmjs.com/package/like2d)
+[NPM](https://www.npmjs.com/package/@like2d/like)
 
 [JSR](https://jsr.io/@like2d/like)
 
