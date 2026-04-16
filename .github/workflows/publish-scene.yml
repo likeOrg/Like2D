@@ -23,13 +23,16 @@ jobs:
           version: 9
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --ignore-workspace
+        working-directory: like-scene
 
       - name: Typecheck
-        run: pnpm --filter @like2d/scene typecheck
+        run: pnpm typecheck
+        working-directory: like-scene
 
       - name: Build
-        run: pnpm --filter @like2d/scene build
+        run: pnpm build
+        working-directory: like-scene
 
       - name: Publish to NPM
         run: npm publish --provenance --access public
