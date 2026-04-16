@@ -1,6 +1,6 @@
 # Changelog
 
-## [3.0.0] - UNRELEASED
+## [3.0.0] - 2026-04-16
 
 During V2, we experimented heavily with API and architecture.
 
