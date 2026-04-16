@@ -36,7 +36,7 @@
   "author": "",
   "license": "MPL-2.0",
   "dependencies": {
-    "@like2d/like": "^3.0.0"
+    "@like2d/like": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
