@@ -21,15 +21,21 @@ or `sceneManager` wherever it is used.
 
 # Getting started
 
-Install like-scene:
+Install with NPM:
 
 ``` bash
 npm install @like2d/scene
-# or
-deno add jsr:@like2d/scene
 ```
 
-Do this once to enable scenes:
+Or with Deno/JSR:
+
+```typescript
+import { createLike } from "jsr:@like2d/like@^3";
+import { SceneManager } from "jsr:@like2d/scene@^0.1";
+```
+
+Then enable scenes:
+
 ```typescript
 import { createLike } from "@like2d/like";
 import { SceneManager } from "@like2d/scene";
