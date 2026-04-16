@@ -36,6 +36,12 @@ FULL once-over of the API for breaking changes
  - [ ] Volume ramp global volume -- must keep internal val?
  - [ ] Determine if declicking is relevant for other params
  - [ ] Enable streaming audio support for large files
+ - [ ] Make sure that passing in a whole status object doesn't cause an excess seek.
+ 
+## General
+ - [ ] Make APIs more forgiving when possible
+   - [ ] Allow calling like.start multiple times
+   - [ ] Look for other sharp edges
 
 ## Action mapping scene
  - [ ] Copy+modify the gamepad mapping scene to make

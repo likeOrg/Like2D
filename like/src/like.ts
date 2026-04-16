@@ -31,12 +31,13 @@ export type LikeHandlers = Partial<LikeEventHandlers> & {
    * event handler callbacks like `like.draw`,
    * replacing it with a system of your choice.
    *
-   * For example, the scene architecture is built around
-   * setting this function. Setting to a custom
-   * function will disable the scene system.
+   * For example, the scene plugin is built around
+   * setting this function.
    *
    * Setting `handleEvent` to `undefined` will revert
    * to default behavior.
+   *
+   * [How to create middleware with handleEvent](../docs/middleware.md)
    */
    handleEvent?: TopLevelEventHandler
 };
@@ -81,11 +82,11 @@ export type LikeBase = {
   dispose(): void;
 
   /**
-   * Used as the default `like.handleEvent`, simply dispatches
-   * an event into LIKE callbacks.
-   * @param event 
+   * Deprecated; use {@link like.callOwnHandlers} with `like`
+   * as the first parameter.
+   * @param event
    */
-  callOwnHandlers(event: LikeEvent): void;
+  callOwnHandlers?: never;
 }
 
 /**

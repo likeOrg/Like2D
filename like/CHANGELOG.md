@@ -19,6 +19,7 @@ The entire API has been redesigned in 3.x to provide a bedrock for future non-br
  - Rename `ready()` to just `ready` on graphics image handle, added error field.
  - Canvas `getSize` now returns undefined if canvas isn't loaded.
  - Image handle size now returns `Vector2 | undefined`.
+ - Deprecate `like.callOwnHandlers(ev)` in favor of `callOwnHandlers(like, ev)`
 
 #### Audio API Redesign
  - The entire audio API has been redesigned to match the WebAudioAPI

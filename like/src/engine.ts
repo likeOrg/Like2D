@@ -63,7 +63,6 @@ export class Engine {
       canvas,
       start: this.start.bind(this),
       dispose: this.dispose.bind(this),
-      callOwnHandlers: (ev) => callOwnHandlers(this.like, ev),
     };
 
     window.addEventListener('focus', () => this.dispatch('focus', ['tab']));
@@ -118,6 +117,17 @@ export class Engine {
   }
 }
 
+/**
+ * What calls the root `like` object -- first it tries calling {@link LikeHandlers.handleEvent}
+ * and if that doesn't exist, calls {@link callOwnHandlers}.
+ *
+ * Don't call this from within a handler object's own `handleEvent` unless you like stack overflows.
+ *
+ * Good for manually composing event handling objects, for example
+ * to create your own scene system.
+ *
+ * If you find yourself using this, look into the [scene plugin.](https://npmjs.com/package/@like2d/like-scene)
+ */
 export function likeDispatch(obj: LikeHandlers, event: LikeEvent) {
   if (obj.handleEvent) {
     obj.handleEvent(event);

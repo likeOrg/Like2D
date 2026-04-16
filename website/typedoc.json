@@ -8,7 +8,7 @@
     "../like/src/math/index.ts"
   ],
   "useTsLinkResolution": true,
-  "projectDocuments": ["../like/CHANGELOG.md"],
+  "projectDocuments": ["../like/CHANGELOG.md", "../like/docs/middleware.md"],
   "tsconfig": "../like/tsconfig.json",
   "out": "./public/api",
   "excludeExternals": true,
