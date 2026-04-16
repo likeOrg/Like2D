@@ -22,12 +22,16 @@ FULL once-over of the API for breaking changes
  - [x] Switch to web audio API
  - [x] Test it
  - [x] Document it
+ 
+## License
+ - [ ] Switch to MPL 2.0 -- add to every relevant file.
 
-# Packages
- - [ ] npm @like2d/scene
- - [ ] jsr @like2d/scene
- - [ ] Publish "redirect version" of npm like2d sending to new package
- - [ ] npm @like2d/like
+## Packages
+  - [ ] Ensure that workflows have the correct package
+  - [ ] Push like 3.0.0 tag
+  - [ ] npm publish @like2d/scene 0.1.0
+  - [ ] jsr publish @like2d/scene 0.1.0
+  - [ ] Publish "redirect version" of npm like2d sending to new package
 
 # 3.x release tasks
 
