@@ -20,7 +20,7 @@
  * @module scene/prefab/mapGamepad
  */
 
-import type { Scene, SceneManager } from "..";
+import type { Scene, SceneManager } from "@like2d/scene";
 import { likeDispatch, type Like, type LikeEvent } from '@like2d/like';
 import { callOwnHandlers } from '@like2d/like';
 import type { Color, PrintProps } from '@like2d/like/graphics';

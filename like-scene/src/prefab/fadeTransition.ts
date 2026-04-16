@@ -13,7 +13,7 @@
  * ```
  */
 
-import type { Scene } from "..";
+import type { Scene } from "@like2d/scene";
 import { callOwnHandlers, likeDispatch, LikeEvent } from '@like2d/like';
 import type { ColorNum } from '@like2d/like/graphics';
 

@@ -3,7 +3,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 /** {@include startScreen.md} */
-import type { Scene } from '..';
+import type { Scene } from '@like2d/scene';
 import type { Like } from '@like2d/like';
 import { Vec2 } from '@like2d/like/math';
 
