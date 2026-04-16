@@ -5,7 +5,7 @@
  - [ ] Twofer: see if you can't include README in root index and then make root redirect to index. In order to solve:
     - [ ] Fix wonky JSR docs if possible, while preserving of course typedoc
     - [ ] Fix weird typedoc wiki where README and like2d/index are different
- - [ ] Check if typedoc error messages matter
+ - [ ] Check over typedoc error messages
 
 ## Audio
  - [ ] Add declicking feature (volume ramp) to every seek and stop

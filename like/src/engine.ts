@@ -130,7 +130,7 @@ export class Engine {
  * Good for manually composing event handling objects, for example
  * to create your own scene system.
  *
- * If you find yourself using this, look into the [scene plugin.](https://npmjs.com/package/@like2d/like-scene)
+ * If you find yourself using this, look into the [scene plugin.](https://npmjs.com/package/@like2d/scene)
  */
 export function likeDispatch(obj: LikeHandlers, event: LikeEvent) {
   if (obj.handleEvent) {
