@@ -32,7 +32,9 @@ FULL once-over of the API for breaking changes
 # 3.x release tasks
 
 ## Audio
- - [ ] Add declicking feature (volume ramp) to pause function
+ - [ ] Add declicking feature (volume ramp) to every seek and stop
+ - [ ] Volume ramp global volume -- must keep internal val?
+ - [ ] Determine if declicking is relevant for other params
 
 ## Action mapping scene
  - [ ] Copy+modify the gamepad mapping scene to make
