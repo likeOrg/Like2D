@@ -38,15 +38,17 @@ export type DrawMode = "fill" | "line";
  * - Alpha defaults to 1 if omitted
  * - CSS color strings also accepted: `"red"`, `"#ff0000"`, `"rgb(255,0,0)"`
  */
-export type ColorNum = [number, number, number, number?];
 export type Color = ColorNum | string;
+export type ColorNum = [number, number, number, number?];
 
+/** @interface passed into several {@link Graphics} draw calls.*/
 export type TransformProps = {
   angle?: number;
   scale?: number | Vector2;
   origin?: Vector2;
 };
 
+/** @interface passed into several {@link Graphics} draw calls.*/
 export type ShapeProps = {
   lineWidth?: number;
   lineCap?: CanvasLineCap;
@@ -54,10 +56,12 @@ export type ShapeProps = {
   miterLimit?: number;
 } & TransformProps;
 
+/** @interface passed into {@link Graphics.draw} */
 export type DrawProps = ShapeProps & {
   quad?: Rectangle;
 };
 
+/** @interface passed into {@link Graphics.print} */
 export type PrintProps = {
   font?: string;
   align?: CanvasTextAlign,
@@ -163,7 +167,7 @@ export class Graphics {
   }
 
   /**
-   * Draws a circle or ellipse.
+   * Draws a circle. For ellipse, set props.scale to a Vector2.
    
    * @param mode Fill or line.
    * @param color Fill or stroke color.
@@ -420,7 +424,8 @@ export class Graphics {
   }
 
   /**
-   * The idiomatic way to render to an external canvas.
+   * The idiomatic way to render to an external canvas, which has to be
+   * managed manually using browser APIs.
    * 
    * Within this scope, the target canvas has changed.
    * 
