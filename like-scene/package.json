@@ -34,7 +34,7 @@
     "typescript"
   ],
   "author": "",
-  "license": "MIT",
+  "license": "MPL-2.0",
   "dependencies": {
     "@like2d/like": "^3.0.0"
   },
