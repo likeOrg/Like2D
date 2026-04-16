@@ -65,8 +65,8 @@ importers:
   like-scene:
     dependencies:
       '@like2d/like':
-        specifier: workspace:*
-        version: link:../like
+        specifier: ^3.0.0
+        version: 3.0.0
     devDependencies:
       typescript:
         specifier: ^5.9.3
@@ -256,6 +256,9 @@ packages:
 
   '@jridgewell/sourcemap-codec@1.5.5':
     resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
+
+  '@like2d/like@3.0.0':
+    resolution: {integrity: sha512-g2TXkfVDP2ujeAL1RtB+IqHPC2cfG2TSSLTgQ3nOWCQ7/ugTn6DPlDwA4b95utU87w0vtqDy+zU5geuV8xtIiQ==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -1457,6 +1460,8 @@ snapshots:
       '@shikijs/vscode-textmate': 10.0.2
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
+
+  '@like2d/like@3.0.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:

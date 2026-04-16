@@ -28,7 +28,9 @@ FULL once-over of the API for breaking changes
 
 ## Packages
   - [x] Ensure that workflows have the correct package
-  - [ ] Push like 3.0.0 and scene 0.1.0 tags
+  - [x] Push like 3.0.0 tag
+  - [x] Switch scene to new like external pkg
+  - [x] Publish scene 0.1.0 tag
   - [ ] Publish "redirect version" of npm like2d sending to new package
   - [ ] Switch starters to 3.0
 
