@@ -24,14 +24,13 @@ FULL once-over of the API for breaking changes
  - [x] Document it
  
 ## License
- - [ ] Switch to MPL 2.0 -- add to every relevant file.
+ - [x] Switch to MPL 2.0 -- add to every relevant file.
 
 ## Packages
-  - [ ] Ensure that workflows have the correct package
-  - [ ] Push like 3.0.0 tag
-  - [ ] npm publish @like2d/scene 0.1.0
-  - [ ] jsr publish @like2d/scene 0.1.0
+  - [x] Ensure that workflows have the correct package
+  - [ ] Push like 3.0.0 and scene 0.1.0 tags
   - [ ] Publish "redirect version" of npm like2d sending to new package
+  - [ ] Switch starters to 3.0
 
 # 3.x release tasks
 
