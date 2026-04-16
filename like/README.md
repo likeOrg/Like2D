@@ -23,7 +23,7 @@
 
 Lightweight web game framework inspired by [LÖVE](https://love2d.org/).
 
-## <div style="color:red">During v2.x.x, LIKE's API will change.</div>
+<div style="color:red; text-align:center">—LÏKE 3.x is Beta software—</div>
 
 ## What it is
 

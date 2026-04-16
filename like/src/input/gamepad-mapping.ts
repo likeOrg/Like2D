@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /**
  * A database, generated on module load,
  * which uses SDL's database to coerce
@@ -15,7 +19,7 @@
  *  - We go with best-match and always fall back on manual mapping.
  */
 
-import type { Vector2 } from "../math";
+import type { Pair, Vector2 } from "../math";
 
 /**
  * @private
@@ -65,13 +69,16 @@ export type LikeButton =
 //// ************* General Gamepad Mapping Functions ******************* ////
 
 export type GamepadMapping = {
-  buttons: ButtonMapping;
-  sticks: StickMapping[];
+  buttons: Record<number, LikeButton>;
+  sticks: Pair<{index: number, invert: boolean}>[];
 };
 
-export type ButtonMapping = Record<number, LikeButton>;
-export type StickMapping = [StickAxisMapping, StickAxisMapping];
-export type StickAxisMapping = { index: number; invert: boolean };
+/** @private */
+export type ButtonMapping = GamepadMapping["buttons"];
+/** @private */
+export type StickMapping = GamepadMapping["sticks"][number];
+/** @private */
+export type StickAxisMapping = StickMapping[number];
 
 /** @private Get an empty mapping for a gamepad. Good for binding from scratch. */
 export const defaultMapping = (stickCount: number): GamepadMapping => ({
@@ -88,7 +95,7 @@ export const standardButtonMapping = (): ButtonMapping =>
   Object.fromEntries(buttonMap.map(({ like, num }) => [num, like]));
 const numToName = standardButtonMapping();
 /** @private */
-export const allButtons = new Set<string>(buttonMap.map(({ like }) => like));
+export const allButtons: Set<string> = new Set(buttonMap.map(({ like }) => like));
 export const fullButtonName = new Map(
   buttonMap.map(({ like, name }) => [like, name]),
 );

@@ -1,86 +1,92 @@
-# Versioning
-Currently We're on "V2.x.x" and the minor versions are breaking.
-This is bad practice.
 
-The next version that _breaks_ the API will be 3.x
+# 3.0 release tasks
 
-Let's identify serious breaking changes that are likely to occur based on short and long term plans.
+FULL once-over of the API for breaking changes
 
-Then, let's update our API and pull the band-aid off all at once.
-
-# ColorNum helpers
-Colors should have some helpers.
- - fromHSV
- - random color
- - setOpacity
+# Things that will break API in 3.x
+ - [x] Remove ad-hoc line wrapping for text metrics
+ - [x] Add fill/line option to start of text print (for consistency)
+ - [x] Split scenes into own package; keep in monorepo.
+ - [x] Document
+ - [x] Remove timer "sleep" functionality -- could be a middleware.
+ - [x] Document and provide an example of middleware
  
-pull in https://www.npmjs.com/package/color-name and we won't have
-to deal with ColorNum existing -- switch colors to just name or RGB
+## Don't export actual JS from submodules
+ - [x] Centralize it all. either reexport or put it in like.blah
+ - [x] Typescript nerds can have their separate modules
 
-Or, we can get a CSS color parsing library.
+## JS starter
+ - [x] Starter
 
-# Fix scene time for good!
- - Discourage use of like.timer.getTime(), encourage
-   use of a time accumulating variable.
+## Audio
+ - [x] Switch to web audio API
+ - [x] Test it
+ - [x] Document it
+ 
+## License
+ - [x] Switch to MPL 2.0 -- add to every relevant file.
 
-# Scene / state stuff
-Carefully consider how much state is in your APIs. Is there a set of functions that would be standard practice to call
-at the start of a scene? Should they be required?
+## Packages
+  - [x] Ensure that workflows have the correct package
+  - [ ] Push like 3.0.0 and scene 0.1.0 tags
+  - [ ] Publish "redirect version" of npm like2d sending to new package
+  - [ ] Switch starters to 3.0
 
-# Action mapping scene
+# 3.x release tasks
+
+## Audio
+ - [ ] Add declicking feature (volume ramp) to every seek and stop
+ - [ ] Volume ramp global volume -- must keep internal val?
+ - [ ] Determine if declicking is relevant for other params
+ - [ ] Enable streaming audio support for large files
+ - [ ] Make sure that passing in a whole status object doesn't cause an excess seek.
+ 
+## General
+ - [ ] Make APIs more forgiving when possible
+   - [ ] Allow calling like.start multiple times
+   - [ ] Look for other sharp edges
+
+## Action mapping scene
  - [ ] Copy+modify the gamepad mapping scene to make
        it possible to map actions.
  - [ ] When actions fire, they return a gamepad number if relevant.
 
-# Sticks!
+## ColorNum helpers
+ - [ ] Add method to convert Color to ColorNum.
+ - [ ] Don't use ColorNum in any API
+
+## Sticks!
  - [ ] Figure out Firefox/Chrome deterministic behavior for d-pads and sticks.
- - [ ] Add stick mapping to mapGamepad scene.
  - [ ] Stick digitization deadzone option.
  - [ ] Stick emulation from buttons.
+ - [ ] Stick calibration / deadzones.
+ - [ ] Add stick mapping to mapGamepad scene.
 
-# Javascript
- - [ ] Identify any possible JS hortcomings for JS users.
+## Mouse
+ - [ ] Add getDelta, which returns the amount of movement since the last frame. NOT since the last time mousemoved was dispatched.
 
-# Audio
- - [ ] Polyphony? 
-
-# Logging
+## Logging
  - [ ] Put a warning ONLY the first time when audio is (or would be) blocked due to autoplay policy.
 
-# Crash handling
+## Crash handling
  - [ ] Bare minimum: descibe and test an idiomatic pattern for restoring game state after a critical error.
  - [ ] Make a screen that displays the crash + error message and encourages you to check console
 
-# Timer extensions
- - [ ] Consider renaming `Timer` to `Time` and allowing for multiple timers i.e. true scene time.
+## Timer extensions
  - [ ] Wrap settimeout and give users an API for delayed calls + cancelling them.
  - [ ] Allow setting timer speed.
 
-# Gamepad extensions
- - [ ] Stick calibration / deadzones.
- - [ ] Allow developer to choose their button naming scheme?
- - [ ] [Add name CRC16 and name fallback behavior from SDL.](https://claude.ai/share/9dab1deb-ea35-41dd-8c17-30e9985478da)
-   - Note above: This hits 48 bits, awfully close to our floating point limits.
-
-# Transform objects
+## Transform objects
  - [ ] Research libraries / builtins for 2d transformation matrices.
  - [ ] Do these transforms during canvas transform operations for mouse transform / camera library purposes.
 
- # Text Overhaul
+## Text Overhaul
  - [ ] Add text metrics returning a Rect.
  - [ ] Consider various use cases for text alignment -- simplify API if needed.
  - [ ] Leverage Vec2 and Rect to find cozy, short abstractions for any text alignment in 2-3 LoC.
 
-# Event module
- - [ ] Put callOwnHandlers, scene functions, etc. into like.event
- - [ ] Add generic event extension system: example is adding fixedUpdate event.
-
-# Storage module
+## Storage module
  - [ ] Investigate: how do we best load previous state back from the last crash?
  - [ ] Investigate: Joypad mapping has autosave / autoload. Should action mapping also? Should this be in `storage`?
    - Thinking: Solve both with a class that basically acts as an indexedDb queue / cache.
 
-# Mouse
- - [ ] Add getDelta, which returns the amount of movement since the last frame. NOT since the last time mousemoved was dispatched.
-
-# Document input mapping workflow [Unreleased docs for v2.11.0]

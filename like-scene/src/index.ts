@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /**
  * Scenes are a modular component of LÏKE based on setting `like.handleEvent`.
  * The scene system is simple and powerful, once understood.
@@ -28,9 +32,8 @@
  * @module scene
  */
 
-import { likeDispatch } from '../engine';
-import { LikeEvent } from '../events';
-import type { Like, LikeHandlers, } from '../like';
+import { callOwnHandlers, likeDispatch } from '@like2d/like';
+import type { LikeEvent, Like, LikeHandlers } from '@like2d/like';
 
 /** {@include creating-scenes.md} */
 export type Scene = (like: Like, scenes: SceneManager) => SceneInstance;
@@ -180,7 +183,7 @@ export class SceneManager {
         top.instance = this.instantiate(top.factory);
       }
     } else {
-      likeDispatch(this.like, { type: 'load', args: [], timestamp: this.like.timer.getTime() })
+      likeDispatch(this.like, { type: 'load', args: [] })
     }
     return oldTop?.factory;
   }
@@ -190,7 +193,7 @@ export class SceneManager {
    */
   instantiate<T extends SceneEx<SceneInstance>>(scene: T): InstantiateReturn<T> {
     const inst = scene(this.like, this);
-    likeDispatch(inst, { type: 'load', args: [], timestamp: this.like.timer.getTime() });
+    likeDispatch(inst, { type: 'load', args: [] });
     return inst as InstantiateReturn<T>;
   }
 
@@ -203,7 +206,7 @@ export class SceneManager {
     const scene = this.scenes.at(pos);
     if (scene) {
       if (scene.instance) {
-        likeDispatch(scene.instance, { type: 'quit', args: [], timestamp: this.like.timer.getTime() })
+        likeDispatch(scene.instance, { type: 'quit', args: [] })
       }
       scene.instance = undefined;
     }
@@ -213,7 +216,7 @@ export class SceneManager {
     const g = this.like.gfx;
     for (const si in this.scenes) {
       const i = Number(si);
-      g.print('white', `${si}: hasInstance: ${!!this.scenes[i].instance}`, [50, i*20+20]);
+      g.print('fill', 'white', `${si}: hasInstance: ${!!this.scenes[i].instance}`, [50, i*20+20]);
     }
   }
 
@@ -225,7 +228,7 @@ export class SceneManager {
       }
       likeDispatch(top.instance, event);
     } else {
-      this.like.callOwnHandlers(event);
+      callOwnHandlers(this.like, event);
     }
     //if (event.type == 'draw') this.debugDraw();
   }

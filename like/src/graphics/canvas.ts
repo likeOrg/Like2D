@@ -1,11 +1,14 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 import { type Dispatcher, type LikeCanvasElement } from "../events";
 import { Rect, Rectangle } from "../math/rect";
 import { Vec2, type Vector2 } from "../math/vector2";
 
-/**
- * A set of options passed into {@link Canvas.setMode}
- */
+/** passed into {@link Canvas.setMode} */
 export type CanvasModeOptions = { fullscreen: boolean };
+/** passed into {@link Canvas.setMode} */
 export type CanvasSize = Vector2 | 'native';
 
 /**
@@ -14,7 +17,7 @@ export type CanvasSize = Vector2 | 'native';
  * Controls game size / scaling -- both native and pixelart mode via {@link Canvas.setMode}, as well as fullscreen functions.
  * 
  * The canvas keeps two canvases: render and display. Each frame, it copies render to display before the canvas is presented.
- * This allows for pixel-accurate scaling.
+ * This allows for pixel-accurate scaling in fixed mode.
  */
 export class Canvas {
     /** The canvas that we're drawing to with `like.gfx` functions.  */
@@ -91,7 +94,9 @@ export class Canvas {
     }
 
     /**
-     * Get the canvas that graphics functions render to.
+     * Escape hatch: use at your own risk!
+     *
+     * Get the 2d canvas context that graphics functions render to.
      * This is separate from the display canvas; it is
      * not visibly exposed but rather copied each frame.
     */
@@ -111,18 +116,18 @@ export class Canvas {
 
     /** Set the game's apparent resolution, fullscreen, etc.
      * 
-     * ### `'native'` mode
+     * @param size
+     * ### `'native'`
      * Keeps the canvas pixel resolution
      * the same as the physical pixel resolution of the
-     * device. 
-     * 
+     * device.
+     *
      * ### Pixel art mode `[width, height]`
      * The canvas will use prescaling to keep your pixel
      * games looking sharp, but without the uneven pixels
      * caused by the naive approach.
-     * 
-     * @param size 'native' for native mode, otherwise [width, height]
-     * @param flags optional options.
+     *
+     * @param optionally set fullscreen
      */
     setMode(size: CanvasSize, flags: Partial<CanvasModeOptions> = {}) {
         this.isNativeMode = size === 'native';

@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /**
  * Where {@link Keyboard}, {@link Mouse}, {@link Gamepad}, and actions in {@link Input} reside.
  * @module input
@@ -30,5 +34,3 @@ export type {
   InputType,
   InputBinding,
 } from "./input";
-
-export { defaultMapping, allButtons, buttonMap } from "./gamepad-mapping";

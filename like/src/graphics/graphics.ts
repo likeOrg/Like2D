@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /**
  * @module graphics
  * @description a reduced-state, Love2D-like wrapper around browser canvas
@@ -38,15 +42,17 @@ export type DrawMode = "fill" | "line";
  * - Alpha defaults to 1 if omitted
  * - CSS color strings also accepted: `"red"`, `"#ff0000"`, `"rgb(255,0,0)"`
  */
-export type ColorNum = [number, number, number, number?];
 export type Color = ColorNum | string;
+export type ColorNum = [number, number, number, number?];
 
+/** @interface passed into several {@link Graphics} draw calls.*/
 export type TransformProps = {
   angle?: number;
   scale?: number | Vector2;
   origin?: Vector2;
 };
 
+/** @interface passed into several {@link Graphics} draw calls.*/
 export type ShapeProps = {
   lineWidth?: number;
   lineCap?: CanvasLineCap;
@@ -54,15 +60,16 @@ export type ShapeProps = {
   miterLimit?: number;
 } & TransformProps;
 
+/** @interface passed into {@link Graphics.draw} */
 export type DrawProps = ShapeProps & {
   quad?: Rectangle;
 };
 
+/** @interface passed into {@link Graphics.print} */
 export type PrintProps = {
   font?: string;
-  width?: number,
   align?: CanvasTextAlign,
-} & TransformProps;
+} & ShapeProps;
 
 function parseColor(color: Color): string {
   if (typeof color === "string") return color;
@@ -82,32 +89,6 @@ function setStrokeProps(
   ctx.lineCap = props?.lineCap ?? "butt";
   ctx.lineJoin = props?.lineJoin ?? "miter";
   ctx.miterLimit = props?.miterLimit ?? 10;
-}
-
-function wrapText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  maxWidth: number,
-): string[] {
-  const words = text.split(" ");
-  const [first, ...rest] = words;
-  const lines: string[] = [];
-  let current = first ?? "";
-  rest.forEach((word) => {
-    if (ctx.measureText(current + " " + word).width < maxWidth) {
-      current += " " + word;
-    } else {
-      lines.push(current);
-      current = word;
-    }
-  });
-  lines.push(current);
-  return lines;
-}
-
-function getFontHeight(ctx: CanvasRenderingContext2D): number {
-  const match = ctx.font.match(/(\d+)px/);
-  return match ? parseInt(match[1]) : 16;
 }
 
 /**
@@ -190,7 +171,7 @@ export class Graphics {
   }
 
   /**
-   * Draws a circle or ellipse.
+   * Draws a circle. For ellipse, set props.scale to a Vector2.
    
    * @param mode Fill or line.
    * @param color Fill or stroke color.
@@ -257,43 +238,37 @@ export class Graphics {
 
   /**
    * Draws text at a position.
-   * 
-   * Keep in mind: if you set `align` without `width` in your props,
-   * nothing will happen -- you'll get left-aligned text.
-   * 
+   *
    * Align works browser-style: if you align center, your text draws
    * to the left and right of its position. If you align right, your position
    * becomes the upper-right corner of the text.
-   * 
-   
-   * @param color Fill color.
+
+   * @param mode Fill or line.
+   * @param color Fill or stroke color.
    * @param text Text string.
    * @param position Top-left position.
    * @param props {@link PrintProps} Optional font, text limit, or alignment.
    */
   print(
+    mode: DrawMode,
     color: Color,
     text: string,
     position: Vector2,
     props?: PrintProps,
   ): void {
     const { font = "16px sans-serif" } = props ?? {};
+    const c = applyColor(color);
     this.ctx.save();
     this.applyTransform(position, props);
     this.ctx.font = font;
-    this.ctx.fillStyle = parseColor(color);
     this.ctx.textAlign = props?.align ?? "left";
-    if (props && 'width' in props) {
-      const { width } = props;
-      const lines = wrapText(this.ctx, text, width as any);
-      const lineHeight = getFontHeight(this.ctx);
-      this.ctx.textBaseline = "top";
-      lines.forEach((line, i) => {
-        this.ctx.fillText(line, 0, i * lineHeight, width);
-      });
-      this.ctx.textBaseline = "alphabetic";
-    } else {
+    if (mode === "fill") {
+      this.ctx.fillStyle = c;
       this.ctx.fillText(text, 0, 0);
+    } else {
+      setStrokeProps(this.ctx, props);
+      this.ctx.strokeStyle = c;
+      this.ctx.strokeText(text, 0, 0);
     }
     this.ctx.restore();
   }
@@ -453,7 +428,8 @@ export class Graphics {
   }
 
   /**
-   * The idiomatic way to render to an external canvas.
+   * The idiomatic way to render to an external canvas, which has to be
+   * managed manually using browser APIs.
    * 
    * Within this scope, the target canvas has changed.
    * 

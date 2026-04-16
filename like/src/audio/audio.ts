@@ -1,220 +1,310 @@
-/** The audio module performs a few things:
- *
- * ## Make audio resources behave as if synchronous
- * Functions like playback and seeking are deferred until the sound is loaded.
- * 
- * ## Track and give global control to all audio objects
- * Start, stop, or set global volume for every currently playing sound.
- */
-
-/** Pass this into like.audio.newSource as config. */
-export type AudioSourceOptions = {
-  volume?: number;
-}
-
-type LoadState =
-  | { loaded: false; pendingPlay: boolean; pendingSeek: number }
-  | { loaded: true };
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 /**
- * Handle to a loaded audio resource, which pretends to be synchronous.
- * Use `play()`, `stop()`, `pause()`, `resume()` for playback control.
- * Access the underlying HTMLAudioElement via `source.audio` for looping,
- * pitch, etc. Note: Use `source.setVolume()` instead of setting
- * `source.audio.volume` directly to ensure global volume scaling works correctly.
+ *  The current state of a playing channel.
  */
-export class AudioSource {
-  readonly path: string;
-  /** Underlying HTMLAudioElement. Modify directly for looping, pitch, etc. Use methods for playback control. Avoid setting volume directly. */
-  readonly audio: HTMLAudioElement;
-  /** Avoid setting these directly. */
-  readonly options: Required<AudioSourceOptions>;
-  /** Resolves when the audio is loaded and ready to play. */
+export type ChannelState = {
+  /**
+   * Modern mode (infinite polyphony): Leave this parameter
+   * undefined and the index will simply increment forever.
+   *
+   * Or, force monophony by choosing a channel index.
+   * This is the more retro-style playback option.
+   * Whatever was playing before is stopped.
+   * This can, for example, be used to reduce audible clutter
+   * on often-repeated sfx by stopping the last one before
+   * the next one plays. Shoving many sfx into one channel
+   * is either a mistake, or an artful technique -- depending
+   * on your sound design skills.
+   */
+  index: number,
+  /** Affects speed and pitch both, like a tape or vinyl.
+   * 0.5 = slow and low, 2.0 = high and fast.
+   */
+  speed: number,
+  /** Keep in mind that volume is multiplied by {@link Audio.globalVolume | global volume.}
+   */
+  volume: number,
+  /** seek position, aka how many seconds into the sound we are.
+   * In `update`, this changes live position. Or, in `status`
+   * this is calculated on the fly.
+   */
+  seek: number,
+  /** Loop a sound _forever_. Be sure to keep track of its
+   *  channel index, otherwise you'll later rely on calling {@link Audio.stopAll}
+   *  or {@link Audio.stopWave} later.
+   */
+  loop: boolean,
+}
+
+/**
+ * A decoded audio resource. Create with {@link Audio.load}.
+ *
+ * Pretends to be synchronous: you _can_ play it before loading,
+ * and LĨKE will do its best to maintain timings.
+ */
+export class Wave {
+  // resolves when loaded.
   readonly ready: Promise<void>;
-  private loadState: LoadState = { loaded: false, pendingPlay: false, pendingSeek: 0 };
-  private audioRef: Audio;
+  // check this field if loading fails.
+  public error?: any;
 
-  constructor(path: string, audioRef: Audio, options: AudioSourceOptions = {}) {
-    this.path = path;
-    this.audioRef = audioRef;
-    this.audio = document.createElement('audio');
-    this.audio.src = path;
+  /**
+    Escape hatch:
+    - Yes you can see the underlying decoded buffer.
+    - No you can't rely on this working the same way forever.
+  */
+  public buffer?: AudioBuffer;
 
-    this.options = {
-      volume: Math.max(0, Math.min(1, options.volume ?? 1))
-    };
-
-    this.audio.volume = this.options.volume * audioRef.getVolume();
-
-    this.ready = new Promise((resolve, reject) => {
-      this.audio.oncanplaythrough = () => {
-        if (this.loadState.loaded) return;
-        const { pendingPlay, pendingSeek } = this.loadState;
-        this.loadState = { loaded: true };
-        this.audio.currentTime = pendingSeek;
-        if (pendingPlay) {
-          this.audio.play()?.catch(() => {
-            // Play failed (autoplay policy) - reset so user can retry
-          });
-        }
+  constructor(readonly path: string, context: AudioContext) {
+    this.ready = new Promise(async (resolve, reject) => {
+      try {
+        const file = await fetch(this.path);
+        const arrBuf = await file.arrayBuffer();
+        this.buffer = await context.decodeAudioData(arrBuf);
         resolve();
-      };
-      this.audio.onerror = () => reject(new Error(`Failed to load audio: ${path}`));
-
-      // Handle audio that is already loaded (cached) when we attach the listener
-      if (this.audio.readyState >= 3) {
-        this.loadState = { loaded: true };
-        resolve();
+      } catch (err) {
+        this.error = err;
+        reject(err);
       }
-    });
+    })
   }
 
   isReady(): boolean {
-    return this.loadState.loaded;
+    return !!this.buffer;
   }
 
-  play(): void {
-    if (this.loadState.loaded) {
-      this.audio.play()?.catch(() => {
-        // Play failed (autoplay policy) - ignore
-      });
-    } else {
-      this.loadState.pendingPlay = true;
-    }
-  }
-
-  stop(): void {
-    if (this.loadState.loaded) {
-      this.audio.pause();
-      this.audio.currentTime = 0;
-    } else {
-      this.loadState.pendingPlay = false;
-      this.loadState.pendingSeek = 0;
-    }
-  }
-
-  pause(): void {
-    if (this.loadState.loaded) {
-      this.audio.pause();
-    } else {
-      this.loadState.pendingPlay = false;
-    }
-  }
-
-  resume(): void {
-    if (this.loadState.loaded) {
-      if (this.audio.paused) {
-        this.audio.play()?.catch(() => {
-          // Play failed (autoplay policy, etc.) - ignore
-        });
-      }
-    } else {
-      this.loadState.pendingPlay = true;
-    }
-  }
-
-  seek(position: number): void {
-    if (this.loadState.loaded) {
-      this.audio.currentTime = position;
-    } else {
-      this.loadState.pendingSeek = position;
-    }
-  }
-
-  tell(): number {
-    if (this.loadState.loaded) return this.audio.currentTime;
-    return this.loadState.pendingSeek;
-  }
-
-  isPlaying(): boolean {
-    if (this.loadState.loaded) return !this.audio.paused && !this.audio.ended;
-    return this.loadState.pendingPlay;
-  }
-
-  isPaused(): boolean {
-    if (this.loadState.loaded) return this.audio.paused;
-    return !this.loadState.pendingPlay;
-  }
-
-  isStopped(): boolean {
-    if (this.loadState.loaded) return this.audio.paused && this.audio.currentTime === 0;
-    return !this.loadState.pendingPlay && this.loadState.pendingSeek === 0;
-  }
-
-  /** Set volume (0-1). Applies global volume scaling. Prefer this over `source.audio.volume`. */
-  setVolume(volume: number): void {
-    this.options.volume = Math.max(0, Math.min(1, volume));
-    this.audio.volume = this.options.volume * this.audioRef.getVolume();
-  }
-
-  getVolume(): number {
-    return this.options.volume;
-  }
-
-  getDuration(): number {
-    if (this.loadState.loaded) return this.audio.duration;
-    return 0;
+  getDuration(): number | null {
+    return this.buffer?.duration ?? null;
   }
 }
 
+type Channel = {
+  state: ChannelState,
+  lastUpdate: number,
+  playing: boolean,
+  sourceNode?: AudioBufferSourceNode,
+  buffer?: AudioBuffer,
+  gainNode: GainNode,
+  path: string,
+}
+
 /**
- * The audio subsystem.
- * 
- * Manages a handful of AudioSource objects, for things like global volume,
- * global play/pause, etc..
- * 
- * To make a new source, use `like.audio.newSource`.
+ * {@include audio.md}
  */
 export class Audio {
-  private sources: WeakRef<AudioSource>[] = [];
-  private globalVolume = 1;
+  private context: AudioContext;
+  private masterGain: GainNode;
+  private channels: (Channel | undefined)[] = new Array(1);
+
+  constructor() {
+    this.context = new AudioContext();
+    this.masterGain = this.context.createGain();
+    this.masterGain.connect(this.context.destination);
+  }
 
   /**
-   * Get a {@link AudioSource}
+   * Load a sound file into a {@link Wave}.
+   *
+   * Save this wave and reuse it! Construction is slow and expensive.
+   * Avoid loading large files (>5 minutes) to avoid using excess memory.
+   *
+   * To unload a wave file, simply drop all references to it so the
+   * garbage collector can clear it out.
+   *
+   * Use promise `Wave.ready` or check `Wave.isReady` to know that it
+   * has finished loading.
    */
-  newSource(path: string, options?: AudioSourceOptions): AudioSource {
-    const source = new AudioSource(path, this, options);
-    this.sources.push(new WeakRef(source));
-    return source;
+  loadWave(path: string): Wave {
+    return new Wave(path, this.context);
   }
 
-  /** Get all audio sources -- note that sources are tracked
-    * using weak references, and storing this list can cause
-    * a memory leak.
-    */
-  getAllSources(): AudioSource[] {
-    const active: AudioSource[] = [];
-    for (const sourceRef of this.sources) {
-      const source = sourceRef.deref();
-      if (source) active.push(source);
+  /**
+   * Play a wave.
+   *
+   * If `options.channel` is set, this will overwrite the playback
+   * state of the previous channel. Otherwise, it allocates a new one.
+   *
+   * If the wave is not loaded, LÏKE will begin playing when it is
+   * loaded. This does not cause delay, but it may cause cut-in.
+   *
+   * @param wave use {@link loadWave}
+   * @param options Playback options (volume, speed, seek, loop)
+   * @returns The index of the active channel (starting at 1),
+   *          unless the wave file failed to load.
+   */
+  play(wave: Wave, options: Partial<ChannelState> = {}): number | null {
+    if (wave.error) return null;
+    const buffer = wave.buffer;
+
+    const channel: Channel = {
+      state: {
+        speed: 1,
+        seek: 0,
+        volume: 1,
+        index: this.channels.length,
+        loop: false,
+        ...options,
+      },
+      gainNode: this.context.createGain(),
+      path: wave.path,
+      playing: false,
+      lastUpdate: this.context.currentTime,
     }
-    return active;
+    channel.gainNode.connect(this.masterGain);
+    const index = channel.state.index;
+    this.stop(index);
+    this.channels[channel.state.index] = channel;
+
+    if (buffer) {
+      this.startPlayback(channel, buffer);
+    } else {
+      wave.ready.then(() => {
+        const ch = this.channels[channel.state.index];
+        if (wave.buffer && ch === channel) {
+          this.startPlayback(ch, wave.buffer)
+        }
+      })
+    }
+    return channel.state.index;
   }
 
+  /**
+   *  Update a playing channel.
+   *
+   *  {@link ChannelState | Full list of parameters}
+   */
+  update(params: Partial<ChannelState> & { index: number }) {
+    const channel = this.channels[params.index];
+    if (!channel) return; // fail silently
+    const state = channel.state;
+    state.seek += this.elapsed(channel);
+
+    const next: ChannelState = {
+      ...state,
+      ...params,
+    }
+
+    // may be used for catch-up
+    channel.lastUpdate = this.context.currentTime;
+
+    if (channel.buffer) {
+      channel.gainNode!.gain.value = channel.state.volume;
+      if (!channel.playing) {
+        // Time to play catch-up
+        channel.playing = true;
+        const duration = channel.buffer.duration;
+        if (!state.loop && next.seek > duration) {
+          // Oh, it ended already...
+          delete this.channels[state.index];
+          return;
+        }
+        this.startSourceNode(channel, next.seek);
+      } else if (params.seek && (1/240) < Math.abs(state.seek - params.seek)) {
+        this.startSourceNode(channel, next.seek);
+      }
+
+      if (next.loop) {
+        channel.sourceNode!.onended = null;
+      } else {
+        channel.sourceNode!.onended = () => {
+          delete this.channels[state.index];
+        };
+      }
+      channel.sourceNode!.loop = next.loop;
+      channel.sourceNode!.playbackRate.value = next.speed;
+    }
+    channel.state = next;
+  }
+
+  /** Get the time elapsed since the last time the state was updated. */
+  private elapsed(ch: Channel) {
+      return (this.context.currentTime - ch.lastUpdate) * ch.state.speed
+  }
+
+  private startSourceNode(channel: Channel, time: number) {
+    if (channel.sourceNode) {
+      channel.sourceNode.onended = null;
+      channel.sourceNode.stop();
+    }
+
+    channel.sourceNode = this.context.createBufferSource();
+    channel.sourceNode.buffer = channel.buffer!;
+    channel.sourceNode.connect(channel.gainNode!);
+    channel.sourceNode.start(0, time);
+  }
+
+  private startPlayback(channel: Channel, buf: AudioBuffer) {
+    channel.buffer = buf;
+    this.update({ index: channel.state.index });
+  }
+
+  /** Stop a playing channel and deallocate it. */
+  stop(channel: number): void {
+    const ch = this.channels[channel];
+    if (ch?.sourceNode) {
+      ch.sourceNode.stop(0);
+    }
+    delete this.channels[channel];
+  }
+
+  /** Get play state for every active channel */
+  active(): ChannelState[] {
+    return this.channels
+      .map((ch) => ch && this.status(ch.state.index))
+      .filter(ch => !!ch);
+  }
+
+  /** Query the state of a current playing sound.
+   *  @returns said state, unless the sound stopped/ended
+   */
+  status(channel: number): ChannelState | undefined {
+    const ch = this.channels[channel];
+    if (ch) {
+      return {
+        ...ch.state,
+        seek: ch.state.seek + this.elapsed(ch),
+      }
+    }
+    return;
+  }
+
+  /** Query just the current play position of a sound.  */
+  tell(channel: number): number | undefined {
+    return this.status(channel)?.seek ?? undefined;
+  }
+
+  /** Stop all playing channels. */
   stopAll(): void {
-    this.getAllSources().forEach(s => s.stop());
+    this.channels.forEach(c => c && this.stop(c.state.index));
+    this.channels = Array(1);
   }
 
-  pauseAll(): void {
-    this.getAllSources().forEach(s => s.pause());
+  /** Stop all channels playing a specific wave. */
+  stopWave(wave: Wave): void {
+    for (const ch of this.channels) {
+      if (ch && ch.path == wave.path) {
+        this.stop(ch.state.index);
+      }
+    }
   }
 
-  resumeAll(): void {
-    this.getAllSources().forEach(s => s.resume());
+  /** Set the master volume, aka gain of the root gain node. */
+  set globalVolume(volume: number) {
+    this.masterGain.gain.value = volume;
   }
 
-  setVolume(volume: number): void {
-    this.globalVolume = Math.max(0, Math.min(1, volume));
-    this.getAllSources().forEach(s => {
-      s.audio.volume = s.options.volume * this.globalVolume;
-    });
+  /** Get the master volume, aka gain of the root gain node. */
+  get globalVolume(): number {
+    return this.masterGain.gain.value;
   }
 
-  getVolume(): number {
-    return this.globalVolume;
-  }
-
-  clone(source: AudioSource): AudioSource {
-    return this.newSource(source.path, { ...source.options });
+  /** Get audio context (escape hatch).
+   *  Not guaranteed to work the same way in future versions.
+   */
+  getContext(): AudioContext {
+    return this.context;
   }
 }

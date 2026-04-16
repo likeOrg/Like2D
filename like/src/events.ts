@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /**
  * @module events
  * @description All events that flow through the engine.
@@ -93,7 +97,7 @@ export type Dispatcher<K extends keyof LikeEventHandlers> = (
  *
  * Example:
  * ```ts
- * { type: 'mousemoved', args: [ [100, 250], [-5, -5] ], timestamp: 2.56 }
+ * { type: 'mousemoved', args: [ [100, 250], [-5, -5] ] }
  * ```
  *
  * {@link LikeHandlers} has the full list.
@@ -102,7 +106,6 @@ export type LikeEvent = {
   [K in keyof LikeEventHandlers]: {
     type: K;
     args: Parameters<LikeEventHandlers[K]>;
-    timestamp: number
   }
 }[keyof LikeEventHandlers];
 

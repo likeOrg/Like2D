@@ -1,5 +1,40 @@
 # Changelog
 
+## [3.0.0] - UNRELEASED
+
+During V2, we experimented heavily with API and architecture.
+
+V3 is the end of that experiment. The goals are clear.
+
+The entire API has been redesigned in 3.x to provide a bedrock for future non-breaking V3 releases.
+
+### Breaking Changes
+ - like2d (NPM) has moved to @like2d/like
+ - Scenes have now been moved to package @like2d/scene -- a separate pkg
+ - Removed ad-hoc line wrapping functionality (text 'width' param)
+   - Will be replaced with text metrics in 3.x
+ - Removed timer sleep function -- this can be middleware
+ - Add `'fill' | 'line'` to first arg of print.
+ - Remove `timestamp` field from events.
+ - Rename `ready()` to just `ready` on graphics image handle, added error field.
+ - Image handle size now returns `Vector2 | undefined` for if image isn't loaded.
+ - Deprecate `like.callOwnHandlers(ev)` in favor of `callOwnHandlers(like, ev)`
+
+#### Audio API Redesign
+ - The entire audio API has been redesigned to match the WebAudioAPI
+   backend (and sane/typical audio practices).
+ - 'Pause' function has been removed — though it may be added back, the
+   new practice is to read the seek value, then call `play` with the old
+   seek value to simulate resuming.
+ 
+### Additions
+ - Text can now be stroked
+ - For the sanity of JS users wanting to include just one url, math functions now export from root `like`
+ - For the same reason as above, culled defaultMapping (silly export) and buttonMap (meh export) and now export `like.input.allButtons`
+
+### Fixes
+ - JSR package finally working
+
 ## [2.13.0] - 2026-04-02
 
 ### Breaking Changes

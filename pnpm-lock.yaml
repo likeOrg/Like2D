@@ -23,9 +23,12 @@ importers:
 
   examples/feature-test:
     dependencies:
-      like:
-        specifier: file:../../like
+      '@like2d/like':
+        specifier: workspace:*
         version: link:../../like
+      '@like2d/scene':
+        specifier: workspace:*
+        version: link:../../like-scene
     devDependencies:
       '@types/node':
         specifier: ^22.13.10
@@ -37,7 +40,17 @@ importers:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@22.19.15)(yaml@2.8.2)
 
-  examples/starter:
+  examples/starter-js:
+    dependencies:
+      like2d:
+        specifier: ^2.13.0
+        version: 2.13.0
+    devDependencies:
+      vite:
+        specifier: ^7.3.1
+        version: 7.3.1(@types/node@22.19.15)(yaml@2.8.2)
+
+  examples/starter-ts:
     dependencies:
       like2d:
         specifier: ^2.13.0
@@ -51,6 +64,16 @@ importers:
         version: 7.3.1(@types/node@22.19.15)(yaml@2.8.2)
 
   like:
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  like-scene:
+    dependencies:
+      '@like2d/like':
+        specifier: workspace:*
+        version: link:../like
     devDependencies:
       typescript:
         specifier: ^5.9.3

@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /**
  * A purely functional math library, mostly for 2d.
  * 
@@ -11,7 +15,7 @@
  * @module math 
  */
 
-export { type Vector2, Vec2, type Pair } from "./vector2";
+export { type Vector2, type Pair, Vec2 } from "./vector2";
 export { type Rectangle, Rect } from "./rect";
 
 /** True modulus, conspicuously missing from JS */

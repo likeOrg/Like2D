@@ -1,21 +1,34 @@
-/**
- * A cozy web-native 2D game framework.
- * 
- */
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 /**
- * Here are the top-level events, modules, and the scene system.
- * 
- * See {@link createLike} to get started.
+ * The main LÏKE entry point and definitions.
+ *
+ *  - {@link createLike | Instantiate LÏKE}
+ *  - {@link LikeBase | Browse the module table}
+ *  - {@link LikeHandlers | See all event types}
+ *
+ * @module like
  */
-
 
 import { Engine } from './engine';
 import type { Like } from './like';
 
+// general
 export type { Like, LikeHandlers, LikeBase, TopLevelEventHandler } from './like';
 export type { LikeEvent, LikeCanvasElement } from './events';
 export { callOwnHandlers, likeDispatch } from './engine';
+
+/** The full library of {@link Vector2} functions. */
+export { Vec2 } from './math/vector2';
+export { type Vector2 } from './math/vector2';
+export { type Pair } from './math/vector2';
+
+/** The full library of {@link Rectangle} functions. */
+export { Rect } from "./math/rect";
+export { type Rectangle } from './math/rect';
+export { mod } from './math';
 
 /**
  * Create a new Like2D game instance attached to a DOM container.

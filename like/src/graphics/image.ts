@@ -1,34 +1,38 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 import { Vector2 } from "../math";
 
 /**
- * An image that can be drawn using {@link Graphics.draw} 
- * 
+ * An image that can be drawn using {@link Graphics.draw}
+ *
  * Unlike raw HTMLImageElement, there is no need to wait for it to load.
  * If the image isn't loaded, it simply won't draw it at all.
- * 
- * If you're planning on loading many large images, simply preload
+ *
+ * If you're planning on loading many large images, simply load
  * these image handles beforehand so that they're ready.
+ *
  */
 export class ImageHandle {
   readonly path: string;
-  private element: HTMLImageElement | null = null;
-  private loadPromise: Promise<void>;
+  readonly ready: Promise<void>;
+  private element: HTMLImageElement;
   private isLoaded = false;
 
   constructor(path: string) {
     this.path = path;
+    this.element = new Image();
 
-    this.loadPromise = new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        this.element = img;
+    this.ready = new Promise((resolve, reject) => {
+      this.element.onload = () => {
         this.isLoaded = true;
         resolve();
       };
-      img.onerror = () => {
+      this.element.onerror = () => {
         reject(new Error(`Failed to load image: ${path}`));
       };
-      img.src = path;
+      this.element.src = path;
     });
   }
 
@@ -36,15 +40,17 @@ export class ImageHandle {
     return this.isLoaded;
   }
 
-  ready(): Promise<void> {
-    return this.loadPromise;
+  get size(): Vector2 | undefined {
+    return this.isReady() ? [this.element.width, this.element.height] : undefined;
   }
 
-  get size(): Vector2 {
-    return [this.element?.width ?? 0, this.element?.height ?? 0];
-  }
-
-  getElement(): HTMLImageElement | null {
+  /**
+   * Escape hatch:
+   *
+   * Yes, you can get the underlying image.
+   * No, it's not stable in the case we ever switch to webGL.
+   */
+  getElement(): HTMLImageElement {
     return this.element;
   }
 }

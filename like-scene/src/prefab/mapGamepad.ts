@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /**
  * An automagical gamepad mapper.
  *
@@ -16,11 +20,12 @@
  * @module scene/prefab/mapGamepad
  */
 
-import type { Scene, SceneManager } from "../";
-import { callOwnHandlers, likeDispatch, type Like } from "../..";
-import type { Color, PrintProps } from "../../graphics";
-import { type LikeButton, defaultMapping, GamepadMapping } from "../../input";
-import { Vector2 } from "../../math/vector2";
+import type { Scene, SceneManager } from "..";
+import { likeDispatch, type Like, type LikeEvent } from '@like2d/like';
+import { callOwnHandlers } from '@like2d/like';
+import type { Color, PrintProps } from '@like2d/like/graphics';
+import { type LikeButton, type GamepadMapping } from '@like2d/like/input';
+import { Vector2 } from '@like2d/like';
 
 const mapOrder: LikeButton[] = [
   "BRight",
@@ -137,7 +142,7 @@ export const mapGamepad = (
   targetPad: number,
 ): Scene => (like: Like, scenes: SceneManager) => {
   const currentlyUnmapped: LikeButton[] = [];
-  const mapping: GamepadMapping = like.gamepad.getMapping(targetPad) ?? defaultMapping(2);
+  const mapping: GamepadMapping = like.gamepad.getMapping(targetPad) ?? { buttons: {}, sticks: [] };
   const alreadyMapped = new Set<number>();
   let held: LikeButton | undefined;
   let frameWait = 10;
@@ -151,7 +156,7 @@ export const mapGamepad = (
   }
 
   return {
-    handleEvent(ev) {
+    handleEvent(ev: LikeEvent) {
       if (ev.type == 'draw') {
         const parent = scenes.get(-2);
         if (parent) {
@@ -172,13 +177,13 @@ export const mapGamepad = (
       const centerText: PrintProps = {
           font: "1px sans-serif",
           align: "center",
-          width: 16,
       }
       const active = currentlyUnmapped.at(-1);
       const csize = like.canvas.getSize();
       like.gfx.scale(csize[0] / 16);
       like.gfx.translate([0, 1]);
       like.gfx.print(
+        'fill',
         "white",
         `Map gamepad ${targetPad}`,
         [8, 0.0],
@@ -206,6 +211,7 @@ export const mapGamepad = (
         buttonProps[prop].draw(like, color);
       }
       like.gfx.print(
+        'fill',
         "white",
         active
           ? `Press ${like.gamepad.fullButtonName(active)}!`

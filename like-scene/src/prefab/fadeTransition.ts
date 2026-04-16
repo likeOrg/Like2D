@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /**
  * Need some time to load?
  *
@@ -9,9 +13,9 @@
  * ```
  */
 
-import { Scene } from "..";
-import { callOwnHandlers, likeDispatch } from "../..";
-import { ColorNum } from "../../graphics";
+import type { Scene } from "..";
+import { callOwnHandlers, likeDispatch, LikeEvent } from '@like2d/like';
+import type { ColorNum } from '@like2d/like/graphics';
 
 export type FadeProps = Partial<{
   color: ColorNum,
@@ -41,8 +45,8 @@ export const fadeTransition = (
   return {
     // stack: [prev: -3, next: -2, this: -1]
     load() { time = 0; },
-    update(dt) { time += dt },
-    handleEvent(ev) {
+    update(dt: number) { time += dt },
+    handleEvent(ev: LikeEvent) {
       let elapsed = time / duration * 2;
 
       if (ev.type == 'draw') {

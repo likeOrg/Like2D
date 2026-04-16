@@ -1,9 +1,9 @@
-name: Publish
+name: Publish Scene
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'scene-*'
 
 permissions:
   id-token: write
@@ -21,23 +21,20 @@ jobs:
       - uses: pnpm/action-setup@v3
         with:
           version: 9
-      
+
       - name: Install dependencies
         run: pnpm install
-      
+
       - name: Typecheck
-        run: pnpm --filter like2d typecheck
-      
+        run: pnpm --filter @like2d/scene typecheck
+
       - name: Build
-        run: pnpm --filter like2d build
-      
-      - name: Run tests
-        run: pnpm --filter like2d test
-      
+        run: pnpm --filter @like2d/scene build
+
       - name: Publish to NPM
         run: npm publish --provenance --access public
-        working-directory: like
-      
+        working-directory: like-scene
+
       - name: Publish to JSR
         run: npx jsr publish
-        working-directory: like
+        working-directory: like-scene

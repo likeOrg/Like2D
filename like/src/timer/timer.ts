@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 import { EngineProps } from "../engine";
 import type { LikeCanvasEventMap } from "../events";
 
@@ -7,7 +11,6 @@ export class Timer {
   private frameCount = 0;
   private fps = 0;
   private fpsAccumulator = 0;
-  private sleepUntil: number | null = null;
 
   constructor(props: EngineProps<never>) {
     props.canvas.addEventListener("like:update", this.update.bind(this), { signal: props.abort })
@@ -38,32 +41,8 @@ export class Timer {
     return this.fps;
   }
 
-  /** Get the ingame time. */
+  /** Get in-engine global time. */
   getTime(): number {
     return this.totalTime;
-  }
-
-  /**
-   * Whether or not the game is (supposed to be) frozen.
-   * The only callback while sleeping is `draw`, and
-   * calling this outside of `draw` will always return
-   * false -- except if you have a custom runtime.
-   */
-  isSleeping(): boolean {
-    if (this.sleepUntil === null) return false;
-    const currentTime = performance.now();
-    if (currentTime < this.sleepUntil) {
-      return true;
-    }
-    this.sleepUntil = null;
-    return false;
-  }
-
-  /**
-   * Freeze the whole game for a time. Audio will keep playing,
-   * but update functions won't be called and events won't fire.
-   */
-  sleep(duration: number): void {
-    this.sleepUntil = performance.now() + (duration * 1000);
   }
 }

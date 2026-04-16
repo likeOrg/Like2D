@@ -1,7 +1,11 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 /** {@include startScreen.md} */
 import type { Scene } from '..';
-import type { Like } from '../..';
-import { Vec2 } from '../../math/vector2';
+import type { Like } from '@like2d/like';
+import { Vec2 } from '@like2d/like/math';
 
 const LOGO = 
   'data:image/svg+xml;base64,' +
@@ -52,12 +56,13 @@ export const startScreen = (
       } else if (logo.isReady()) {
         like.gfx.clear([0.5, 0, 0.5, 1]);
         const winSize = like.canvas.getSize();
-        const scale = (winSize[0] * 0.5) / logo.size[0];
+        const scale = (winSize[0] * 0.5) / logo.size![0];
         like.gfx.draw(logo, Vec2.div(winSize, 2), {
           scale,
-          origin: Vec2.div(logo.size, 2),
+          origin: Vec2.div(logo.size!, 2),
         });
         like.gfx.print(
+          'fill',
           [1, 1, 0, 0.5 + 0.5 * Math.sin(like.timer.getTime() * 3)],
           "▶️ click to start ◀️",
           Vec2.mul(winSize, [0.5, 0.8]),

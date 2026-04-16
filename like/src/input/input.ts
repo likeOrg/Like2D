@@ -1,3 +1,7 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 import type { Keyboard } from './keyboard';
 import type { Mouse, MouseButton } from './mouse';
 import { Gamepad, GamepadTarget } from './gamepad';
@@ -5,7 +9,9 @@ import { allButtons, LikeButton } from './gamepad-mapping';
 import { Dispatcher, LikeActionEvent } from '../events';
 import { EngineProps } from '../engine';
 
+/** @private */
 export type InputType = InputBinding['type'];
+
 export type InputBinding =
   | { type: 'keyboard'; scancode: string }
   | { type: 'mouse'; button: MouseButton }
@@ -13,6 +19,9 @@ export type InputBinding =
 
 /** {@include input.md} */
 export class Input {
+  /** Set of all standard gamepad button names */
+  static allButtons = allButtons;
+
   private currState = new Set<string>();
   private prevState = new Set<string>();
   private actionTable: Record<string, InputBinding[]> = {};
