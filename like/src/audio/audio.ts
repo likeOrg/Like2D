@@ -57,10 +57,10 @@ export class Wave {
 type Channel = {
   state: ChannelState,
   lastUpdate: number,
-  defer: boolean,
+  playing: boolean,
   sourceNode?: AudioBufferSourceNode,
   buffer?: AudioBuffer,
-  gainNode?: GainNode,
+  gainNode: GainNode,
   path: string,
 }
 
@@ -124,10 +124,12 @@ export class Audio {
         loop: false,
         ...options,
       },
+      gainNode: this.context.createGain(),
       path: wave.path,
-      defer: !wave.buffer,
+      playing: false,
       lastUpdate: this.context.currentTime,
     }
+    channel.gainNode.connect(this.masterGain);
     const index = channel.state.index;
     this.stop(index);
     this.channels[channel.state.index] = channel;
@@ -166,33 +168,32 @@ export class Audio {
     next.seek += elapsed;
     channel.lastUpdate = this.context.currentTime;
 
-    if (channel.sourceNode && channel.gainNode) {
-      // OK, we're loaded!
-      channel.sourceNode.loop = next.loop;
-      channel.sourceNode.playbackRate.value = next.speed;
-      channel.gainNode.gain.value = next.volume;
-
-      if (channel.defer) {
+    if (channel.buffer) {
+      channel.gainNode!.gain.value = channel.state.volume;
+      if (!channel.playing) {
         // Time to play catch-up
-        channel.defer = false;
-        const duration = channel.sourceNode.buffer!.duration;
+        channel.playing = true;
+        const duration = channel.buffer.duration;
         next.seek += elapsed;
         if (!state.loop && next.seek > duration) {
           // Oh, it ended already...
           delete this.channels[state.index];
           return;
         }
+        this.startSourceNode(channel, next.seek);
+      } else if (params.seek) {
+        this.startSourceNode(channel, next.seek);
       }
 
-      if (channel.sourceNode) {
-        if (next.loop) {
-          channel.sourceNode.onended = null;
-        } else {
-          channel.sourceNode.onended = () => {
-            delete this.channels[state.index];
-          };
-        }
+      if (next.loop) {
+        channel.sourceNode!.onended = null;
+      } else {
+        channel.sourceNode!.onended = () => {
+          delete this.channels[state.index];
+        };
       }
+      channel.sourceNode!.loop = next.loop;
+      channel.sourceNode!.playbackRate.value = next.speed;
     }
     channel.state = next;
   }
@@ -202,14 +203,20 @@ export class Audio {
       return (this.context.currentTime - ch.lastUpdate) * ch.state.speed
   }
 
+  private startSourceNode(channel: Channel, time: number) {
+    if (channel.sourceNode) {
+      channel.sourceNode.onended = null;
+      channel.sourceNode.stop();
+    }
+
+    channel.sourceNode = this.context.createBufferSource();
+    channel.sourceNode.buffer = channel.buffer!;
+    channel.sourceNode.connect(channel.gainNode!);
+    channel.sourceNode.start(0, time);
+  }
+
   private startPlayback(channel: Channel, buf: AudioBuffer) {
     channel.buffer = buf;
-    channel.gainNode = this.context.createGain();
-    channel.sourceNode = this.context.createBufferSource();
-    channel.sourceNode.buffer = buf;
-    channel.sourceNode.connect(channel.gainNode);
-    channel.gainNode.connect(this.masterGain);
-    channel.sourceNode.start()
     this.update({ index: channel.state.index });
   }
 
