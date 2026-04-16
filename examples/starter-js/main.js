@@ -1,4 +1,4 @@
-import { createLike, Vec2 } from "https://esm.sh/like2d@^2.13.0";
+import { createLike, Vec2 } from "https://esm.sh/@like2d/like@^3.0.0";
 
 let drop;
 let dropp;
@@ -11,8 +11,7 @@ like.load = () => {
   nextDropTime = like.timer.getTime() + 1;
   like.canvas.setMode([240, 160]);
   drop = like.gfx.newImage("drop.png");
-  dropp = like.audio.newSource("dropp.ogg");
-  dropp.audio.preservesPitch = false;
+  dropp = like.audio.loadWave("dropp.ogg");
 };
 
 like.update = (dt) => {
@@ -21,15 +20,16 @@ like.update = (dt) => {
     let pos =
       time - followMouseTime < 0.2
         ? like.mouse.getPosition()
-        : Vec2.mul([Math.random(), Math.random() - 0.1], like.canvas.getSize());
+        : Vec2.mul([Math.random(), Math.random() - 0.5], like.canvas.getSize());
     drops.push({birth: time, pos});
     nextDropTime = time + Math.random() / 2 + 0.2;
   }
   for (const {birth} of drops)
     if (time - birth - dt > 2 != time - birth > 2 && like.canvas.hasFocus()) {
-      dropp.audio.playbackRate = 2 ** ([0,4,7,11][Math.floor(Math.random()*4)] / 12);
-      dropp.seek(0);
-      dropp.play();
+      like.audio.play(dropp, {
+        index: 0,
+        speed: 2 ** ([0,4,7,11][Math.floor(Math.random()*4)] / 12),
+      });
     }
   drops = drops.filter(d => time - d.birth < 8);
 };
@@ -40,10 +40,11 @@ like.mousemoved = () => {
 
 like.draw = () => {
   let time = like.timer.getTime();
+  if (!drop.isReady()) return;
   const dropOrigin = Vec2.mul(drop.size, [0.5, 0.8]);
   like.gfx.clear(`hsl(${Math.cos(time/10)*40+220}, 50%, 50%)`);
-  like.gfx.print("white", "welcome to", [20, 20], { font: "10px sans" });
-  like.gfx.print("white", "LÏKE (beta)", [80, 20]);
+  like.gfx.print("fill", "white", "welcome to", [20, 20], { font: "10px sans" });
+  like.gfx.print("fill", "white", "LÏKE (beta)", [80, 20]);
 
   for (let {birth, pos} of drops) {
     let age = time - birth;
