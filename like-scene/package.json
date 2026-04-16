@@ -1,6 +1,6 @@
 {
   "name": "@like2d/scene",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Scene management system for Like2D",
   "type": "module",
   "main": "./dist/index.js",
@@ -35,8 +35,8 @@
   ],
   "author": "",
   "license": "MIT",
-  "peerDependencies": {
-    "@like2d/like": "workspace:*"
+  "dependencies": {
+    "@like2d/like": "^3.0.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
