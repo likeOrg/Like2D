@@ -51,15 +51,15 @@ const mapOrder: LikeButton[] = [
 ];
 
 /** All the buttons on an NES */
-export const buttonSetNES = new Set<LikeButton>(mapOrder.slice(0, 8));
+export const buttonSetNES: Set<LikeButton> = new Set(mapOrder.slice(0, 8));
 /** All the buttons on a GBA -- Like an NES but with L+R */
-export const buttonSetGBA = new Set<LikeButton>(mapOrder.slice(0, 10));
+export const buttonSetGBA: Set<LikeButton> = new Set(mapOrder.slice(0, 10));
 /** All the buttons on a SNES */
-export const buttonSetSNES = new Set<LikeButton>(mapOrder.slice(0, 12));
+export const buttonSetSNES: Set<LikeButton> = new Set(mapOrder.slice(0, 12));
 /** All the buttons on a PS1 -- Like a SNES but with L2+R2 */
-export const buttonSetPS1 = new Set<LikeButton>(mapOrder.slice(0, 14));
+export const buttonSetPS1: Set<LikeButton> = new Set(mapOrder.slice(0, 14));
 /** All the buttons -- including the stick buttons. */
-export const buttonSetAll = new Set<LikeButton>(mapOrder);
+export const buttonSetAll: Set<LikeButton> = new Set(mapOrder);
 
 const drawCircButt = (pos: Vector2, size: number) => (like: Like, color: Color) =>
   like.gfx.circle("fill", color, pos, size);
