@@ -5,7 +5,9 @@ import { allButtons, LikeButton } from './gamepad-mapping';
 import { Dispatcher, LikeActionEvent } from '../events';
 import { EngineProps } from '../engine';
 
+/** @private */
 export type InputType = InputBinding['type'];
+
 export type InputBinding =
   | { type: 'keyboard'; scancode: string }
   | { type: 'mouse'; button: MouseButton }

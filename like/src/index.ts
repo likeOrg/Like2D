@@ -16,9 +16,14 @@ export type { Like, LikeHandlers, LikeBase, TopLevelEventHandler } from './like'
 export type { LikeEvent, LikeCanvasElement } from './events';
 export { callOwnHandlers, likeDispatch } from './engine';
 
-// maths
-export { type Vector2, type Pair, Vec2 } from './math/vector2';
-export { type Rectangle, Rect } from './math/rect';
+/** The full library of {@link Vector2} functions. */
+export { Vec2 } from './math/vector2';
+export { type Vector2 } from './math/vector2';
+export { type Pair } from './math/vector2';
+
+/** The full library of {@link Rectangle} functions. */
+export { Rect } from "./math/rect";
+export { type Rectangle } from './math/rect';
 export { mod } from './math';
 
 /**

@@ -1,13 +1,8 @@
-/** @private */
+/** An array with 2 of the same item. */
 export type Pair<T> = [T, T];
 
 /** {@include vector2.md} */
-
 export type Vector2 = Pair<number>;
-
-/**
- * The full library of {@link Vector2} functions.
-*/
 
 import { mod as mmod } from "./";
 

@@ -1,7 +1,7 @@
-/** {@include rectangle.md} */
 
 import { Vec2, Vector2 } from "./";
 
+/** {@include rectangle.md} */
 export type Rectangle = [number, number, number, number];
 
 export namespace Rect {

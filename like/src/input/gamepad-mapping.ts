@@ -15,7 +15,7 @@
  *  - We go with best-match and always fall back on manual mapping.
  */
 
-import type { Vector2 } from "../math";
+import type { Pair, Vector2 } from "../math";
 
 /**
  * @private
@@ -65,13 +65,16 @@ export type LikeButton =
 //// ************* General Gamepad Mapping Functions ******************* ////
 
 export type GamepadMapping = {
-  buttons: ButtonMapping;
-  sticks: StickMapping[];
+  buttons: Record<number, LikeButton>;
+  sticks: Pair<{index: number, invert: boolean}>[];
 };
 
-export type ButtonMapping = Record<number, LikeButton>;
-export type StickMapping = [StickAxisMapping, StickAxisMapping];
-export type StickAxisMapping = { index: number; invert: boolean };
+/** @private */
+export type ButtonMapping = GamepadMapping["buttons"];
+/** @private */
+export type StickMapping = GamepadMapping["sticks"][number];
+/** @private */
+export type StickAxisMapping = StickMapping[number];
 
 /** @private Get an empty mapping for a gamepad. Good for binding from scratch. */
 export const defaultMapping = (stickCount: number): GamepadMapping => ({
