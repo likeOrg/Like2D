@@ -1,10 +1,10 @@
-import { Color, type ImageHandle } from "like2d/graphics";
-import { createLike } from "like2d";
-import { Vec2, Vector2 } from "like2d/math";
-import { AudioSource } from "like2d/audio";
+import { Color, type ImageHandle } from "@like2d/like/graphics";
+import { createLike } from "@like2d/like";
+import { Vec2, Vector2 } from "@like2d/like/math";
+import { Wave } from "@like2d/like/audio";
 
 let drop: ImageHandle;
-let dropp: AudioSource;
+let dropp: Wave;
 const like = createLike(document.querySelector('body')!);
 let drops: Array<{birth: number, pos: Vector2}> = [];
 let nextDropTime = 0;
@@ -14,8 +14,7 @@ like.load = () => {
   nextDropTime = like.timer.getTime() + 1;
   like.canvas.setMode([240, 160]);
   drop = like.gfx.newImage("drop.png");
-  dropp = like.audio.newSource("dropp.ogg");
-  dropp.audio.preservesPitch = false;
+  dropp = like.audio.loadWave("dropp.ogg");
 };
 
 like.update = (dt: number) => {
@@ -24,15 +23,16 @@ like.update = (dt: number) => {
     let pos =
       time - followMouseTime < 0.2
         ? like.mouse.getPosition()
-        : Vec2.mul([Math.random(), Math.random() - 0.1], like.canvas.getSize());
+        : Vec2.mul([Math.random(), Math.random() - 0.5], like.canvas.getSize());
     drops.push({birth: time, pos});
     nextDropTime = time + Math.random() / 2 + 0.2;
   }
   for (const {birth} of drops) 
     if (time - birth - dt > 2 != time - birth > 2 && like.canvas.hasFocus()) {
-      dropp.audio.playbackRate = 2 ** ([0,4,7,11][Math.floor(Math.random()*4)] / 12);
-      dropp.seek(0);
-      dropp.play();
+      like.audio.play(dropp, {
+        index: 0,
+        speed: 2 ** ([0,4,7,11][Math.floor(Math.random()*4)] / 12),
+      });
     }
   drops = drops.filter(d => time - d.birth < 8);
 };
@@ -43,10 +43,12 @@ like.mousemoved = () => {
 
 like.draw = () => {
   let time = like.timer.getTime();
-  const dropOrigin = Vec2.mul(drop.size, [0.5, 0.8]);
-  like.gfx.clear(`hsl(${Math.cos(time/10)*40+220}, 50%, 50%)`);
-  like.gfx.print("white", "welcome to", [20, 20], { font: "10px sans" });
-  like.gfx.print("white", "LÏKE (beta)", [80, 20]);
+  const dsize = drop.size;
+  if (!dsize) return;
+  const dropOrigin = Vec2.mul(dsize, [0.5, 0.8]);
+  like.gfx.clear(`hsl(${Math.cos(time / 10) * 40 + 220}, 50%, 50%)`);
+  like.gfx.print("fill", "white", "welcome to", [20, 20], { font: "10px sans" });
+  like.gfx.print("fill", "white", "LÏKE (beta)", [80, 20]);
 
   for (let {birth, pos} of drops) {
     let age = time - birth;
