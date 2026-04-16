@@ -1,14 +1,37 @@
 /**
- *  The current state of a playing (or paused) channel.
+ *  The current state of a playing channel.
  */
 export type ChannelState = {
+  /**
+   * Modern mode (infinite polyphony): Leave this parameter
+   * undefined and the index will simply increment forever.
+   *
+   * Or, force monophony by choosing a channel index.
+   * This is the more retro-style playback option.
+   * Whatever was playing before is stopped.
+   * This can, for example, be used to reduce audible clutter
+   * on often-repeated sfx by stopping the last one before
+   * the next one plays. Shoving many sfx into one channel
+   * is either a mistake, or an artful technique -- depending
+   * on your sound design skills.
+   */
   index: number,
-  // affects speed and pitch both
+  /** Affects speed and pitch both, like a tape or vinyl.
+   * 0.5 = slow and low, 2.0 = high and fast.
+   */
   speed: number,
-  // multiplied by global volume
+  /** Keep in mind that volume is multiplied by {@link Audio.globalVolume | global volume.}
+   */
   volume: number,
-  // seek position; equivalent to `tell`
+  /** seek position, aka how many seconds into the sound we are.
+   * In `update`, this changes live position. Or, in `status`
+   * this is calculated on the fly.
+   */
   seek: number,
+  /** Loop a sound _forever_. Be sure to keep track of its
+   *  channel index, otherwise you'll later rely on calling {@link Audio.stopAll}
+   *  or {@link Audio.stopWave} later.
+   */
   loop: boolean,
 }
 
@@ -65,15 +88,12 @@ type Channel = {
 }
 
 /**
- * The audio subsystem.
- *
- * Create with `like.audio`. Manages {@link Wave} resources and playback channels.
+ * {@include audio.md}
  */
 export class Audio {
   private context: AudioContext;
   private masterGain: GainNode;
   private channels: (Channel | undefined)[] = new Array(1);
-  private globalVolume = 1;
 
   constructor() {
     this.context = new AudioContext();
@@ -158,14 +178,14 @@ export class Audio {
     const channel = this.channels[params.index];
     if (!channel) return; // fail silently
     const state = channel.state;
+    state.seek += this.elapsed(channel);
+
     const next: ChannelState = {
       ...state,
       ...params,
     }
 
     // may be used for catch-up
-    const elapsed = this.elapsed(channel);
-    next.seek += elapsed;
     channel.lastUpdate = this.context.currentTime;
 
     if (channel.buffer) {
@@ -174,14 +194,13 @@ export class Audio {
         // Time to play catch-up
         channel.playing = true;
         const duration = channel.buffer.duration;
-        next.seek += elapsed;
         if (!state.loop && next.seek > duration) {
           // Oh, it ended already...
           delete this.channels[state.index];
           return;
         }
         this.startSourceNode(channel, next.seek);
-      } else if (params.seek) {
+      } else if (params.seek && (1/240) < Math.abs(state.seek - params.seek)) {
         this.startSourceNode(channel, next.seek);
       }
 
@@ -266,14 +285,14 @@ export class Audio {
     }
   }
 
-  setGlobalVolume(volume: number): void {
-    this.globalVolume = volume;
+  /** Set the master volume, aka gain of the root gain node. */
+  set globalVolume(volume: number) {
     this.masterGain.gain.value = volume;
   }
 
-  /** Get global volume. */
-  getGlobalVolume(): number {
-    return this.globalVolume;
+  /** Get the master volume, aka gain of the root gain node. */
+  get globalVolume(): number {
+    return this.masterGain.gain.value;
   }
 
   /** Get audio context (escape hatch).
