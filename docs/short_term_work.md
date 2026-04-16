@@ -20,17 +20,19 @@ FULL once-over of the API for breaking changes
 
 ## Audio
  - [x] Switch to web audio API
- - [ ] Test it
+ - [x] Test it
  - [ ] Document it
 
 # Packages
- - [ ] Publish "redirect version" of npm like2d sending to new package
- - [ ] npm @like2d/like
  - [ ] npm @like2d/scene
  - [ ] jsr @like2d/scene
+ - [ ] Publish "redirect version" of npm like2d sending to new package
+ - [ ] npm @like2d/like
 
 # 3.x release tasks
 
+## Audio
+ - [ ] Add declicking feature (volume ramp) to pause function
 
 ## Action mapping scene
  - [ ] Copy+modify the gamepad mapping scene to make
