@@ -6,7 +6,7 @@ For a list of all possible play and update parameters, {@link ChannelState | che
 To play a sound, load it and then play it.
 
 ```js
-const wave = like.audio.newWave("beanBlast.ogg")
+const wave = like.audio.loadWave("beanBlast.ogg")
 
 like.actionpressed = (action) => {
     if (action == "blast") {
