@@ -21,7 +21,7 @@ FULL once-over of the API for breaking changes
 ## Audio
  - [x] Switch to web audio API
  - [x] Test it
- - [ ] Document it
+ - [x] Document it
 
 # Packages
  - [ ] npm @like2d/scene
@@ -35,6 +35,7 @@ FULL once-over of the API for breaking changes
  - [ ] Add declicking feature (volume ramp) to every seek and stop
  - [ ] Volume ramp global volume -- must keep internal val?
  - [ ] Determine if declicking is relevant for other params
+ - [ ] Enable streaming audio support for large files
 
 ## Action mapping scene
  - [ ] Copy+modify the gamepad mapping scene to make

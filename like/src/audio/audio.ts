@@ -170,9 +170,7 @@ export class Audio {
   /**
    *  Update a playing channel.
    *
-   *  If the channel's wave is not-yet-loaded / not-yet-playing,
-   *  we make a best effort
-   *  to synchronize state as if it had been playing this whole time.
+   *  {@link ChannelState | Full list of parameters}
    */
   update(params: Partial<ChannelState> & { index: number }) {
     const channel = this.channels[params.index];
@@ -255,6 +253,9 @@ export class Audio {
       .filter(ch => !!ch);
   }
 
+  /** Query the state of a current playing sound.
+   *  @returns said state, unless the sound stopped/ended
+   */
   status(channel: number): ChannelState | undefined {
     const ch = this.channels[channel];
     if (ch) {
@@ -266,6 +267,7 @@ export class Audio {
     return;
   }
 
+  /** Query just the current play position of a sound.  */
   tell(channel: number): number | undefined {
     return this.status(channel)?.seek ?? undefined;
   }
