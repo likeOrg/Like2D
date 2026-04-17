@@ -127,7 +127,7 @@ export class Canvas {
      * games looking sharp, but without the uneven pixels
      * caused by the naive approach.
      *
-     * @param optionally set fullscreen
+     * @param flags optionally set fullscreen
      */
     setMode(size: CanvasSize, flags: Partial<CanvasModeOptions> = {}) {
         this.isNativeMode = size === 'native';
