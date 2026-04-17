@@ -130,7 +130,7 @@ LIKE's API is not the same as LOVE, but similar in spirit. Notable differences:
 
 ## Links
 
-[NPM](https://www.npmjs.com/package/like2d)
+[NPM](https://www.npmjs.com/package/@like2d/like)
 
 [JSR](https://jsr.io/@like2d/like)
 
