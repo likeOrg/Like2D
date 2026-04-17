@@ -25,7 +25,12 @@ It's almost like: imagine if Vanilla gamedev was good.
 
 ## Open-Source and compact
 
-LIKE is under the MIT license, so you're free to modify it as you see fit.
+LIKE is under the MPL license, meaning you're free to use it on closed-source
+games.
+
+You're also free to modify it as you see fit as long as you
+share your modifications under MPL.
+
 The code base is intentionally kept as small and simple as possible, so you can work on it too.
 
 ## Ready to go?
