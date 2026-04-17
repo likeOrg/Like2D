@@ -32,8 +32,17 @@ The code base is intentionally kept as small and simple as possible, so you can 
 
 Clone a simple starter this way:
 
+Typescript:
 ```bash
-npx degit likeOrg/Like2D/examples/starter my-game
+npx degit likeOrg/Like2D/examples/starter-ts my-game
+cd my-game
+npm install
+npm run dev
+```
+
+Javascript:
+```bash
+npx degit likeOrg/Like2D/examples/starter-js my-game
 cd my-game
 npm install
 npm run dev
