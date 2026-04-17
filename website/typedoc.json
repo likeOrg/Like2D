@@ -1,4 +1,8 @@
 {
+  "plugin": ["typedoc-plugin-redirect"],
+  "redirects": {
+    "modules.html": "index.html"
+  },
   "entryPoints": [
     "../like/src/index.ts",
     "../like/src/graphics/index.ts",
@@ -22,7 +26,6 @@
   ],
   "sortEntryPoints": false,
   "groupOrder": [
-    "Modules",
     "*"
   ],
   "categoryOrder": [
@@ -53,5 +56,7 @@
   "hideGenerator": true,
   "categorizeByGroup": true,
   "searchInComments": true,
-  "cleanOutputDir": true
+  "cleanOutputDir": true,
+  "favicon": "../website/public/logo-icon.svg",
+  "groupReferencesByType": true
 }

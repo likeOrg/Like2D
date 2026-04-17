@@ -136,7 +136,7 @@ LIKE's API is not the same as LOVE, but similar in spirit. Notable differences:
 
 [GitHub](https://github.com/likeOrg/Like2D)
 
-[Full Documentation](https://likeorg.github.io/Like2D/api/documents/README.html) 
+[Full Documentation](https://likeorg.github.io/Like2D/api/) 
 
 ## License
 
