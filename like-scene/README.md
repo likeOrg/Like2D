@@ -365,4 +365,4 @@ for the uuper one.
 
 ## License
 
-MIT
+MPL 2.0

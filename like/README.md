@@ -140,4 +140,4 @@ LIKE's API is not the same as LOVE, but similar in spirit. Notable differences:
 
 ## License
 
-MIT
+MPL 2.0
